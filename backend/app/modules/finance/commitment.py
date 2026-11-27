@@ -99,6 +99,7 @@ class Commitment:
     tolerance_abs: str | None = None
     shared_change_orders: int = 0
     invoiced: Decimal = _ZERO
+    retained: Decimal = _ZERO
     paid: Decimal = _ZERO
     invoices_in_other_currency: int = 0
     invoice_ids: list[uuid.UUID] = field(default_factory=list)
@@ -121,6 +122,31 @@ class Commitment:
             {"invoice_tolerance_pct": self.tolerance_pct, "invoice_tolerance_abs": self.tolerance_abs},
             self.revised,
         )
+
+    def pay_summary(self, current_net: object, current_retention: object) -> dict[str, str]:
+        """The certificate summary with this invoice added, net of VAT, in the commitment's currency.
+
+        A, completed to date, is everything invoiced before plus this invoice.
+        B, retention, is A times the agreed share; without an agreed share it
+        is what the invoices actually hold. C, previously certified, is what
+        earlier invoices billed less what they held. Current due is A - B - C.
+        """
+        net = _dec(current_net)
+        completed = self.invoiced + net
+        if self.retention_percent > 0 and not self.retain_on_receipt:
+            retention = (completed * self.retention_percent / Decimal(100)).quantize(Decimal("0.01"))
+        else:
+            retention = self.retained + _dec(current_retention)
+        previous = self.invoiced - self.retained
+        earned = completed - retention
+        return {
+            "completed_to_date": str(completed),
+            "retention": str(retention),
+            "earned_less_retention": str(earned),
+            "previously_certified": str(previous),
+            "current_due": str(earned - previous),
+            "balance_to_finish": str(self.revised - completed),
+        }
 
     def as_dict(self) -> dict[str, Any]:
         """The API shape (:class:`CommitmentResponse`)."""
@@ -281,6 +307,7 @@ async def load_commitment(
             commitment.invoices_in_other_currency += 1
             continue
         commitment.invoiced += _dec(inv.amount_subtotal)
+        commitment.retained += _dec(inv.retention_amount)
         commitment.invoice_ids.append(inv.id)
         for pay in inv.payments or []:
             amount = _dec(pay.amount)

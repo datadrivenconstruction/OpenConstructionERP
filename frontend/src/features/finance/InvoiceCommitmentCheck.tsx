@@ -34,8 +34,19 @@ interface PostingResult {
   suggestion?: string | null;
 }
 
+/** The certificate summary with this invoice added (net of VAT): A, B, A - B, C, A - B - C, balance. */
+export interface PaySummary {
+  completed_to_date: string;
+  retention: string;
+  earned_less_retention: string;
+  previously_certified: string;
+  current_due: string;
+  balance_to_finish: string;
+}
+
 export interface PostingCheck {
   commitment: Commitment | null;
+  summary?: PaySummary | null;
   blocking: boolean;
   report: { results: PostingResult[] };
 }
@@ -124,6 +135,7 @@ export function InvoiceCommitmentCheck({
 
   const failed = (data?.report?.results ?? []).filter((r) => !r.passed);
   const commitment = data?.commitment ?? null;
+  const summary = data?.summary ?? null;
   if (!commitment && failed.length === 0) return null;
 
   const errors = failed.filter((r) => r.severity === 'error');
@@ -182,6 +194,33 @@ export function InvoiceCommitmentCheck({
           </p>
           {notes}
         </dl>
+      )}
+
+      {commitment && summary && (
+        <table className="w-full text-xs" data-testid="invoice-pay-summary">
+          <tbody>
+            {(
+              [
+                ['completed_to_date', t('finance.pay_summary_completed', { defaultValue: 'A. Completed and stored to date' })],
+                ['retention', t('finance.pay_summary_retention', { defaultValue: 'B. Retention' })],
+                ['earned_less_retention', t('finance.pay_summary_earned', { defaultValue: 'Earned less retention (A - B)' })],
+                ['previously_certified', t('finance.pay_summary_previous', { defaultValue: 'C. Previously certified' })],
+                ['current_due', t('finance.pay_summary_current_due', { defaultValue: 'Current payment due (A - B - C)' })],
+                ['balance_to_finish', t('finance.pay_summary_balance', { defaultValue: 'Balance to finish' })],
+              ] as const
+            ).map(([field, label]) => (
+              <tr key={field} className={field === 'current_due' ? 'font-semibold' : undefined}>
+                <td className="py-0.5 text-content-secondary">{label}</td>
+                <td className="py-0.5 text-right tabular-nums" data-testid={`pay-summary-${field}`}>
+                  <MoneyDisplay
+                    amount={isDecimalString(summary[field]) ? summary[field] : null}
+                    currency={commitment.currency_code}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       {errors.length > 0 && (

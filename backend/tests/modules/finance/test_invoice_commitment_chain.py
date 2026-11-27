@@ -166,6 +166,33 @@ def test_a_payment_run_reads_the_scheduled_payment_date_before_the_due_date() ->
     assert picked.amount == Decimal("100.00")
 
 
+def test_the_pay_summary_holds_retention_on_everything_completed_to_date() -> None:
+    from app.modules.finance.commitment import Commitment
+
+    # 20,000 agreed at 5 %; 10,000 billed before, 500 of it held. This invoice bills 4,000.
+    commitment = Commitment(
+        kind="subcontract",
+        id=uuid.uuid4(),
+        ref="Concrete",
+        project_id=uuid.uuid4(),
+        status="active",
+        vendor_contact_id=VENDOR,
+        currency_code="USD",
+        original=Decimal("20000.00"),
+        retention_percent=Decimal("5"),
+        invoiced=Decimal("10000.00"),
+        retained=Decimal("500.00"),
+    )
+    assert commitment.pay_summary("4000.00", "200.00") == {
+        "completed_to_date": "14000.00",
+        "retention": "700.00",
+        "earned_less_retention": "13300.00",
+        "previously_certified": "9500.00",
+        "current_due": "3800.00",
+        "balance_to_finish": "6000.00",
+    }
+
+
 # ── the gate, on PostgreSQL ──────────────────────────────────────────────────
 
 
@@ -267,6 +294,9 @@ async def test_partial_invoices_on_an_order_stop_at_the_commitment_until_a_chang
     )
     assert check["blocking"] is True
     assert check["commitment"]["remaining"] == "4000.00"
+    assert check["summary"]["previously_certified"] == "6000.00"
+    assert check["summary"]["current_due"] == "5000.00"
+    assert check["summary"]["balance_to_finish"] == "-1000.00"
     with pytest.raises(HTTPException) as refused:
         await service.approve_invoice(second, actor_id=actor)
     assert refused.value.status_code == 422
@@ -404,6 +434,15 @@ async def test_a_subcontract_invoice_is_weighed_against_the_revised_agreement(se
         exclude_invoice_id=exact,
     )
     assert check["commitment"]["original"] == "20000.00"
+    # A 22,000, B 5 % = 1,100, nothing certified before, so 20,900 is due and nothing is left to finish.
+    assert check["summary"] == {
+        "completed_to_date": "22000.00",
+        "retention": "1100.00",
+        "earned_less_retention": "20900.00",
+        "previously_certified": "0",
+        "current_due": "20900.00",
+        "balance_to_finish": "0.00",
+    }
     assert check["commitment"]["approved_changes"] == "2000.00"
     assert check["blocking"] is False
     retention = [r for r in check["report"]["results"] if r["rule_id"] == "invoice_posting.commitment_retention"]

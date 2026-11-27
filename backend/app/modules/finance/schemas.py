@@ -324,6 +324,9 @@ class InvoiceResponse(BaseModel):
     submitted_at: str | None = None
     approved_by: UUID | None = None
     approved_at: str | None = None
+    # Display names of the two people above, filled by the router.
+    submitted_by_name: str | None = None
+    approved_by_name: str | None = None
     currency_code: str = ""
     amount_subtotal: str = "0"
     tax_amount: str = "0"
@@ -418,6 +421,8 @@ class InvoicePostingCheckResponse(BaseModel):
     """What approving the invoice would meet: its commitment and the ``invoice_posting`` report."""
 
     commitment: CommitmentResponse | None = None
+    # A completed to date, B retention, A - B, C previously certified, A - B - C, balance to finish.
+    summary: dict[str, str] | None = None
     blocking: bool
     report: dict[str, Any]
 

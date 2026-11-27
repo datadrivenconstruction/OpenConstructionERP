@@ -200,10 +200,25 @@ async def _fetch_counterparty_names(session: AsyncSession, contact_ids: Iterable
     return {str(c.id): _contact_display_name(c) for c in rows}
 
 
+async def _add_people_names(session: AsyncSession, names: dict[str, str], invoices: Iterable[Invoice]) -> None:
+    """Add who submitted and who approved each invoice to ``names``, keyed ``user:<id>``."""
+    from app.modules.users.models import User
+
+    ids = {uid for inv in invoices for uid in (inv.submitted_by, inv.approved_by) if uid}
+    if not ids:
+        return
+    rows = (await session.execute(select(User.id, User.full_name, User.email).where(User.id.in_(ids)))).all()
+    names.update({f"user:{uid}": full_name or email for uid, full_name, email in rows})
+
+
 def _invoice_to_response(invoice: Invoice, names: dict[str, str]) -> InvoiceResponse:
     resp = InvoiceResponse.model_validate(invoice)
     if invoice.contact_id:
         resp.counterparty_name = names.get(invoice.contact_id)
+    if invoice.submitted_by:
+        resp.submitted_by_name = names.get(f"user:{invoice.submitted_by}")
+    if invoice.approved_by:
+        resp.approved_by_name = names.get(f"user:{invoice.approved_by}")
     return resp
 
 
@@ -433,6 +448,7 @@ async def list_invoices(
         limit=limit,
     )
     names = await _fetch_counterparty_names(session, (i.contact_id for i in items))
+    await _add_people_names(session, names, items)
     return InvoiceListResponse(
         items=[_invoice_to_response(i, names) for i in items],
         total=total,
@@ -514,6 +530,7 @@ async def create_invoice(
     await _require_project_access(session, data.project_id, user_id)
     invoice = await service.create_invoice(data, user_id=user_id)
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -566,6 +583,7 @@ async def list_invoices_alias(
         limit=limit,
     )
     names = await _fetch_counterparty_names(session, (i.contact_id for i in items))
+    await _add_people_names(session, names, items)
     return InvoiceListResponse(
         items=[_invoice_to_response(i, names) for i in items],
         total=total,
@@ -1474,6 +1492,7 @@ async def create_invoice_from_claim(
     await _require_project_access(session, invoice.project_id, user_id)
     response.status_code = status.HTTP_200_OK if pre_existing is not None else status.HTTP_201_CREATED
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -1500,6 +1519,7 @@ async def get_receivable_for_claim(
         )
     await _require_project_access(session, invoice.project_id, user_id)
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -2908,6 +2928,7 @@ async def get_invoice(
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.get_invoice(invoice_id)
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -2929,6 +2950,7 @@ async def update_invoice(
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.update_invoice(invoice_id, data, actor_id=str(user_id) if user_id else None)
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -2962,6 +2984,7 @@ async def approve_invoice(
         actor_id=str(user_id) if user_id else None,
     )
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 
@@ -2998,6 +3021,7 @@ async def pay_invoice(
         actor_id=str(user_id) if user_id else None,
     )
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    await _add_people_names(session, names, [invoice])
     return _invoice_to_response(invoice, names)
 
 

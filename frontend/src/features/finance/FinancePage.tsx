@@ -109,7 +109,7 @@ import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { financeGuide } from './financeGuide';
 import { DEFAULT_FINANCE_TAB, isFinanceTab, type FinanceTab } from './financeTabs';
 import { UnlinkedTwinBanner } from '@/features/subcontractors/UnlinkedTwinBanner';
-import { fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
+import { fmtDate, fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { VideoHint } from '@/features/videos/VideoHint';
 
@@ -208,6 +208,8 @@ interface Invoice {
   submitted_at?: string | null;
   approved_by?: string | null;
   approved_at?: string | null;
+  submitted_by_name?: string | null;
+  approved_by_name?: string | null;
   invoice_date?: string | null;
   currency_code?: string | null;
   notes?: string | null;
@@ -3440,6 +3442,23 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                     </select>
                   );
                 })()}
+                {(editingInvoice?.submitted_at || editingInvoice?.approved_at) && (
+                  <p className="mt-1 text-2xs text-content-tertiary" data-testid="invoice-approval-trail">
+                    {editingInvoice.submitted_at &&
+                      t('finance.submitted_by_on', {
+                        defaultValue: 'Submitted by {{name}} on {{date}}',
+                        name: editingInvoice.submitted_by_name || '-',
+                        date: fmtDate(editingInvoice.submitted_at),
+                      })}
+                    {editingInvoice.submitted_at && editingInvoice.approved_at ? ' · ' : ''}
+                    {editingInvoice.approved_at &&
+                      t('finance.approved_by_on', {
+                        defaultValue: 'Approved by {{name}} on {{date}}',
+                        name: editingInvoice.approved_by_name || '-',
+                        date: fmtDate(editingInvoice.approved_at),
+                      })}
+                  </p>
+                )}
               </WideModalField>
             )}
           </WideModalSection>

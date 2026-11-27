@@ -112,6 +112,27 @@ describe('InvoiceCommitmentCheck', () => {
     expect(api.apiPost).toHaveBeenCalledWith('/v1/finance/invoices/posting-check/', INPUT);
   });
 
+  it('shows the certificate summary A, B, A - B, C and the current payment due', async () => {
+    // 9,000 billed before with 450 held at 5 %; this invoice bills 2,500.
+    api.apiPost.mockResolvedValue({
+      ...WARNED,
+      summary: {
+        completed_to_date: '11500.00',
+        retention: '575.00',
+        earned_less_retention: '10925.00',
+        previously_certified: '8550.00',
+        current_due: '2375.00',
+        balance_to_finish: '0.00',
+      },
+    });
+    wrap(<InvoiceCommitmentCheck input={INPUT} />);
+    expect((await screen.findByTestId('pay-summary-completed_to_date')).textContent).toContain('11,500.00');
+    expect(screen.getByTestId('pay-summary-retention').textContent).toContain('575.00');
+    expect(screen.getByTestId('pay-summary-previously_certified').textContent).toContain('8,550.00');
+    expect(screen.getByTestId('pay-summary-current_due').textContent).toContain('2,375.00');
+    expect(screen.getByTestId('invoice-pay-summary').textContent).toContain('Current payment due (A - B - C)');
+  });
+
   it('says approval will be refused and hands the reason to the form', async () => {
     api.apiPost.mockResolvedValue(REFUSED);
     const onBlockingChange = vi.fn();
