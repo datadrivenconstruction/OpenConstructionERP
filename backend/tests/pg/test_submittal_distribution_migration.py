@@ -43,7 +43,7 @@ def _column(sync_conn) -> dict | None:
 
 async def test_revision_chains_onto_the_previous_head() -> None:
     assert _rev.revision == "vsub01_submittal_distribution"
-    assert _rev.down_revision == "vdoc01_ncr_linked_documents"
+    assert _rev.down_revision == "vct01_cost_type_budget_lines"
 
 
 async def test_up_down_up_matches_the_model_column() -> None:
