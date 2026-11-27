@@ -479,6 +479,11 @@
     "note": "m² is a universal Latin SI symbol; fa keeps it in Latin form consistently (daily_diary.area_m2, boq.area_m2, etc.). ru only differs by using Cyrillic м², not a real translation need.",
     "reason_category": "symbol"
   },
+  "costmodel.ctg_eac": {
+    "en_value": "EAC",
+    "note": "bare technical/business acronym or initialism, same as reports.html_eac; identical in every locale including ru",
+    "reason_category": "abbreviation"
+  },
   "costmodel.mod_boq": {
     "en_value": "BOQ",
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated); identical in every locale including ru (bn locale addition)",
