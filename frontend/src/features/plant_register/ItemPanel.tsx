@@ -13,7 +13,7 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { ArrowLeft, Download, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import clsx from 'clsx';
 
 import { Badge } from '@/shared/ui/Badge';
@@ -448,7 +448,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                 <Button
                   size="sm"
                   variant="ghost"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   onClick={() =>
                     run.mutate({ where: 'paper', call: () => downloadExport(projectId, 'paper', 'pdf', item.id) })
                   }

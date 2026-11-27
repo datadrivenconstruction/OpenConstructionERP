@@ -20,7 +20,6 @@ import {
   CheckCircle2,
   LogIn,
   Pencil,
-  Download,
   Printer,
   AlertTriangle,
   CalendarClock,
@@ -31,6 +30,7 @@ import {
   Unlink,
   ClipboardList,
   Route,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -2318,7 +2318,7 @@ function GateTimeline({
         </div>
         <div className="flex items-center gap-1.5">
           <Button variant="ghost" size="sm" onClick={exportCsv} disabled={!sortedActive.length}>
-            <Download size={14} className="mr-1" />
+            <Upload size={14} className="mr-1" />
             {t('siteLogistics.export_csv', { defaultValue: 'Export CSV' })}
           </Button>
           <Button variant="ghost" size="sm" onClick={printDay} disabled={!sortedActive.length}>

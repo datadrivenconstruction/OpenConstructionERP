@@ -29,7 +29,6 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
-  Download,
   Gauge,
   ListTree,
   Plus,
@@ -39,6 +38,7 @@ import {
   Search,
   SlidersHorizontal,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Skeleton } from '@/shared/ui';
 import { fmtList, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
@@ -744,7 +744,7 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={handleExport}
               disabled={!data || !data.groups.length}
             >

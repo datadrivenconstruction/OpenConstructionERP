@@ -13,12 +13,12 @@ import {
   X,
   Camera,
   PenLine,
-  Download,
   ShieldCheck,
   CircleAlert,
   TriangleAlert,
   Loader2,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Button, Badge, SideDrawer } from '@/shared/ui';
@@ -317,7 +317,7 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="secondary"
-                  icon={<Download size={16} />}
+                  icon={<Upload size={16} />}
                   loading={exportMut.isPending}
                   onClick={() => exportMut.mutate()}
                 >

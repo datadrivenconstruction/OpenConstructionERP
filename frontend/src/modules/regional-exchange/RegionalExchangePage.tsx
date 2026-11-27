@@ -631,7 +631,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Upload size={16} />
+          <Download size={16} />
           {t('regional.tab_import', { defaultValue: 'Import' })}
         </button>
         <button
@@ -643,7 +643,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Download size={16} />
+          <Upload size={16} />
           {t('regional.tab_export', { defaultValue: 'Export' })}
         </button>
       </div>
@@ -664,7 +664,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
             {importFile ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-2 text-sm text-content-primary">
-                  <FileUp size={20} className="text-oe-blue" />
+                  <FileDown size={20} className="text-oe-blue" />
                   <span className="font-medium">{importFile.name}</span>
                   <span className="text-content-tertiary">
                     ({fmtFixed(importFile.size / 1024, 1)} KB)
@@ -843,7 +843,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                       isImporting ? (
                         <Loader2 size={16} className="animate-spin" />
                       ) : (
-                        <Upload size={16} />
+                        <Download size={16} />
                       )
                     }
                     onClick={handleImport}
@@ -1127,7 +1127,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                     isExporting ? (
                       <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      <FileDown size={16} />
+                      <FileUp size={16} />
                     )
                   }
                   onClick={handleExport}

@@ -1201,7 +1201,7 @@ export function LoadedDatabasesSection() {
                   exportMutation.isPending ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Download size={14} />
+                    <Upload size={14} />
                   )
                 }
                 onClick={() => exportMutation.mutate()}
@@ -2681,7 +2681,7 @@ function ColumnMappingPanel({
           onClick={onImport}
           disabled={!canImport}
           icon={
-            importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />
+            importing ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />
           }
         >
           <BusyLabel
@@ -3379,7 +3379,7 @@ export function ImportDatabasePage() {
                   directImportMutation.isPending ? (
                     <Loader2 size={16} className="animate-spin" />
                   ) : (
-                    <Upload size={16} />
+                    <Download size={16} />
                   )
                 }
               >

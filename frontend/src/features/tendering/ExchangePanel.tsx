@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, Download, FileText, Paperclip, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileText, Paperclip, X, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 import { fmtList, formatDateValue } from '@/shared/lib/formatters';
@@ -147,7 +147,7 @@ export function ExchangePanel({ pkg }: { pkg: ExchangePackage }) {
         </div>
         {showX86 && (
           <Button variant="secondary" size="sm" disabled={!pkg.boq_id} onClick={() => void onAward()} data-testid="exchange-x86">
-            <Download size={14} aria-hidden />
+            <Upload size={14} aria-hidden />
             {t('tendering.exchange.export_x86', { defaultValue: 'Award file (GAEB X86)' })}
           </Button>
         )}

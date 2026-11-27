@@ -13,7 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
-  Download,
+  Upload,
 } from 'lucide-react';
 import {
   Breadcrumb,
@@ -793,7 +793,7 @@ export default function RiskAnalysisModule() {
                 }
               </Button>
               {result && (
-                <Button variant="ghost" size="sm" icon={<Download size={16} />} onClick={handleExportCSV}>
+                <Button variant="ghost" size="sm" icon={<Upload size={16} />} onClick={handleExportCSV}>
                   {t('risk.export_csv', { defaultValue: 'Export CSV' })}
                 </Button>
               )}

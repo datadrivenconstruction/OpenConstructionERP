@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle2, Download, Info, Pencil } from 'lucide-react';
+import { CheckCircle2, Info, Pencil, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { fmtDate } from '@/shared/lib/formatters';
@@ -342,7 +342,7 @@ export function ConceptRecord({
               key={e.part}
               size="sm"
               variant="secondary"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               loading={exportFile.isPending && exportFile.variables?.part === e.part}
               onClick={() => exportFile.mutate({ part: e.part, format: e.format })}
               data-testid={`export-${e.part}`}

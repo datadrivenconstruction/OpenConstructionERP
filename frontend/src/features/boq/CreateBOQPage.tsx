@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, X, FileSpreadsheet, FilePlus2, Upload, FileUp } from 'lucide-react';
+import { ChevronDown, X, FileSpreadsheet, FilePlus2, FileUp, Download } from 'lucide-react';
 import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -433,7 +433,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
                 aria-pressed={startMode === 'import'}
                 data-testid="create-boq-import-mode"
               >
-                <Upload size={16} className={startMode === 'import' ? 'text-oe-blue' : 'text-content-tertiary'} />
+                <Download size={16} className={startMode === 'import' ? 'text-oe-blue' : 'text-content-tertiary'} />
                 {t('boq.start_import', { defaultValue: 'Import a file' })}
               </button>
             </div>

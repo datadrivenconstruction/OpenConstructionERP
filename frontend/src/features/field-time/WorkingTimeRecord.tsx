@@ -19,7 +19,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, ScrollText, Download, AlertTriangle } from 'lucide-react';
+import { Loader2, ScrollText, AlertTriangle, Upload } from 'lucide-react';
 import { Badge, Button, CollapsibleSection, EmptyState, ErrorState } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
@@ -166,7 +166,7 @@ export function WorkingTimeRecordPanel({
         <Button
           variant="secondary"
           size="md"
-          icon={<Download size={16} />}
+          icon={<Upload size={16} />}
           loading={downloading}
           disabled={!record || record.days.length === 0}
           onClick={() => void onExport()}

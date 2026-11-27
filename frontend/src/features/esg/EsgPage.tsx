@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Download,
   Leaf,
   ListFilter,
   Minus,
@@ -24,6 +23,7 @@ import {
   Trash2,
   Users,
   X,
+  Upload,
 } from 'lucide-react';
 import { Badge, Button, Card, ConfirmDialog, DismissibleInfo, EmptyState, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1154,7 +1154,7 @@ export function EsgPage() {
               })}
               className="shrink-0 whitespace-nowrap"
             >
-              <Download size={14} className="mr-1 shrink-0" />
+              <Upload size={14} className="mr-1 shrink-0" />
               <span>{t('esg.export_csv', { defaultValue: 'Export CSV' })}</span>
             </Button>
             <Button

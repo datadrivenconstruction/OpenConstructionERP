@@ -556,7 +556,7 @@ export default function RegionalExchangeHubPage() {
                       : 'bg-surface-tertiary text-content-secondary hover:text-content-primary'
                   }`}
                 >
-                  {which === 'import' ? <Upload size={12} aria-hidden="true" /> : <Download size={12} aria-hidden="true" />}
+                  {which === 'import' ? <Download size={12} aria-hidden="true" /> : <Upload size={12} aria-hidden="true" />}
                   {which === 'import'
                     ? t('regional.tab_import', { defaultValue: 'Import' })
                     : t('regional.tab_export', { defaultValue: 'Export' })}
@@ -652,7 +652,7 @@ export default function RegionalExchangeHubPage() {
                       {busy ? (
                         <Loader2 size={14} aria-hidden="true" className="animate-spin" />
                       ) : (
-                        <Upload size={14} aria-hidden="true" />
+                        <Download size={14} aria-hidden="true" />
                       )}
                       {t('exchange.choose_file', { defaultValue: 'Choose a file' })}
                     </Button>
@@ -714,7 +714,7 @@ export default function RegionalExchangeHubPage() {
                     {busy ? (
                       <Loader2 size={14} aria-hidden="true" className="animate-spin" />
                     ) : (
-                      <Download size={14} aria-hidden="true" />
+                      <Upload size={14} aria-hidden="true" />
                     )}
                     {t('exchange.download_as', { defaultValue: 'Download as {{format}}', format: selected.name })}
                   </Button>

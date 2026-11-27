@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Trash2,
   Layers,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1988,7 +1989,7 @@ function WidgetTile({
           title={t('bi.export_csv', { defaultValue: 'Export data as CSV' })}
           data-widget-id={widgetId}
         >
-          {exporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+          {exporting ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
           CSV
         </button>
         <button
@@ -1998,7 +1999,7 @@ function WidgetTile({
           className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-50"
           title={t('bi.export_svg', { defaultValue: 'Export chart as SVG' })}
         >
-          <Download size={12} />
+          <Upload size={12} />
           SVG
         </button>
         <button

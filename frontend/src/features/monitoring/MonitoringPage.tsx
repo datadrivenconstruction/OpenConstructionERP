@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, AlertOctagon, AlertTriangle, BellRing, CalendarClock, Printer, Upload } from 'lucide-react';
+import { Activity, AlertOctagon, AlertTriangle, BellRing, CalendarClock, Printer, Download } from 'lucide-react';
 import {
   Breadcrumb,
   Button,
@@ -113,7 +113,7 @@ export default function MonitoringPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<Upload size={16} />} onClick={() => setImportOpen(true)} data-testid="mon-import" disabled={!canWrite}>
+      <Button variant="primary" icon={<Download size={16} />} onClick={() => setImportOpen(true)} data-testid="mon-import" disabled={!canWrite}>
         {t('survey.monitoring.action.import_readings', { defaultValue: 'Import readings' })}
       </Button>
       <Button

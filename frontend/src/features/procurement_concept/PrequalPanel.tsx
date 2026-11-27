@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle2, Download, Pencil, Plus, Trash2, Users } from 'lucide-react';
+import { CheckCircle2, Pencil, Plus, Trash2, Users, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -166,7 +166,7 @@ export function PrequalPanel({
           </select>
         </div>
         <div className="ml-auto flex flex-wrap items-start gap-2">
-          <Button size="sm" variant="ghost" icon={<Download size={14} />} loading={exportList.isPending} onClick={() => exportList.mutate()}>
+          <Button size="sm" variant="ghost" icon={<Upload size={14} />} loading={exportList.isPending} onClick={() => exportList.mutate()}>
             {t('procurement_concept.ui.prequal.export', { defaultValue: 'Short list (XLSX)' })}
           </Button>
           {!notApplicable(can?.add) && (

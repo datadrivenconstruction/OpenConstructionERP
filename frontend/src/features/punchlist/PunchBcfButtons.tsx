@@ -71,7 +71,7 @@ export function PunchBcfButtons({ projectId, selectedIds }: { projectId: string;
         title={t('punch.bcf_export_hint', {
           defaultValue: 'Export as BCF topics; importing the file back updates the same items',
         })}
-        icon={exportMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
+        icon={exportMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileUp size={14} />}
       >
         {t('punch.bcf_export', { defaultValue: 'Export BCF' })}
       </Button>
@@ -93,7 +93,7 @@ export function PunchBcfButtons({ projectId, selectedIds }: { projectId: string;
         onClick={() => inputRef.current?.click()}
         disabled={importMut.isPending}
         data-testid="punchlist-import-bcf"
-        icon={importMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileUp size={14} />}
+        icon={importMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
       >
         {t('punch.bcf_import', { defaultValue: 'Import BCF' })}
       </Button>

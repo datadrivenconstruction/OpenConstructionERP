@@ -10,7 +10,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Plus,
-  Download,
   ShieldCheck,
   ChevronDown,
   ChevronRight,
@@ -25,6 +24,7 @@ import {
   DollarSign,
   Calculator,
   Percent,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import type { QualityBreakdown, Tip } from './boqHelpers';
@@ -568,7 +568,7 @@ export function ExportWarningDialog({
             onClick={() => onConfirm(exportWarning.format)}
             className="flex h-8 items-center gap-1.5 rounded-lg bg-semantic-warning px-4 text-xs font-medium text-white hover:bg-semantic-warning transition-colors"
           >
-            <Download size={14} />
+            <Upload size={14} />
             {t('boq.export_anyway', { defaultValue: 'Export Anyway' })}
           </button>
         </div>

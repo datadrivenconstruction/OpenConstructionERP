@@ -9,7 +9,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClipboardPaste, X, Upload, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ClipboardPaste, X, AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -429,7 +429,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
             <Button
               variant="primary"
               size="sm"
-              icon={<Upload size={16} />}
+              icon={<Download size={16} />}
               onClick={handleImport}
               disabled={rows.length === 0 || loading}
               loading={loading}

@@ -39,7 +39,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Crosshair,
-  Download,
   ExternalLink,
   ImageOff,
   MessageSquare,
@@ -50,6 +49,7 @@ import {
   Tag,
   User,
   X,
+  Upload,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -878,7 +878,7 @@ export function ReviewIssuesDock({
             defaultValue: 'Export these issues as .bcfzip',
           })}
         >
-          <Download size={14} />
+          <Upload size={14} />
         </button>
         <button
           type="button"

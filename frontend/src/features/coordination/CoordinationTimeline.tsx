@@ -12,8 +12,8 @@ import {
   Radar,
   Layers,
   ClipboardCheck,
-  Download,
   Activity,
+  Upload,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -46,7 +46,7 @@ function IconForType({ type }: { type: string }) {
     case 'rule_pack_installed':
       return <ClipboardCheck size={16} className="text-semantic-success" />;
     case 'bcf_export':
-      return <Download size={16} className="text-purple-600" />;
+      return <Upload size={16} className="text-purple-600" />;
     default:
       return <Activity size={16} className="text-content-secondary" />;
   }

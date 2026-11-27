@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Copy, Download, FileSpreadsheet, Loader2, Upload, XCircle } from 'lucide-react';
+import { CheckCircle2, Copy, Download, FileSpreadsheet, Loader2, XCircle } from 'lucide-react';
 
 import { Badge, Button, Input, WideModal, WideModalSection } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -395,7 +395,7 @@ export function ScheduleSpreadsheetImportDialog({
               onClick={() => commitMut.mutate(allowDuplicate)}
               disabled={!canCommit}
               loading={commitMut.isPending}
-              icon={<Upload size={16} />}
+              icon={<Download size={16} />}
             >
               {target === 'replace'
                 ? t('schedule.tabular_import.import_replace', { defaultValue: 'Replace contents' })

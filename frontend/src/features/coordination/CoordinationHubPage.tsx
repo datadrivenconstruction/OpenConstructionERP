@@ -29,7 +29,7 @@ import {
   Sparkles,
   Activity,
   FolderOpen,
-  Download,
+  Upload,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -445,7 +445,7 @@ export function CoordinationHubPage() {
                 variant="secondary"
                 onClick={handleExport}
                 disabled={exporting}
-                icon={<Download size={16} />}
+                icon={<Upload size={16} />}
               >
                 {t('coordination.export_csv', { defaultValue: 'Export CSV' })}
               </Button>

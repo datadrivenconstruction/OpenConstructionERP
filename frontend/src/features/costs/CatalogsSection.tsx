@@ -15,13 +15,13 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
-  Download,
   ListPlus,
   Loader2,
   Pencil,
   Plus,
   Trash2,
   X,
+  Upload,
 } from 'lucide-react';
 import { Button, Badge } from '@/shared/ui';
 import { extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
@@ -650,7 +650,7 @@ export function CatalogsSection({
                   {isExporting ? (
                     <Loader2 size={12} className="animate-spin" />
                   ) : (
-                    <Download size={12} />
+                    <Upload size={12} />
                   )}
                 </button>
                 <button

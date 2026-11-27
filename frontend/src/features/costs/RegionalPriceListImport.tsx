@@ -12,7 +12,7 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, BookOpen, CheckCircle2, Loader2, Upload } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Loader2, Upload, Download } from 'lucide-react';
 import { Button, Card } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -540,7 +540,7 @@ export function RegionalPriceListImport() {
                   variant="primary"
                   onClick={() => importMutation.mutate()}
                   disabled={busy || importable === 0 || !catalogName.trim() || (needsRegion && !overrides.regionCode && !src.region_code)}
-                  icon={importMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                  icon={importMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                 >
                   {importMutation.isPending
                     ? t('costs.import_importing', { defaultValue: 'Importing...' })

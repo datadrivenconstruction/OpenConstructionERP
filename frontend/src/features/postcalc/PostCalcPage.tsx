@@ -30,7 +30,6 @@ import { useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { HistoricalRangeCell, useHistoricalContext } from '@/features/analytics/HistoricalRange';
 import {
-  Download,
   Gauge,
   Layers,
   ListChecks,
@@ -39,6 +38,7 @@ import {
   Timer,
   TrendingDown,
   TrendingUp,
+  Upload,
 } from 'lucide-react';
 import {
   Badge,
@@ -791,7 +791,7 @@ export function PostCalcPage() {
               onClick={onDownload}
               disabled={!projectId || downloading || !report || isQuantityTab}
             >
-              <Download size={16} />
+              <Upload size={16} />
               {t('postcalc.export_markdown')}
             </Button>
           </>

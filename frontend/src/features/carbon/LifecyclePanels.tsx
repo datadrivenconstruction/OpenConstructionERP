@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { AlertTriangle, Download, FileUp, Flame, Truck } from 'lucide-react';
+import { AlertTriangle, Flame, Truck, Upload, FileDown } from 'lucide-react';
 
 import { Badge, Button, Card, EmptyState } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -274,7 +274,7 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
         </Card>
         <Card>
           <h3 className="oe-card-title flex items-center gap-2">
-            <FileUp className="h-4 w-4" aria-hidden />
+            <FileDown className="h-4 w-4" aria-hidden />
             {t('carbon.lc.epd_import_title', { defaultValue: 'Import EPD' })}
           </h3>
           <p className="mt-1 text-xs text-content-tertiary">
@@ -405,7 +405,7 @@ export function CompanyReportPanel() {
                   key={f}
                   size="sm"
                   variant="secondary"
-                  icon={<Download className="h-4 w-4" />}
+                  icon={<Upload className="h-4 w-4" />}
                   onClick={() => exportCompanyReport(current, f).catch((e) => setErr(getErrorMessage(e)))}
                 >
                   {t(`carbon.lc.export_${f}`, { defaultValue: f.toUpperCase() })}

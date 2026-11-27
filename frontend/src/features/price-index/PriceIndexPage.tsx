@@ -363,7 +363,7 @@ function PriceIndexContent() {
                 {importP0151Mut.isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Upload className="h-3.5 w-3.5" />
+                  <Download className="h-3.5 w-3.5" />
                 )}
                 {t('price_index.p0151.import', { defaultValue: 'Import Stats SA P0151.1 (South Africa CPAP)' })}
                 <input
@@ -1150,7 +1150,7 @@ function EscalateResults({ result }: { result: EscalatePreviewResponse }) {
           <Button
             variant="primary"
             size="sm"
-            icon={<Download className="h-4 w-4" />}
+            icon={<Upload className="h-4 w-4" />}
             onClick={() => downloadEscalatePreviewCsv(result)}
           >
             {t('price_index.escalate_export_csv', { defaultValue: 'Export escalated rates (CSV)' })}

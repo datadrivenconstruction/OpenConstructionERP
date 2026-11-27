@@ -25,7 +25,7 @@
 import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Download, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { Button, ErrorState, KpiBand } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
@@ -524,7 +524,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
             size="sm"
             onClick={handleExport}
             disabled={!plan || exporting || planQuery.isFetching}
-            icon={exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            icon={exporting ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
           >
             {t('cost_plan.export_xlsx', { defaultValue: 'Export to Excel' })}
           </Button>

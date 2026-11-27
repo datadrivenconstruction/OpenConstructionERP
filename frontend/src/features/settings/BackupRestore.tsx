@@ -10,7 +10,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Download,
   Upload,
   Loader2,
   FileArchive,
@@ -383,7 +382,7 @@ export function BackupRestore() {
                       onClick={handleExport}
                       disabled={exporting}
                       loading={exporting}
-                      icon={!exporting ? <Download size={14} /> : undefined}
+                      icon={!exporting ? <Upload size={14} /> : undefined}
                     >
                       {exporting
                         ? t('backup.exporting', { defaultValue: 'Creating backup...' })

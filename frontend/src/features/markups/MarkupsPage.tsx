@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import {
   PenTool,
   Search,
-  Download,
   GitCompare,
   ChevronDown,
   ChevronLeft,
@@ -37,6 +36,7 @@ import {
   CalendarClock,
   AlertTriangle,
   ClipboardCheck,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -2069,7 +2069,7 @@ export function MarkupsPage() {
               size="sm"
               onClick={handleExportCSV}
               disabled={!projectId}
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               title={t('markups.export', { defaultValue: 'Export' })}
             >
               <span className="hidden lg:inline">{t('markups.export', { defaultValue: 'Export' })}</span>

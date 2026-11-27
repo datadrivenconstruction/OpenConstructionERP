@@ -25,12 +25,12 @@ import {
   CheckSquare,
   Square,
   Database,
-  Upload,
   Trash2,
   House,
   TrendingUp,
   AlertTriangle,
   type LucideIcon,
+  Download,
 } from 'lucide-react';
 import { Button, Card, Badge, ConfirmDialog, EmptyState, Skeleton, DismissibleInfo, IntroRichText, CountryFlag, CountryFlagBackdrop, Breadcrumb, ModuleGuideButton } from '@/shared/ui';
 import { CurrencyPicker } from '@/shared/ui/CurrencyPicker';
@@ -382,7 +382,7 @@ function RegionImportGrid({
                     isImporting ? (
                       <Loader2 size={12} className="animate-spin" />
                     ) : (
-                      <Upload size={12} />
+                      <Download size={12} />
                     )
                   }
                   onClick={() => handleImport(region.id)}
@@ -1850,7 +1850,7 @@ export function CatalogPage() {
           <Button
             variant="primary"
             size="sm"
-            icon={<Upload size={14} />}
+            icon={<Download size={14} />}
             disabledReason={write.reason}
             onClick={() => setShowImportGrid(!showImportGrid)}
             data-guide="catalog-import"
@@ -2171,7 +2171,7 @@ export function CatalogPage() {
               <div className="flex items-center gap-2">
                 <Button
                   variant="primary"
-                  icon={<Upload size={16} />}
+                  icon={<Download size={16} />}
                   disabledReason={write.reason}
                   onClick={() => setShowImportGrid(true)}
                 >

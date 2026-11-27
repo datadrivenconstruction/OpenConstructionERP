@@ -373,7 +373,7 @@ export function ScheduleInterchangePanel({
       {/* ── Export ──────────────────────────────────────────────────────── */}
       <Card padding="md">
         <div className="mb-1 flex items-center gap-2">
-          <Download size={16} className="text-content-secondary" />
+          <Upload size={16} className="text-content-secondary" />
           <h3 className="oe-card-title">
             {t('schedule.interchange.export_title', { defaultValue: 'Export schedule' })}
           </h3>
@@ -392,7 +392,7 @@ export function ScheduleInterchangePanel({
             exportMut.isPending ? (
               <Loader2 size={16} className="animate-spin" />
             ) : (
-              <Download size={16} />
+              <Upload size={16} />
             )
           }
         >
@@ -500,7 +500,7 @@ export function ScheduleInterchangePanel({
       {/* ── Import ──────────────────────────────────────────────────────── */}
       <Card padding="md">
         <div className="mb-1 flex items-center gap-2">
-          <Upload size={16} className="text-content-secondary" />
+          <Download size={16} className="text-content-secondary" />
           <h3 className="oe-card-title">
             {t('schedule.interchange.import_title', { defaultValue: 'Import schedule' })}
           </h3>
@@ -572,7 +572,7 @@ export function ScheduleInterchangePanel({
               importMut.isPending ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Upload size={16} />
+                <Download size={16} />
               )
             }
           >
@@ -693,7 +693,7 @@ export function ScheduleInterchangePanel({
               vendorImportMut.isPending ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Upload size={16} />
+                <Download size={16} />
               )
             }
           >

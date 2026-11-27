@@ -1069,7 +1069,7 @@ export function BcfIssuesPanel({
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             loading={importMut.isPending}
-            icon={<Upload size={14} />}
+            icon={<Download size={14} />}
           >
             {t('bcf.import', { defaultValue: 'Import .bcfzip' })}
           </Button>
@@ -1090,7 +1090,7 @@ export function BcfIssuesPanel({
               onClick={() => exportMut.mutate()}
               loading={exportMut.isPending}
               disabled={topics.length === 0}
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
             >
               {t('bcf.export', { defaultValue: 'Export .bcfzip' })}
             </Button>

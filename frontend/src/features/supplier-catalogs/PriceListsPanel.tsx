@@ -21,6 +21,7 @@ import {
   Search,
   Trash2,
   Upload,
+  Download,
 } from 'lucide-react';
 import { Badge, Button, EmptyState, SkeletonTable } from '@/shared/ui';
 import { WideModal, WideModalField, WideModalSection } from '@/shared/ui/WideModal';
@@ -325,7 +326,7 @@ export function PriceListsPanel({ vendors }: { vendors: Vendor[] }) {
         <Button variant="secondary" icon={<Percent size={14} />} onClick={() => setDiscountsOpen(true)}>
           {t('supplier_catalogs.my_discounts', { defaultValue: 'My discounts' })}
         </Button>
-        <Button variant="primary" icon={<Upload size={14} />} onClick={() => setImportOpen(true)}>
+        <Button variant="primary" icon={<Download size={14} />} onClick={() => setImportOpen(true)}>
           {t('supplier_catalogs.import_price_list', { defaultValue: 'Import price list' })}
         </Button>
       </div>

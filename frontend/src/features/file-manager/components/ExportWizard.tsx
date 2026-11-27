@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Loader2, Download, ChevronLeft, AlertTriangle } from 'lucide-react';
+import { X, Loader2, ChevronLeft, AlertTriangle, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { useToastStore } from '@/stores/useToastStore';
 import { previewExport, downloadBundle } from '../api';
@@ -293,7 +293,7 @@ export function ExportWizard({ open, projectId, projectName, onClose }: ExportWi
                 disabled={downloading}
                 className="inline-flex items-center gap-2 h-9 px-4 text-xs font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50"
               >
-                {downloading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                {downloading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
                 {t('files.export.download_btn', { defaultValue: 'Download bundle' })}
               </button>
             )}

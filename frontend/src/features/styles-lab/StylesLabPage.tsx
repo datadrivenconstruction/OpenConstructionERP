@@ -14,10 +14,32 @@
 
 import { useState, type ReactNode } from 'react';
 import {
-  Hammer, Building2, Calculator, Ruler, FileText, Layers, Sparkles,
-  CircleDot, ChevronRight, Download, Plus, ArrowRight, ArrowUpRight, X, Check,
-  AlertTriangle, Zap, Wand2, Box, Boxes, Settings, TrendingUp,
-  Bell, Activity, Cpu, Lightbulb,
+  Hammer,
+  Building2,
+  Calculator,
+  Ruler,
+  FileText,
+  Layers,
+  Sparkles,
+  CircleDot,
+  ChevronRight,
+  Plus,
+  ArrowRight,
+  ArrowUpRight,
+  X,
+  Check,
+  AlertTriangle,
+  Zap,
+  Wand2,
+  Box,
+  Boxes,
+  Settings,
+  TrendingUp,
+  Bell,
+  Activity,
+  Cpu,
+  Lightbulb,
+  Upload,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -293,7 +315,7 @@ function ButtonsSection() {
 
         <Specimen no={8} name="3D Press" family="Tactile" note="Тёмный bottom-edge даёт физическое нажатие. Stripe style.">
           <button className="inline-flex h-10 items-center gap-2 px-5 rounded-lg text-sm font-semibold text-white bg-oe-blue active:translate-y-[2px] transition-transform duration-fast shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.25),0_2px_0_0_#005bb5] active:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.25),0_0px_0_0_#005bb5]">
-            <Download className="h-4 w-4" /> Export GAEB
+            <Upload className="h-4 w-4" /> Export GAEB
           </button>
         </Specimen>
 

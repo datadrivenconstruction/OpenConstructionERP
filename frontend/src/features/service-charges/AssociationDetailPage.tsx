@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CheckCircle2, Download, Plus, Receipt, Scale, Trash2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Plus, Receipt, Scale, Trash2, Upload } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -437,10 +437,10 @@ export function AssociationDetailPage() {
               <ArrowLeft size={14} className="rtl:rotate-180" />
               {t('service_charges.back', { defaultValue: 'All associations' })}
             </Link>
-            <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => void downloadExport(assoc.id, 'csv')}>
+            <Button variant="ghost" size="sm" icon={<Upload size={14} />} onClick={() => void downloadExport(assoc.id, 'csv')}>
               CSV
             </Button>
-            <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => void downloadExport(assoc.id, 'json')}>
+            <Button variant="ghost" size="sm" icon={<Upload size={14} />} onClick={() => void downloadExport(assoc.id, 'json')}>
               JSON
             </Button>
           </div>

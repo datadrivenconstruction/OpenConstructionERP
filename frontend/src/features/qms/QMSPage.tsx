@@ -22,9 +22,9 @@ import {
   Lock,
   Unlock,
   ShieldAlert,
-  Download,
   Network,
   ArrowRight,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1735,7 +1735,7 @@ function ITPPlanDrawer({
               disabled={exportingCsv}
               className="flex items-center gap-1 rounded border border-border-light px-2 py-1 text-2xs font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
             >
-              {exportingCsv ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+              {exportingCsv ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
               {t('qms.export_compliance_csv', {
                 defaultValue: 'Export compliance (CSV)',
               })}

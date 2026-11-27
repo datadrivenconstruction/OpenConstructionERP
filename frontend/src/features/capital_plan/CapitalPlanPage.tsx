@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Download, GitCompare, Plus, Sparkles, Wallet } from 'lucide-react';
+import { ChevronLeft, ChevronRight, GitCompare, Plus, Sparkles, Wallet, Upload } from 'lucide-react';
 
 import { Button, Card, CardContent, EmptyState, ModuleGuideButton, Skeleton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -350,7 +350,7 @@ export function CapitalPlanPage() {
             ))}
           </select>
         </label>
-        <Button variant="secondary" size="sm" icon={<Download size={14} />} disabled={!scenario} onClick={() => scenario && capitalPlanApi.exportXlsx(scenario.id).catch(fail)}>
+        <Button variant="secondary" size="sm" icon={<Upload size={14} />} disabled={!scenario} onClick={() => scenario && capitalPlanApi.exportXlsx(scenario.id).catch(fail)}>
           {t('capital_plan.export', { defaultValue: 'Export' })}
         </Button>
       </div>

@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { BarChart3, Download, Loader2, Network, Plus, Trash2 } from 'lucide-react';
+import { BarChart3, Loader2, Network, Plus, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Breadcrumb,
@@ -459,11 +459,11 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
 
       <div className="flex flex-wrap gap-2 border-t border-border-light pt-3">
         <Button variant="secondary" size="sm" onClick={() => onExport('csv')}>
-          <Download size={14} className="mr-1.5" />
+          <Upload size={14} className="mr-1.5" />
           {t('cost_benchmarks.export_csv', { defaultValue: 'Export anonymised (CSV)' })}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => onExport('json')}>
-          <Download size={14} className="mr-1.5" />
+          <Upload size={14} className="mr-1.5" />
           {t('cost_benchmarks.export_json', { defaultValue: 'Export anonymised (JSON)' })}
         </Button>
       </div>

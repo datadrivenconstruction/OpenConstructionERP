@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Download,
   Loader2,
   Columns3,
   Zap,
@@ -35,6 +34,7 @@ import {
   Network,
   ArrowRight,
   Gauge,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, CollapsibleSection, WideModal } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -1656,7 +1656,7 @@ export function InspectionsPage() {
                 exportMut.isPending ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Download size={14} />
+                  <Upload size={14} />
                 )
               }
               onClick={() => exportMut.mutate()}

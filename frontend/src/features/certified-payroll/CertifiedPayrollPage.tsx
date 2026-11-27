@@ -11,12 +11,12 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
-  Download,
   Gavel,
   Lock,
   Trash2,
   ShieldCheck,
   FileSignature,
+  Upload,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -590,7 +590,7 @@ function WeekDetail({ weekId }: { weekId: string }) {
           size="sm"
           onClick={() => void downloadWeekForm(week.id, week.week_ending, 'csv')}
         >
-          <Download className="mr-2 h-4 w-4" />
+          <Upload className="mr-2 h-4 w-4" />
           {t('certified_payroll.export.csv')}
         </Button>
         <Button
@@ -598,7 +598,7 @@ function WeekDetail({ weekId }: { weekId: string }) {
           size="sm"
           onClick={() => void downloadWeekForm(week.id, week.week_ending, 'json')}
         >
-          <Download className="mr-2 h-4 w-4" />
+          <Upload className="mr-2 h-4 w-4" />
           {t('certified_payroll.export.json')}
         </Button>
       </div>

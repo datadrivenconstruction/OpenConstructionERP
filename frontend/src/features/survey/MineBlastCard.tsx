@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Plus, Upload } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader, EmptyState, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -163,7 +163,7 @@ export function MineBlastCard({ projectId, canWrite }: { projectId: string; canW
                   {t('mine.blast.drilled_csv', { defaultValue: 'As-drilled holes, same columns as the design' })}
                   <textarea rows={4} className="oe-textarea mt-1 w-full font-mono text-xs" value={drilled} onChange={(e) => setDrilled(e.target.value)} />
                 </label>
-                <Button size="sm" variant="primary" icon={<Upload size={14} />} disabled={!drilled.trim()} loading={asDrilled.isPending} onClick={() => asDrilled.mutate()}>
+                <Button size="sm" variant="primary" icon={<Download size={14} />} disabled={!drilled.trim()} loading={asDrilled.isPending} onClick={() => asDrilled.mutate()}>
                   {t('mine.blast.import_drilled', { defaultValue: 'Import as-drilled' })}
                 </Button>
               </div>

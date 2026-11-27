@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   Eye,
   Search,
-  Download,
   Loader2,
   Plus,
   Heart,
@@ -28,6 +27,7 @@ import {
   Microscope,
   Network,
   ArrowRight,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1174,7 +1174,7 @@ function IncidentsTab({
             exportMut.isPending ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
-              <Download size={14} />
+              <Upload size={14} />
             )
           }
           onClick={() => exportMut.mutate()}
@@ -1730,7 +1730,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             exportMut.isPending ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
-              <Download size={14} />
+              <Upload size={14} />
             )
           }
           onClick={() => exportMut.mutate()}

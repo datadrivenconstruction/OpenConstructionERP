@@ -35,7 +35,7 @@ import {
   Trash2,
   CheckCircle2,
   Lock,
-  Download,
+  Upload,
 } from 'lucide-react';
 import {
   summariseQueue,
@@ -334,7 +334,7 @@ function HeldSection({
               onClick={() => void onExport()}
               className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-semantic-warning/30 px-3 text-sm font-semibold text-semantic-warning"
             >
-              <Download size={16} aria-hidden="true" />
+              <Upload size={16} aria-hidden="true" />
               {t('field.sync_queue.held_export', { defaultValue: 'Export' })}
             </button>
           )}

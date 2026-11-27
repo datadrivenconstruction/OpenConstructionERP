@@ -26,7 +26,6 @@ import {
   ArrowUp,
   Boxes,
   ChevronsUpDown,
-  Download,
   FolderOpen,
   Loader2,
   Pencil,
@@ -35,6 +34,7 @@ import {
   ShieldCheck,
   Trash2,
   X,
+  Upload,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -396,7 +396,7 @@ export function GeneratedModulePage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   loading={exporting}
                   disabled={missingProject}
                   onClick={() => setExportOpen((v) => !v)}

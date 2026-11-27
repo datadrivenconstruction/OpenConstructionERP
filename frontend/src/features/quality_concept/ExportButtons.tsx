@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -27,10 +27,10 @@ export function ExportButtons({ projectId, what, label }: { projectId: string; w
   return (
     <span className="inline-flex flex-wrap items-center gap-1" data-testid="export-buttons" data-export={what}>
       {label && <span className="text-xs text-content-secondary">{label}</span>}
-      <Button variant="ghost" size="sm" icon={<Download size={14} />} loading={busy === 'xlsx'} onClick={() => run('xlsx')}>
+      <Button variant="ghost" size="sm" icon={<Upload size={14} />} loading={busy === 'xlsx'} onClick={() => run('xlsx')}>
         {t('qualityConcept.export.xlsx', { defaultValue: 'Spreadsheet' })}
       </Button>
-      <Button variant="ghost" size="sm" icon={<Download size={14} />} loading={busy === 'pdf'} onClick={() => run('pdf')}>
+      <Button variant="ghost" size="sm" icon={<Upload size={14} />} loading={busy === 'pdf'} onClick={() => run('pdf')}>
         {t('qualityConcept.export.pdf', { defaultValue: 'PDF' })}
       </Button>
       {error && (

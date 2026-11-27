@@ -7,7 +7,7 @@
 // control, and the Export CSV button.
 
 import { useTranslation } from 'react-i18next';
-import { Download, Search, X } from 'lucide-react';
+import { Search, X, Upload } from 'lucide-react';
 import { Card } from '@/shared/ui';
 import { CHANNELS, DIRECTIONS, channelLabel, directionLabel } from './labels';
 import type { PhoneChannel, PhoneDirection, PhoneLog } from './types';
@@ -134,7 +134,7 @@ export function PhoneLogFilters({
           disabled={shown === 0}
           className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Download className="h-4 w-4" />
+          <Upload className="h-4 w-4" />
           {t('phonelog.export_csv', { defaultValue: 'Export CSV' })}
         </button>
       </div>

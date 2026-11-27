@@ -33,7 +33,6 @@ import { PdfDetailsPanel } from './PdfDetailsPanel';
 import { BOQColumnPicker } from './BOQColumnPicker';
 import {
   Plus,
-  Download,
   ArrowUpRight,
   Upload,
   ClipboardPaste,
@@ -50,7 +49,6 @@ import {
   Variable as VariableIcon,
   FileSpreadsheet,
   FileText,
-  FileDown,
   RefreshCw,
   AlertTriangle,
   SearchCheck,
@@ -67,6 +65,8 @@ import {
   ListCollapse,
   Ruler,
   FileSearch,
+  FileUp,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -506,7 +506,7 @@ export function BOQToolbar({
           {/* File: import / export / paste / density / carbon */}
           {!readOnly && canImport && (
             <IconBtn
-              icon={isImporting ? <RefreshCw size={16} className="animate-spin" /> : <Upload size={16} />}
+              icon={isImporting ? <RefreshCw size={16} className="animate-spin" /> : <Download size={16} />}
               title={t('common.import')}
               onClick={onImportClick}
               disabled={isImporting}
@@ -536,7 +536,7 @@ export function BOQToolbar({
                   : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary'
               }`}
             >
-              <Download size={16} />
+              <Upload size={16} />
             </button>
             {showExportMenu && exportMenuPos &&
               createPortal(
@@ -558,7 +558,7 @@ export function BOQToolbar({
                     {t('boq.export_format_csv', { defaultValue: 'CSV (.csv)' })}
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
-                    <FileDown size={16} className="text-content-tertiary" />
+                    <FileUp size={16} className="text-content-tertiary" />
                     {t('offers.export_internal_pdf', { defaultValue: 'Internal estimate (PDF)' })}
                   </button>
                   <button role="menuitem" onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">

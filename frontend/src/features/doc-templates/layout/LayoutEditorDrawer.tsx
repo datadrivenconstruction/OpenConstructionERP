@@ -452,10 +452,10 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                         <RotateCcw size={14} />
                       </button>
                       <button type="button" disabled={busy} onClick={onExport} className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-secondary" aria-label={t('doc_layout.export', { defaultValue: 'Export as file' })} title={t('doc_layout.export', { defaultValue: 'Export as file' })}>
-                        <Download size={14} />
+                        <Upload size={14} />
                       </button>
                       <button type="button" disabled={busy} onClick={() => fileRef.current?.click()} className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-secondary" aria-label={t('doc_layout.import', { defaultValue: 'Import from file' })} title={t('doc_layout.import', { defaultValue: 'Import from file' })}>
-                        <Upload size={14} />
+                        <Download size={14} />
                       </button>
                       <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => e.target.files?.[0] && void onImport(e.target.files[0])} />
                     </span>

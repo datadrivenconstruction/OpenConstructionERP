@@ -6,10 +6,32 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search, Plus, Layers, ChevronLeft, ChevronRight, MoreHorizontal,
-  Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
-  Upload, Tag, Eye, Share2, LayoutGrid, Table2, ArrowUpDown, BarChart3, AlertCircle,
-  CheckSquare, Square as SquareIcon, Library,
+  Search,
+  Plus,
+  Layers,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Copy,
+  Trash2,
+  Download,
+  ExternalLink,
+  FileSpreadsheet,
+  X,
+  Sparkles,
+  Loader2,
+  Upload,
+  Tag,
+  Eye,
+  Share2,
+  LayoutGrid,
+  Table2,
+  ArrowUpDown,
+  BarChart3,
+  AlertCircle,
+  CheckSquare,
+  Square as SquareIcon,
+  Library,
 } from 'lucide-react';
 import { Button, Card, Badge, DismissibleInfo, IntroRichText, EmptyState, SkeletonGrid, Breadcrumb, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -418,7 +440,7 @@ export function AssembliesPage() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={() => setShowExportMenu((p) => !p)}
             >
               {t('common.export')}
@@ -491,7 +513,7 @@ export function AssembliesPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Upload size={14} />}
+            icon={<Download size={14} />}
             disabledReason={editReason}
             onClick={() => setShowImportModal(true)}
           >
@@ -845,7 +867,7 @@ export function AssembliesPage() {
             {t('common.clear', { defaultValue: 'Clear' })}
           </button>
           <span className="ml-auto flex flex-wrap items-center gap-1.5">
-            <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleBulkExport}>
+            <Button variant="secondary" size="sm" icon={<Upload size={14} />} onClick={handleBulkExport}>
               {t('assemblies.bulk_export', { defaultValue: 'Export selected' })}
             </Button>
             <Button variant="secondary" size="sm" icon={<Tag size={14} />} disabledReason={editReason} onClick={() => setShowBulkTag(true)}>
@@ -2266,7 +2288,7 @@ function ImportAssemblyModal({
             onClick={handleImport}
             disabled={!jsonText.trim()}
             loading={importing}
-            icon={<Upload size={16} />}
+            icon={<Download size={16} />}
           >
             {t('assemblies.import_btn', { defaultValue: 'Import' })}
           </Button>

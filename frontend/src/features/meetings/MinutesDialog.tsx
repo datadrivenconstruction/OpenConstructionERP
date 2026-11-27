@@ -15,13 +15,13 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
-  FileDown,
   Loader2,
   RefreshCw,
   Save,
   Send,
   Share2,
   Sparkles,
+  FileUp,
 } from 'lucide-react';
 import {
   Badge,
@@ -262,7 +262,7 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
             {exportMut.isPending ? (
               <Loader2 size={14} className="mr-1.5 animate-spin" />
             ) : (
-              <FileDown size={14} className="mr-1.5" />
+              <FileUp size={14} className="mr-1.5" />
             )}
             {t('meetings.export_pdf', { defaultValue: 'Export PDF' })}
           </Button>

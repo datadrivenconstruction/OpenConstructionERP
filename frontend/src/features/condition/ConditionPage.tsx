@@ -17,7 +17,6 @@ import {
   CalendarRange,
   CheckCircle2,
   ClipboardCheck,
-  Download,
   Gauge,
   Network,
   Plus,
@@ -26,6 +25,7 @@ import {
   Trash2,
   Wand2,
   XCircle,
+  Upload,
 } from 'lucide-react';
 import { Badge, Button, Card, CollapsibleSection, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -449,7 +449,7 @@ export function ConditionPage() {
                   <Button size="sm" variant="secondary" icon={<Wand2 size={14} />} loading={deriveMut.isPending} disabledReason={createReason} onClick={() => deriveMut.mutate()} data-testid="condition-derive">
                     {t('condition.derive', { defaultValue: 'Propose actions from ratings' })}
                   </Button>
-                  <Button size="sm" variant="secondary" icon={<Download size={14} />} loading={exportMut.isPending} onClick={() => exportMut.mutate()}>
+                  <Button size="sm" variant="secondary" icon={<Upload size={14} />} loading={exportMut.isPending} onClick={() => exportMut.mutate()}>
                     {t('condition.export_csv', { defaultValue: 'Export CSV' })}
                   </Button>
                   <Button size="sm" variant="secondary" icon={<ShieldCheck size={14} />} loading={applyMut.isPending} disabledReason={approveReason} onClick={() => applyMut.mutate()}>

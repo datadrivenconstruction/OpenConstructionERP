@@ -8,7 +8,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { Download, FileUp } from 'lucide-react';
+import { FileUp, Upload } from 'lucide-react';
 import { Badge, Breadcrumb, Button, EmptyState, SkeletonTable } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -286,7 +286,7 @@ export function OwnerSchedulePage() {
             </div>
             <Button
               variant="secondary"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={() =>
                 exportSchedule(boqId).catch((e) =>
                   addToast({ type: 'error', title: t('owner_schedule.export_failed', { defaultValue: 'Export failed' }), message: getErrorMessage(e) }),

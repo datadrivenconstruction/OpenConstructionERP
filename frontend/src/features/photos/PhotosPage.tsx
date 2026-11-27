@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, Columns2, FolderPlus, Grid3x3, Images, Loader2, Map as MapIcon, Download, X } from 'lucide-react';
+import { CalendarDays, Columns2, FolderPlus, Grid3x3, Images, Loader2, Map as MapIcon, X, Upload } from 'lucide-react';
 import { AuthImage, Button, EmptyState, ErrorState, ModuleGuideButton, Badge } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { FieldItemsMap } from '@/shared/ui/FieldItemsMap';
@@ -441,7 +441,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
               disabled={exporter.busy}
               loading={exporter.busy}
               onClick={() => exporter.start(filters.album ? { album_id: filters.album } : {})}
-              icon={<Download className="h-4 w-4" aria-hidden />}
+              icon={<Upload className="h-4 w-4" aria-hidden />}
             >
               {exporter.busy ? t('photoArchive.export.progress', { value: exporter.progress }) : t('photoArchive.export.all')}
             </Button>
@@ -521,7 +521,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
             onClick={() => exporter.start({ photo_ids: selected })}
             className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-1 text-xs disabled:opacity-50"
           >
-            <Download className="h-3 w-3" aria-hidden />
+            <Upload className="h-3 w-3" aria-hidden />
             {t('photoArchive.export.selected')}
           </button>
         </BulkBar>

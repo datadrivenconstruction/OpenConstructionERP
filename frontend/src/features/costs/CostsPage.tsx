@@ -1232,7 +1232,7 @@ export function CostsPage() {
             <Button
               variant="primary"
               size="sm"
-              icon={<Upload size={14} />}
+              icon={<Download size={14} />}
               onClick={() => navigate('/costs/import')}
               data-guide="costs-import"
             >
@@ -1255,7 +1255,7 @@ export function CostsPage() {
                   exportMutation.isPending ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Download size={14} />
+                    <Upload size={14} />
                   )
                 }
                 onClick={() => exportMutation.mutate()}

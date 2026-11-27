@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, FileCheck2 } from 'lucide-react';
+import { FileCheck2, Upload } from 'lucide-react';
 import clsx from 'clsx';
 
 import { Button } from '@/shared/ui/Button';
@@ -243,7 +243,7 @@ export function ExportBar({ projectId, settings, document }: { projectId: string
             key={format}
             size="sm"
             variant="ghost"
-            icon={<Download size={14} />}
+            icon={<Upload size={14} />}
             loading={busy === format}
             onClick={() => download(format)}
             data-testid={`export-${document}-${format}`}

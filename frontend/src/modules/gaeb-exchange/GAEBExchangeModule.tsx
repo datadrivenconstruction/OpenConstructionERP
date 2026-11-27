@@ -563,7 +563,7 @@ export default function GAEBExchangeModule() {
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Upload size={16} />
+          <Download size={16} />
           {t('gaeb.tab_import', { defaultValue: 'Import' })}
         </button>
         <button
@@ -575,7 +575,7 @@ export default function GAEBExchangeModule() {
               : 'border-transparent text-content-tertiary hover:text-content-secondary'
           }`}
         >
-          <Download size={16} />
+          <Upload size={16} />
           {t('gaeb.tab_export', { defaultValue: 'Export' })}
         </button>
       </div>
@@ -599,7 +599,7 @@ export default function GAEBExchangeModule() {
             {importFile ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-2 text-sm text-content-primary">
-                  <FileUp size={20} className="text-oe-blue" />
+                  <FileDown size={20} className="text-oe-blue" />
                   <span className="font-medium">{importFile.name}</span>
                   <span className="text-content-tertiary">
                     ({fmtFixed(importFile.size / 1024, 1)} KB)
@@ -731,7 +731,7 @@ export default function GAEBExchangeModule() {
                   <Button
                     variant="primary"
                     className="w-full"
-                    icon={isImporting ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    icon={isImporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                     onClick={handleImport}
                     disabled={!importTargetBoqId || isImporting}
                   >
@@ -948,7 +948,7 @@ export default function GAEBExchangeModule() {
 
               <Button
                 variant="primary"
-                icon={isExporting ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                icon={isExporting ? <Loader2 size={16} className="animate-spin" /> : <FileUp size={16} />}
                 onClick={handleExport}
                 disabled={isExporting}
               >

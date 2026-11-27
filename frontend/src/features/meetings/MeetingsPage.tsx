@@ -1991,7 +1991,7 @@ const MeetingRow = React.memo(function MeetingRow({
               {isExporting ? (
                 <Loader2 size={14} className="mr-1.5 animate-spin" />
               ) : (
-                <FileDown size={14} className="mr-1.5" />
+                <FileUp size={14} className="mr-1.5" />
               )}
               {t('meetings.export_pdf', { defaultValue: 'Export PDF' })}
             </Button>
@@ -2407,7 +2407,7 @@ export function MeetingsPage() {
               size="sm"
               onClick={() => setShowImportModal(true)}
               disabled={!projectId}
-              icon={<FileUp size={14} />}
+              icon={<FileDown size={14} />}
             >
               {t('meetings.import_summary', { defaultValue: 'Import Summary' })}
             </Button>

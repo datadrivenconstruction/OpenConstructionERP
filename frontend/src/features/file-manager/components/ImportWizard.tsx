@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { X, Loader2, Upload, ChevronLeft, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, ChevronLeft, AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import clsx from 'clsx';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
@@ -179,7 +179,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full rounded-xl border-2 border-dashed border-border-light hover:border-oe-blue hover:bg-oe-blue/5 transition-colors py-10 flex flex-col items-center gap-2 text-content-secondary"
               >
-                <Upload size={20} className="text-content-tertiary" />
+                <Download size={20} className="text-content-tertiary" />
                 <span className="text-sm font-medium">
                   {t('files.import.select_file', { defaultValue: 'Choose .ocep file' })}
                 </span>

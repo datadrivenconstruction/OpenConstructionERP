@@ -1711,7 +1711,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               exportBudgetsMut.isPending ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Download size={14} />
+                <Upload size={14} />
               )
             }
             onClick={() => exportBudgetsMut.mutate()}
@@ -1722,7 +1722,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Upload size={14} />}
+            icon={<Download size={14} />}
             onClick={() => {
               setShowImport(true);
               setImportFile(null);
@@ -2022,7 +2022,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 }
               }}
             >
-              <Upload size={24} className="text-content-tertiary mb-2" />
+              <Download size={24} className="text-content-tertiary mb-2" />
               <p className="text-sm text-content-secondary text-center">
                 {importFile
                   ? importFile.name
@@ -2081,7 +2081,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 {importPending ? (
                   <Loader2 size={16} className="animate-spin mr-1.5" />
                 ) : (
-                  <Upload size={16} className="mr-1.5" />
+                  <Download size={16} className="mr-1.5" />
                 )}
                 <span>{t('finance.import_btn', { defaultValue: 'Import' })}</span>
               </Button>
@@ -2552,7 +2552,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
               exportInvoicesMut.isPending ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Download size={14} />
+                <Upload size={14} />
               )
             }
             onClick={() => exportInvoicesMut.mutate()}

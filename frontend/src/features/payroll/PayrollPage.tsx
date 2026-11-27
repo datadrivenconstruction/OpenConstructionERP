@@ -21,12 +21,12 @@ import {
   Send,
   BookCheck,
   Scale,
-  Download,
   ExternalLink,
   AlertTriangle,
   MinusCircle,
   Trash2,
   HandCoins,
+  Upload,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -893,7 +893,7 @@ export default function PayrollPage() {
                   onClick={() => void handleExport(selectedBatchId, 'csv')}
                   aria-label={t('payroll.export_csv', { defaultValue: 'Export CSV' })}
                 >
-                  <Download size={16} />
+                  <Upload size={16} />
                   {t('payroll.export_csv', { defaultValue: 'Export CSV' })}
                 </Button>
                 <Button
@@ -902,7 +902,7 @@ export default function PayrollPage() {
                   onClick={() => void handleExport(selectedBatchId, 'json')}
                   aria-label={t('payroll.export_json', { defaultValue: 'Export JSON' })}
                 >
-                  <Download size={16} />
+                  <Upload size={16} />
                   {t('payroll.export_json', { defaultValue: 'Export JSON' })}
                 </Button>
                 {canSubmit && (

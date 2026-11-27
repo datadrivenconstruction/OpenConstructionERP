@@ -12,7 +12,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { FileSpreadsheet, Upload } from 'lucide-react';
+import { FileSpreadsheet, Download } from 'lucide-react';
 
 import { Button, Card } from '@/shared/ui';
 import { useHasPermission } from '@/shared/lib/permissionGates';
@@ -89,7 +89,7 @@ export function SpreadsheetImportEntry({ projectId, schedule, variant }: Spreads
               })}
             </p>
           </div>
-          <Button variant="secondary" icon={<Upload size={16} />} onClick={() => setOpen(true)} disabled={!canImport}>
+          <Button variant="secondary" icon={<Download size={16} />} onClick={() => setOpen(true)} disabled={!canImport}>
             {t('schedule.tabular_import.open', { defaultValue: 'Import spreadsheet' })}
           </Button>
         </div>
