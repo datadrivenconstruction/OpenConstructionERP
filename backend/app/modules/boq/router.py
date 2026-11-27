@@ -200,6 +200,7 @@ from app.modules.boq.schemas import (
     MarkupResponse,
     MarkupUpdate,
     PositionCO2Detail,
+    PositionComposition,
     PositionCreate,
     PositionLinksResponse,
     PositionResponse,
@@ -2386,6 +2387,40 @@ async def bulk_add_positions(
         ) from exc
 
     return [_position_to_response(p) for p in inserted]
+
+
+@router.get(
+    "/positions/{position_id}/composition/",
+    response_model=PositionComposition,
+    summary="Check that a position's resources add up to its unit rate",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def inspect_position_composition(
+    position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> PositionComposition:
+    """Re-derive the unit rate from the resource rows and list per-row issues. Writes nothing."""
+    from app.modules.boq.composition_check import inspect_composition
+
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+    base, fx_map = await service._resolve_project_fx(existing.boq_id)
+    return PositionComposition(
+        **inspect_composition(
+            unit_rate=existing.unit_rate,
+            quantity=existing.quantity,
+            metadata=existing.metadata_,
+            fx_rates_map=fx_map,
+            base_currency=base,
+        )
+    )
 
 
 @router.get(
