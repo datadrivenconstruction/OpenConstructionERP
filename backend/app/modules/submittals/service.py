@@ -635,7 +635,7 @@ class SubmittalService:
         if missing:
             locale = get_locale()
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"{tr('submittal.people_have_project_access.fail', locale, count=len(missing))}. "
                     f"{tr('submittal.people_have_project_access.suggestion', locale)}"

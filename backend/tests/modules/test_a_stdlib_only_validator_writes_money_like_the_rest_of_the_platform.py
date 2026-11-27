@@ -138,7 +138,9 @@ class TestTheCurrencyRegistryIsStandardLibraryOnly:
         for module in ("procurement", "subcontractors"):
             imported = _imported_modules(BACKEND / "app" / "modules" / module / "validators.py")
             foreign = {
-                name for name in imported if name.split(".")[0] not in sys.stdlib_module_names and name not in registries
+                name
+                for name in imported
+                if name.split(".")[0] not in sys.stdlib_module_names and name not in registries
             }
             assert foreign == set(), f"{module} imports outside the standard library: {sorted(foreign)}"
 

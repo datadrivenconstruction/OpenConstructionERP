@@ -22,6 +22,7 @@
 // fails here too.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -275,6 +276,8 @@ beforeEach(() => {
   api.downloadWithAuth.mockResolvedValue(undefined);
   api.apiPost.mockResolvedValue({ ...LEGACY, id: 's-new' });
   useProjectContextStore.setState({ activeProjectId: 'p-1', activeProjectName: PROJECT.name });
+  // Filing needs the editor role since viewers see the button disabled.
+  useAuthStore.setState({ userRole: 'editor' });
 });
 
 afterEach(() => {

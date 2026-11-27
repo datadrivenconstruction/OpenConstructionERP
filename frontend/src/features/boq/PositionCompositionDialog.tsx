@@ -11,6 +11,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Button, WideModal } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { fmtList } from '@/shared/lib/formatters';
 import {
   ISSUE_CODES,
   confidencePercent,
@@ -124,7 +125,7 @@ export function PositionCompositionDialog({ positionId, onClose, onChanged }: Pr
             <p className="text-xs text-semantic-warning" data-testid="composition-fx">
               {t('boq.position_cost.fx_missing', {
                 defaultValue: 'No exchange rate in the project for: {{codes}}. These rows are left out of the sum.',
-                codes: data.fx_missing.join(', '),
+                codes: fmtList(data.fx_missing),
               })}
             </p>
           )}
@@ -150,13 +151,13 @@ export function PositionCompositionDialog({ positionId, onClose, onChanged }: Pr
                     <td className="text-right tabular-nums">{c.quantity}</td>
                     <td className="text-right tabular-nums">{c.unit_rate}</td>
                     <td className="text-xs text-semantic-warning">
-                      {c.issues
-                        .map((code) =>
+                      {fmtList(
+                        c.issues.map((code) =>
                           (ISSUE_CODES as readonly string[]).includes(code)
                             ? t(`boq.position_cost.issue_${code}`, { defaultValue: code })
                             : code,
-                        )
-                        .join(', ')}
+                        ),
+                      )}
                     </td>
                     <td className="text-right">
                       <Button

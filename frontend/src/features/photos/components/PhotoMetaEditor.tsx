@@ -11,6 +11,7 @@ import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useToastStore } from '@/stores/useToastStore';
 import { fetchAlbums, patchPhoto, photosKeys, setPhotoAlbums, type ArchivePhoto } from '../api';
 import { bulkPatch, parseTags, PHOTO_CATEGORIES } from '../model';
+import { fmtList } from '@/shared/lib/formatters';
 
 /** Where a photo can start a record, with the create convention each page reads. */
 export function raiseRoute(photo: ArchivePhoto, target: 'punch' | 'ncr' | 'safety'): string {
@@ -97,10 +98,9 @@ export function PhotoMetaEditor({ photo, onChange }: { photo: ArchivePhoto; onCh
   const current = { category, tags };
   const albumList = albums.data ?? [];
   const albumValue = albumIds.length === 0 ? '' : albumIds.length === 1 ? albumIds[0]! : '__several__';
-  const severalNames = albumIds
-    .map((id) => albumList.find((a) => a.id === id)?.name)
-    .filter(Boolean)
-    .join(', ');
+  const severalNames = fmtList(
+    albumIds.map((id) => albumList.find((a) => a.id === id)?.name).filter((n): n is string => Boolean(n)),
+  );
   const savedNote = (field: SavedField) =>
     saved === field ? (
       <span role="status" className="inline-flex items-center gap-1 text-xs text-semantic-success" data-testid={`photo-saved-${field}`}>

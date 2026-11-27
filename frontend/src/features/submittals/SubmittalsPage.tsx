@@ -110,6 +110,7 @@ import { submittalsGuide } from './submittalsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildSubmittalsInsights } from './submittalsInsights';
 import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
+import { fmtList } from '@/shared/lib/formatters';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -974,7 +975,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
               <span className="text-xs text-content-tertiary">
                 {t('submittals.distribution_to', {
                   defaultValue: 'Distribution: {{names}}',
-                  names: submittal.distribution_names.join(', '),
+                  names: fmtList(submittal.distribution_names),
                 })}
               </span>
             )}

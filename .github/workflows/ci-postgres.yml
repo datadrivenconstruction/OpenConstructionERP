@@ -1872,7 +1872,7 @@ jobs:
       # dimension plus a per-cohort branch in check 4, not a new job. Not done
       # here: widening the DDL gate was the task, and changing what the
       # verifier asserts about a shipped behaviour is a separate decision.
-      OE_UPGRADE_FROM_VERSION: "15.3.0"
+      OE_UPGRADE_FROM_VERSION: "14.8.1"
       OE_UPGRADE_AGED_STATE: ${{ github.workspace }}/aged-database-state.json
       DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_upgrade
       DATABASE_SYNC_URL: postgresql+psycopg2://oe:oe@localhost:5432/openconstructionerp_upgrade

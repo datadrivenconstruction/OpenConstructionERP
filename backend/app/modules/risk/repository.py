@@ -142,6 +142,7 @@ class RiskRepository:
 
     async def all_for_project(self, project_id: uuid.UUID) -> list[RiskItem]:
         """Return all risk items for a project (used for summary/matrix)."""
-        stmt = select(RiskItem).where(RiskItem.project_id == project_id)
+        # Stable order: Monte Carlo assigns draws by position, and updated rows come back reordered.
+        stmt = select(RiskItem).where(RiskItem.project_id == project_id).order_by(RiskItem.created_at, RiskItem.id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
