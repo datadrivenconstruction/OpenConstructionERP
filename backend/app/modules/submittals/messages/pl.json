@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Ten dokument materiałowy nie podaje producenta, więc recenzent nie ma produktu do zatwierdzenia",
       "suggestion": "Wpisz oferowanego producenta lub markę"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Nikt nie ma piłki w tym otwartym submittalu, więc nikt nie ma go na liście do dalszego działania",
+      "suggestion": "Przypisz jako 'piłkę' osobę, która ma działać jako następna"
+    },
+    "distribution_present": {
+      "fail": "Ten otwarty submittal ma pustą listę dystrybucyjną, więc nikt nie zostaje o nim poinformowany do wiadomości",
+      "suggestion": "Dodaj do listy dystrybucyjnej osoby, które powinny go otrzymać"
+    },
+    "people_have_project_access": {
+      "fail": "Osoby wskazane jako 'piłka' lub na liście dystrybucyjnej (liczba: {count}) nie mają dostępu do tego projektu",
+      "suggestion": "Udziel im dostępu do projektu albo usuń ich z submittala"
     }
   }
 }

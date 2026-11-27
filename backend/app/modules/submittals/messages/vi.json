@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Hồ sơ vật liệu này không ghi nhà sản xuất, nên người xem xét không có sản phẩm nào để duyệt",
       "suggestion": "Nhập nhà sản xuất hoặc thương hiệu được chào"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Không ai đang giữ 'bóng' trên hồ sơ submittal đang mở này, nên chưa có người nào được giao bước xử lý tiếp theo",
+      "suggestion": "Gán người cần xử lý tiếp theo làm người đang giữ 'bóng' (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Hồ sơ submittal đang mở này chưa có danh sách phân phối, nên không ai được thông báo để biết",
+      "suggestion": "Thêm vào danh sách phân phối những người cần nhận hồ sơ này"
+    },
+    "people_have_project_access": {
+      "fail": "Những người được ghi là người giữ 'bóng' hoặc có trong danh sách phân phối (số lượng: {count}) không thể mở dự án này",
+      "suggestion": "Cấp quyền truy cập dự án cho họ hoặc gỡ họ khỏi hồ sơ submittal"
     }
   }
 }

@@ -167,6 +167,39 @@ class SubmittalMaterialHasManufacturer(_RegisterRule):
     check_name = "check_material_has_manufacturer"
 
 
+class SubmittalBallInCourtAssigned(_RegisterRule):
+    """An open submittal must say whose turn it is."""
+
+    rule_id = "submittal.ball_in_court_assigned"
+    name = "Submittal Ball In Court Assigned"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a submitted or under-review submittal with nobody holding the ball."
+    check_name = "check_ball_in_court_assigned"
+
+
+class SubmittalDistributionPresent(_RegisterRule):
+    """An open submittal should name who receives it."""
+
+    rule_id = "submittal.distribution_present"
+    name = "Submittal Distribution Present"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a submitted or under-review submittal with an empty distribution list."
+    check_name = "check_distribution_present"
+
+
+class SubmittalPeopleHaveProjectAccess(_RegisterRule):
+    """The ball holder and the distribution list must be able to open the project."""
+
+    rule_id = "submittal.people_have_project_access"
+    name = "Submittal People Have Project Access"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a ball in court or distribution entry for a user with no access to the project."
+    check_name = "check_people_have_project_access"
+
+
 SUBMITTAL_REGISTER_RULES: tuple[type[_RegisterRule], ...] = (
     SubmittalResubmissionLinked,
     SubmittalOutcomeMatchesStatus,
@@ -174,6 +207,9 @@ SUBMITTAL_REGISTER_RULES: tuple[type[_RegisterRule], ...] = (
     SubmittalLongLeadHasLeadTime,
     SubmittalApprovalNeededByNotPassed,
     SubmittalMaterialHasManufacturer,
+    SubmittalBallInCourtAssigned,
+    SubmittalDistributionPresent,
+    SubmittalPeopleHaveProjectAccess,
 )
 
 

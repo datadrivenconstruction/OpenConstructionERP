@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Denne materialinnsendingen oppgir ingen produsent, så kontrolløren har ingen produkt å godkjenne",
       "suggestion": "Oppgi produsenten eller merket som tilbys"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Ingen har ballen på denne åpne submittalen, så den står ikke på noens liste for neste handling",
+      "suggestion": "Tildel personen som må handle videre som 'ball i banen' (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Denne åpne submittalen har en tom distribusjonsliste, så ingen blir informert om den til orientering",
+      "suggestion": "Legg til personene som skal motta den i distribusjonslisten"
+    },
+    "people_have_project_access": {
+      "fail": "Personer oppført som 'ball i banen' eller på distribusjonslisten (antall: {count}) kan ikke åpne dette prosjektet",
+      "suggestion": "Gi dem tilgang til prosjektet, eller fjern dem fra submittalen"
     }
   }
 }

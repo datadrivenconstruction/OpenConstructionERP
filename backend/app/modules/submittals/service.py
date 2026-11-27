@@ -580,8 +580,30 @@ class SubmittalService:
             "required_on_site_date": getattr(submittal, "required_on_site_date", None),
             "long_lead": getattr(submittal, "long_lead", False) is True,
             "lead_time_weeks": getattr(submittal, "lead_time_weeks", None),
+            "ball_in_court": str(submittal.ball_in_court) if submittal.ball_in_court else None,
+            "distribution_list": [str(u) for u in (getattr(submittal, "distribution_list", None) or [])],
             "as_of": datetime.now(UTC).date().isoformat(),
         }
+
+    async def _people_without_access(self, submittal: Submittal, payload: dict[str, Any]) -> list[str]:
+        """User ids on the ball or the distribution list that cannot open the project.
+
+        Uses the same check as every project route. A lookup that fails for any
+        other reason counts as no finding: an advisory rule must not invent one.
+        """
+        from app.dependencies import verify_project_access
+
+        people = {u for u in [payload.get("ball_in_court"), *payload.get("distribution_list", [])] if u}
+        out: list[str] = []
+        for user_id in sorted(people):
+            try:
+                await verify_project_access(submittal.project_id, user_id, self.session)
+            except HTTPException as exc:
+                if exc.status_code == status.HTTP_404_NOT_FOUND:
+                    out.append(user_id)
+            except Exception:  # pragma: no cover - defensive
+                logger.debug("Project access lookup failed for %s", user_id, exc_info=True)
+        return out
 
     async def _validate_submittal(
         self,
@@ -590,8 +612,10 @@ class SubmittalService:
         operation: str,
     ) -> ValidationReport:
         """Run the ``submittal`` rule set against one submittal."""
+        payload = self._validation_payload(submittal)
+        payload["people_without_access"] = await self._people_without_access(submittal, payload)
         return await validation_engine.validate(
-            data=self._validation_payload(submittal),
+            data=payload,
             rule_sets=[SUBMITTAL_RULE_SET],
             target_type="submittal",
             target_id=str(submittal.id),

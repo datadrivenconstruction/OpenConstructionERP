@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Cette soumission de matériau ne désigne aucun fabricant, le réviseur n'a donc aucun produit à approuver",
       "suggestion": "Saisissez le fabricant ou la marque proposé"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Personne n'a la main sur ce document soumis ouvert, il n'apparaît donc dans la liste d'aucun responsable de l'action suivante",
+      "suggestion": "Désignez comme responsable de l'action suivante (ball in court) la personne qui doit agir ensuite"
+    },
+    "distribution_present": {
+      "fail": "Ce document soumis ouvert n'a aucune liste de diffusion, donc personne n'en est informé pour information",
+      "suggestion": "Ajoutez à la liste de diffusion les personnes qui doivent le recevoir"
+    },
+    "people_have_project_access": {
+      "fail": "Personne(s) désignée(s) comme responsable de l'action suivante ou figurant dans la liste de diffusion (nombre : {count}) ne peut pas ouvrir ce projet",
+      "suggestion": "Donnez-leur accès au projet ou retirez-les du document soumis"
     }
   }
 }

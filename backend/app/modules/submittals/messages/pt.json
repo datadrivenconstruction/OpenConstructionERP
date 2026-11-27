@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Esta submissão de material não indica nenhum fabricante, por isso o revisor não tem um produto para aprovar",
       "suggestion": "Introduza o fabricante ou a marca proposta"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Ninguém está com a bola neste submittal em aberto, então ele não está na lista de ninguém para a próxima ação",
+      "suggestion": "Atribua como 'com a bola' a pessoa que deve agir em seguida (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Este submittal em aberto tem a lista de distribuição vazia, então ninguém é notificado para conhecimento",
+      "suggestion": "Adicione à lista de distribuição as pessoas que devem recebê-lo"
+    },
+    "people_have_project_access": {
+      "fail": "Pessoas indicadas como 'com a bola' ou na lista de distribuição (quantidade: {count}) não conseguem abrir este projeto",
+      "suggestion": "Dê a elas acesso ao projeto ou remova-as do submittal"
     }
   }
 }

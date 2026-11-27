@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Ez az anyagbenyújtás nem nevez meg gyártót, így a felülvizsgálónak nincs jóváhagyandó terméke",
       "suggestion": "Adja meg a felajánlott gyártót vagy márkát"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Ennél a nyitott dokumentumnál senki nincs soron, így senki listáján nem szerepel a következő lépés",
+      "suggestion": "Jelöljön ki olyan személyt 'soron lévőként' (ball in court), akinek a következő lépést kell tennie"
+    },
+    "distribution_present": {
+      "fail": "Ennek a nyitott dokumentumnak üres a terjesztési listája, ezért senki nem kap róla tájékoztatást",
+      "suggestion": "Adja hozzá a terjesztési listához azokat, akiknek meg kell kapniuk"
+    },
+    "people_have_project_access": {
+      "fail": "A soron lévőként vagy a terjesztési listán szereplő személyek (szám: {count}) nem nyithatják meg ezt a projektet",
+      "suggestion": "Adjon nekik hozzáférést a projekthez, vagy vegye le őket a dokumentumról"
     }
   }
 }

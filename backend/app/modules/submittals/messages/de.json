@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Diese Materialeinreichung nennt keinen Hersteller, daher hat der Prüfer kein Produkt zum Freigeben",
       "suggestion": "Den angebotenen Hersteller oder die Marke eintragen"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Bei dieser offenen Einreichung hat niemand den Ball, also steht sie auf niemandes Liste für den nächsten Schritt",
+      "suggestion": "Die Person, die als Nächstes handeln muss, als 'am Zug' eintragen"
+    },
+    "distribution_present": {
+      "fail": "Diese offene Einreichung hat eine leere Verteilerliste, daher wird niemand zur Information darüber benachrichtigt",
+      "suggestion": "Die Personen, die sie erhalten sollen, in die Verteilerliste aufnehmen"
+    },
+    "people_have_project_access": {
+      "fail": "{count} Person(en), die als 'am Zug' oder auf der Verteilerliste geführt werden, können dieses Projekt nicht öffnen",
+      "suggestion": "Ihnen Zugriff auf das Projekt geben oder sie von der Einreichung entfernen"
     }
   }
 }

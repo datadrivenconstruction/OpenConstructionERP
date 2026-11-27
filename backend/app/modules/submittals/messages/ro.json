@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Această documentație pentru material nu menționează niciun producător, așa că reviewerul nu are un produs de aprobat",
       "suggestion": "Introduceți producătorul sau marca oferită"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Nimeni nu are mingea la acest submittal deschis, deci nimeni nu are de acționat următorul pas",
+      "suggestion": "Desemnează ca 'în posesia mingii' persoana care trebuie să acționeze următoarea"
+    },
+    "distribution_present": {
+      "fail": "Acest submittal deschis are lista de distribuție goală, deci nimeni nu este notificat pentru informare",
+      "suggestion": "Adaugă în lista de distribuție persoanele care trebuie să-l primească"
+    },
+    "people_have_project_access": {
+      "fail": "Persoanele desemnate ca 'în posesia mingii' sau din lista de distribuție (număr: {count}) nu pot deschide acest proiect",
+      "suggestion": "Acordă-le acces la proiect sau scoate-le din submittal"
     }
   }
 }

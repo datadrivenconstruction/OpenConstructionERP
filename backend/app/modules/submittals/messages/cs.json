@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Tento podklad materiálu neuvádí výrobce, takže posuzovatel nemá produkt, který by mohl schválit",
       "suggestion": "Zadejte nabízeného výrobce nebo značku"
+    },
+    "ball_in_court_assigned": {
+      "fail": "U tohoto otevřeného dokumentu nikdo není na řadě, takže není jasné, kdo má příště jednat",
+      "suggestion": "Přiřaďte jako 'na řadě' osobu, která musí jednat jako další"
+    },
+    "distribution_present": {
+      "fail": "Tento otevřený dokument má prázdný distribuční seznam, takže o něm nikdo není informován",
+      "suggestion": "Do distribučního seznamu přidejte osoby, které ho mají obdržet"
+    },
+    "people_have_project_access": {
+      "fail": "Osoby uvedené jako 'na řadě' nebo v distribučním seznamu (počet: {count}) nemají přístup k tomuto projektu",
+      "suggestion": "Udělte jim přístup k projektu, nebo je z dokumentu odeberte"
     }
   }
 }
