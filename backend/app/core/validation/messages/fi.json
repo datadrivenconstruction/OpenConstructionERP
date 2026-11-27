@@ -825,6 +825,14 @@
       "fail": "Rivi {line} ei ole linkitetty kustannusriviin, joten sen tilausta ei näytetä budjettiin sidottuna",
       "suggestion": "Luo rivi BOQ:sta tai linkitä se kustannusriviin ennen tilaamista"
     },
+    "requisition_value_band_currency": {
+      "fail": "Rivi {line} on hinnoiteltu valuutassa {currency}, mutta hyväksynnän arvorajat on asetettu valuutassa {band_currency}, joten sen arvo ei voi ratkaista hyväksyjiä",
+      "suggestion": "Hinnoittele rivi arvorajojen valuutassa tai siirrä se erilliseen tarvepyyntöön"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Rivillä {line} ei ole hintaa, joten se lasketaan nollaksi arvossa, joka ratkaisee tämän tarvepyynnön hyväksyjät",
+      "suggestion": "Syötä rivin yksikköhinta ennen lähettämistä"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Rivi {line} ehdottaa toimittajaa {vendor}, joka ei ole toimittajarekisterissä",
       "suggestion": "Valitse ehdotettu toimittaja toimittajarekisteristä tai poista ehdotus"

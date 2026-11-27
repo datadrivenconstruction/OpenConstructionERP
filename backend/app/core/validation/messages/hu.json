@@ -825,6 +825,14 @@
       "fail": "A(z) {line}. sor nincs költségsorhoz kapcsolva, így a rendelése nem jelenik meg a költségvetés terhére lekötöttként",
       "suggestion": "Hozza létre a sort a BOQ-ból, vagy rendelés előtt kapcsolja költségsorhoz"
     },
+    "requisition_value_band_currency": {
+      "fail": "A(z) {line} tétel {currency} pénznemben van árazva, de a jóváhagyási értékhatárok {band_currency} pénznemben vannak megadva, így értéke nem határozhatja meg a jóváhagyókat",
+      "suggestion": "Árazza a tételt az értékhatárok pénznemében, vagy helyezze át külön igénylésbe"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "A(z) {line} tételnek nincs ára, ezért nullának számít abban az értékben, amely eldönti, ki hagyja jóvá ezt az igénylést",
+      "suggestion": "Beküldés előtt adjon meg egységárat a tételhez"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "A(z) {line}. sor a(z) {vendor} szállítót javasolja, amely nincs a szállítói törzsben",
       "suggestion": "Válassza ki a javasolt szállítót a szállítói törzsből, vagy törölje a javaslatot"

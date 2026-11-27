@@ -1353,6 +1353,9 @@ class RequisitionApprovalStep(BaseModel):
     state: str
     decided_at: str | None = None
     comment: str | None = None
+    #: Start of the value band that put this approver in the chain, or None for a designated one.
+    band_from: str | None = None
+    band_currency: str | None = None
 
 
 class RequisitionResponse(BaseModel):
@@ -1537,12 +1540,41 @@ class ScheduleActivityOptionPage(BaseModel):
 # ── Requisition order owner, external orders and change feed (issue #516) ─────
 
 
+class ApprovalBandIn(BaseModel):
+    """One value band: from ``from_amount`` (inclusive) these approvers also sign, in order."""
+
+    from_amount: Decimal = Field(..., gt=0, max_digits=18, decimal_places=2)
+    approvers: list[UUID] = Field(..., min_length=1, max_length=5)
+
+
+class ApprovalBandsIn(BaseModel):
+    """The project's value bands in one currency. An empty ``bands`` list switches them off."""
+
+    currency: str = Field(default="", max_length=3, pattern=r"^([A-Za-z]{3})?$")
+    bands: list[ApprovalBandIn] = Field(default_factory=list, max_length=6)
+
+
+class ApprovalBandOut(BaseModel):
+    """One stored value band with its approvers' names."""
+
+    from_amount: str
+    approvers: list[RequisitionApprovalStep] = Field(default_factory=list)
+
+
+class ApprovalBandsOut(BaseModel):
+    """The project's value bands as stored."""
+
+    currency: str
+    bands: list[ApprovalBandOut] = Field(default_factory=list)
+
+
 class ProcurementSettingsResponse(BaseModel):
     """A project's purchasing settings for requisitions."""
 
     project_id: UUID
     order_owner: str = "ocerp"
     default_approvers: list[RequisitionApprovalStep] = Field(default_factory=list)
+    approval_bands: ApprovalBandsOut | None = None
 
 
 class ProcurementSettingsUpdate(BaseModel):
@@ -1550,6 +1582,7 @@ class ProcurementSettingsUpdate(BaseModel):
 
     order_owner: Literal["ocerp", "external"] | None = None
     default_approval_chain: list[UUID] | None = Field(default=None, max_length=10)
+    approval_bands: ApprovalBandsIn | None = None
 
 
 class ExternalOrderLineIn(BaseModel):

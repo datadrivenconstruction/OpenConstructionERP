@@ -172,6 +172,9 @@ export interface RequisitionApprovalStep {
   state: 'approved' | 'next' | 'waiting';
   decided_at: string | null;
   comment: string | null;
+  /** Start of the value band that added this approver; absent for a designated one. */
+  band_from?: string | null;
+  band_currency?: string | null;
 }
 
 export interface RequisitionOrderRef {
@@ -310,15 +313,34 @@ export interface ConvertToPOResult {
   fully_ordered_requisition_ids?: string[];
 }
 
+/** From ``from_amount`` (inclusive) these approvers also sign a requisition, after its own. */
+export interface ApprovalBand {
+  from_amount: string;
+  approvers: RequisitionApprovalStep[];
+}
+
+export interface ApprovalBands {
+  currency: string;
+  bands: ApprovalBand[];
+}
+
+export interface ApprovalBandDraft {
+  from_amount: string;
+  approvers: string[];
+}
+
 export interface ProcurementSettings {
   project_id: string;
   order_owner: OrderOwner;
   default_approvers: RequisitionApprovalStep[];
+  approval_bands?: ApprovalBands | null;
 }
 
 export interface ProcurementSettingsBody {
   order_owner?: OrderOwner;
   default_approval_chain?: string[];
+  /** An empty ``bands`` list switches value routing off. */
+  approval_bands?: { currency: string; bands: ApprovalBandDraft[] };
 }
 
 export interface ExternalOrderLineIn {
@@ -829,6 +851,31 @@ export function isPositiveDecimal(raw: string | null | undefined): boolean {
   const value = (raw ?? '').trim();
   if (!/^\d+(\.\d+)?$/.test(value)) return false;
   return /[1-9]/.test(value);
+}
+
+/**
+ * Why a band list cannot be saved, or null when it can: a band without a
+ * positive start or without an approver, starts that do not rise, an approver
+ * in two bands, or a currency that is not a three-letter code.
+ */
+export type BandDraftProblem = 'currency' | 'amount' | 'approvers' | 'order' | 'repeated';
+
+export function bandDraftProblem(currency: string, bands: ApprovalBandDraft[]): BandDraftProblem | null {
+  if (bands.length === 0) return null;
+  if (!/^[A-Za-z]{3}$/.test(currency.trim())) return 'currency';
+  const seen = new Set<string>();
+  let previous: number | null = null;
+  for (const band of bands) {
+    if (!isPositiveDecimal(band.from_amount)) return 'amount';
+    if (band.approvers.length === 0) return 'approvers';
+    if (band.approvers.some((a) => seen.has(a))) return 'repeated';
+    band.approvers.forEach((a) => seen.add(a));
+    // Starts are compared as numbers only for order; the exact text is what is sent.
+    const start = Number(band.from_amount.trim());
+    if (previous !== null && start <= previous) return 'order';
+    previous = start;
+  }
+  return null;
 }
 
 /** Days between two ISO dates (b minus a), or null when either is missing or invalid. */

@@ -825,6 +825,14 @@
       "fail": "Pozycja {line} nie jest powiązana z pozycją kosztową, więc jej zamówienie nie pokaże się jako zobowiązanie wobec budżetu",
       "suggestion": "Utwórz pozycję z BOQ albo przed zamówieniem powiąż ją z pozycją kosztową"
     },
+    "requisition_value_band_currency": {
+      "fail": "Pozycja {line} jest wyceniona w {currency}, ale progi wartości zatwierdzania są ustawione w {band_currency}, więc jej wartość nie może wskazać zatwierdzających",
+      "suggestion": "Wyceń pozycję w walucie progów albo przenieś ją do osobnego zapotrzebowania"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Pozycja {line} nie ma ceny, więc liczy się jako zero w wartości, która decyduje o zatwierdzających to zapotrzebowanie",
+      "suggestion": "Wpisz cenę jednostkową pozycji przed wysłaniem"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Pozycja {line} sugeruje dostawcę {vendor}, którego nie ma w rejestrze dostawców",
       "suggestion": "Wybierz sugerowanego dostawcę z rejestru dostawców lub usuń sugestię"

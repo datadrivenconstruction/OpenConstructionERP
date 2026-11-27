@@ -825,6 +825,14 @@
       "fail": "La riga {line} non è collegata a una voce di costo, quindi il suo ordine non risulterà impegnato sul budget",
       "suggestion": "Genera la riga dal BOQ, oppure collegala a una voce di costo prima di ordinare"
     },
+    "requisition_value_band_currency": {
+      "fail": "La riga {line} è valorizzata in {currency}, ma le soglie di importo per l'approvazione sono in {band_currency}, quindi il suo valore non può decidere gli approvatori",
+      "suggestion": "Valorizzate la riga nella valuta delle soglie oppure spostatela in una richiesta separata"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "La riga {line} non ha prezzo, quindi conta zero nell'importo che decide chi approva questa richiesta",
+      "suggestion": "Inserite un costo unitario per la riga prima dell'invio"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "La riga {line} suggerisce il fornitore {vendor}, che non è nell'anagrafica fornitori",
       "suggestion": "Scegli il fornitore suggerito dall'anagrafica fornitori, oppure elimina il suggerimento"

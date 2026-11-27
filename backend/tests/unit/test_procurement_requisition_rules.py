@@ -36,6 +36,8 @@ from app.core.validation.rules import (
     ProcurementRequisitionSuggestedVendorDiffers,
     ProcurementRequisitionSuggestedVendorInDirectory,
     ProcurementRequisitionSuggestionConflict,
+    ProcurementRequisitionUnpricedUnderBands,
+    ProcurementRequisitionValueBandCurrency,
     ProcurementRequisitionVendorActive,
     ProcurementRequisitionVendorChosen,
     ProcurementRequisitionVendorInDirectory,
@@ -74,6 +76,9 @@ RULES = [
     # Issue #516, coverage.
     ProcurementRequisitionSourcesReconcile,
     ProcurementRequisitionOverAllocated,
+    # Approval by value.
+    ProcurementRequisitionValueBandCurrency,
+    ProcurementRequisitionUnpricedUnderBands,
 ]
 
 

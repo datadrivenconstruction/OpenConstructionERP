@@ -825,6 +825,14 @@
       "fail": "{line}행이 원가 항목에 연결되어 있지 않아, 해당 주문이 예산 대비 약정으로 표시되지 않습니다",
       "suggestion": "내역서에서 행을 생성하거나, 주문 전에 원가 항목에 연결하세요"
     },
+    "requisition_value_band_currency": {
+      "fail": "{line} 행은 {currency}(으)로 가격이 책정되었지만 승인 금액 구간은 {band_currency}(으)로 설정되어 있어 이 행의 금액으로 승인자를 정할 수 없습니다",
+      "suggestion": "행의 가격을 금액 구간의 통화로 입력하거나 별도의 구매 요청으로 옮기세요"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "{line} 행에 가격이 없어 이 구매 요청의 승인자를 정하는 금액에서 0으로 계산됩니다",
+      "suggestion": "제출하기 전에 행의 단가를 입력하세요"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "{line}행이 공급업체 {vendor}을(를) 제안했지만 공급업체 목록에 없습니다",
       "suggestion": "공급업체 목록에서 제안된 공급업체를 선택하거나 제안을 지우세요"

@@ -825,6 +825,14 @@
       "fail": "{line}-qator xarajat qatori bilan bogʻlanmagan, shuning uchun uning buyurtmasi byudjetga nisbatan majburiyat sifatida koʻrinmaydi",
       "suggestion": "Qatorni BOQ dan yarating yoki buyurtma berishdan oldin xarajat qatoriga bogʻlang"
     },
+    "requisition_value_band_currency": {
+      "fail": "{line} qatori {currency} valyutasida baholangan, ammo tasdiqlash qiymat chegaralari {band_currency} valyutasida, shuning uchun uning qiymati tasdiqlovchilarni belgilay olmaydi",
+      "suggestion": "Qatorni chegaralar valyutasida baholang yoki uni alohida talabnomaga o'tkazing"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "{line} qatorining narxi yo'q, shuning uchun u ushbu talabnomani kim tasdiqlashini belgilovchi qiymatda nol deb hisoblanadi",
+      "suggestion": "Yuborishdan oldin qator uchun birlik narxini kiriting"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "{line}-qator {vendor} yetkazib beruvchisini taklif qiladi, u yetkazib beruvchilar reyestrida yoʻq",
       "suggestion": "Taklif qilingan yetkazib beruvchini yetkazib beruvchilar reyestridan tanlang yoki taklifni oʻchiring"

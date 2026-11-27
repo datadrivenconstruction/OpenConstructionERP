@@ -825,6 +825,14 @@
       "fail": "A linha {line} não está vinculada a uma linha de custo, então o pedido dela não aparecerá como comprometido contra o orçamento",
       "suggestion": "Gere a linha a partir do BOQ ou vincule-a a uma linha de custo antes de pedir"
     },
+    "requisition_value_band_currency": {
+      "fail": "A linha {line} está valorizada em {currency}, mas os limiares de valor de aprovação estão em {band_currency}, pelo que o seu valor não pode decidir os aprovadores",
+      "suggestion": "Valorize a linha na moeda dos limiares ou mova-a para uma requisição separada"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "A linha {line} não tem preço, pelo que conta como zero no valor que decide quem aprova esta requisição",
+      "suggestion": "Introduza um custo unitário para a linha antes de submeter"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "A linha {line} sugere o fornecedor {vendor}, que não está no cadastro de fornecedores",
       "suggestion": "Escolha o fornecedor sugerido no cadastro de fornecedores ou apague a sugestão"

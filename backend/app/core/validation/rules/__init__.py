@@ -12066,6 +12066,28 @@ class ProcurementRequisitionLineCostLine(_ProcurementRule):
     check_name = "check_requisition_line_cost_line"
 
 
+class ProcurementRequisitionValueBandCurrency(_ProcurementRule):
+    """A line priced in another currency than the value bands cannot be weighed against them."""
+
+    rule_id = "procurement.requisition_value_band_currency"
+    name = "Requisition Priced In The Band Currency"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a priced line whose currency differs from the project's approval value bands."
+    check_name = "check_requisition_value_band_currency"
+
+
+class ProcurementRequisitionUnpricedUnderBands(_ProcurementRule):
+    """An unpriced line counts as zero in the value that decides the approvers."""
+
+    rule_id = "procurement.requisition_unpriced_under_bands"
+    name = "Requisition Line Priced For Value Approval"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a line without a price when the project routes requisition approval on value."
+    check_name = "check_requisition_unpriced_under_bands"
+
+
 # Issue #516, second slice: the suggested supplier of each line and the line's
 # own needed-by date. The suggestion rules never pick a supplier; they make an
 # unknown, inactive or disagreeing suggestion visible.
@@ -13348,6 +13370,8 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionVendorChosen(), ["procurement_requisition"]),
         (ProcurementRequisitionSingleCurrency(), ["procurement_requisition"]),
         (ProcurementRequisitionLineCostLine(), ["procurement_requisition"]),
+        (ProcurementRequisitionValueBandCurrency(), ["procurement_requisition"]),
+        (ProcurementRequisitionUnpricedUnderBands(), ["procurement_requisition"]),
         (ProcurementRequisitionSuggestedVendorInDirectory(), ["procurement_requisition"]),
         (ProcurementRequisitionSuggestedVendorActive(), ["procurement_requisition"]),
         (ProcurementRequisitionSuggestionConflict(), ["procurement_requisition"]),

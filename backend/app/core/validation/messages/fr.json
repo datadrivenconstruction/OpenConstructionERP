@@ -825,6 +825,14 @@
       "fail": "La ligne {line} n'est pas liée à une ligne de coût, sa commande n'apparaîtra donc pas comme engagée sur le budget",
       "suggestion": "Créez la ligne depuis le BOQ, ou liez-la à une ligne de coût avant de commander"
     },
+    "requisition_value_band_currency": {
+      "fail": "La ligne {line} est valorisée en {currency}, mais les seuils de montant d'approbation sont fixés en {band_currency}, sa valeur ne peut donc pas déterminer les approbateurs",
+      "suggestion": "Valorisez la ligne dans la devise des seuils, ou déplacez-la dans une demande séparée"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "La ligne {line} n'a pas de prix et compte donc pour zéro dans le montant qui détermine les approbateurs de cette demande",
+      "suggestion": "Saisissez un coût unitaire pour la ligne avant de soumettre"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "La ligne {line} suggère le fournisseur {vendor}, qui n'est pas dans l'annuaire des fournisseurs",
       "suggestion": "Choisissez le fournisseur suggéré dans l'annuaire des fournisseurs, ou supprimez la suggestion"

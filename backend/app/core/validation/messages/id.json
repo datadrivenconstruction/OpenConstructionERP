@@ -825,6 +825,14 @@
       "fail": "Baris {line} tidak terhubung ke baris biaya, sehingga pesanannya tidak akan tampil sebagai komitmen terhadap anggaran",
       "suggestion": "Buat baris dari BOQ, atau hubungkan ke baris biaya sebelum memesan"
     },
+    "requisition_value_band_currency": {
+      "fail": "Baris {line} diberi harga dalam {currency}, tetapi ambang nilai persetujuan ditetapkan dalam {band_currency}, sehingga nilainya tidak dapat menentukan penyetuju",
+      "suggestion": "Beri harga baris dalam mata uang ambang nilai, atau pindahkan ke permintaan terpisah"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Baris {line} tidak memiliki harga, sehingga dihitung nol dalam nilai yang menentukan siapa yang menyetujui permintaan ini",
+      "suggestion": "Masukkan biaya satuan untuk baris sebelum mengirim"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Baris {line} menyarankan pemasok {vendor}, yang tidak ada di daftar pemasok",
       "suggestion": "Pilih pemasok yang disarankan dari daftar pemasok, atau hapus sarannya"

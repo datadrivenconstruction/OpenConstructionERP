@@ -861,6 +861,14 @@
       "fail": "Line {line} is not linked to a cost line, so its order will not show as committed against the budget",
       "suggestion": "Raise the line from the BOQ, or link it to a cost line before ordering"
     },
+    "requisition_value_band_currency": {
+      "fail": "Line {line} is priced in {currency}, but the approval value bands are set in {band_currency}, so its value cannot decide the approvers",
+      "suggestion": "Price the line in the currency of the value bands, or move it to a separate requisition"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Line {line} has no price, so it counts as zero in the value that decides who approves this requisition",
+      "suggestion": "Enter a unit cost for the line before submitting"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Line {line} suggests supplier {vendor}, which is not in the Vendor directory",
       "suggestion": "Pick the suggested supplier from the Vendor directory, or clear the suggestion"

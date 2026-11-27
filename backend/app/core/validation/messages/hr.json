@@ -825,6 +825,14 @@
       "fail": "Stavka {line} nije povezana s troškovnom stavkom, pa se njezina narudžba neće prikazati kao preuzeta obveza prema proračunu",
       "suggestion": "Izradite stavku iz BOQ-a ili je prije naručivanja povežite s troškovnom stavkom"
     },
+    "requisition_value_band_currency": {
+      "fail": "Stavka {line} je vrednovana u {currency}, ali su vrijednosni pragovi odobrenja postavljeni u {band_currency}, pa njezina vrijednost ne može odrediti odobravatelje",
+      "suggestion": "Vrednujte stavku u valuti pragova ili je premjestite u zaseban zahtjev"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Stavka {line} nema cijenu pa se računa kao nula u vrijednosti koja određuje tko odobrava ovaj zahtjev",
+      "suggestion": "Unesite jediničnu cijenu stavke prije slanja"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Stavka {line} predlaže dobavljača {vendor}, koji nije u imeniku dobavljača",
       "suggestion": "Odaberite predloženog dobavljača iz imenika dobavljača ili obrišite prijedlog"

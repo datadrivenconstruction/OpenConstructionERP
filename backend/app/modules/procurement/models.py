@@ -634,6 +634,8 @@ class ProcurementProjectSettings(Base):
     outside purchasing system orders, and OCERP only reconciles what it
     reports). Award subscribers read it and draft no order when it is
     ``external``. ``default_approval_chain`` is copied onto new requisitions.
+    ``approval_bands`` (``{"currency", "bands": [{"from_amount", "approvers"}]}``)
+    adds approvers at submission once the requisition value crosses a band.
     """
 
     __tablename__ = "oe_procurement_project_settings"
@@ -641,6 +643,7 @@ class ProcurementProjectSettings(Base):
     project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, unique=True, index=True)
     order_owner: Mapped[str] = mapped_column(String(20), nullable=False, default="ocerp", server_default="ocerp")
     default_approval_chain: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    approval_bands: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
     updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     def __repr__(self) -> str:

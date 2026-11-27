@@ -17,16 +17,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ArrowUp, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, WideModal, type BadgeVariant } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
+import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   EXTERNAL_ORDER_STATUSES,
+  bandDraftProblem,
   getProcurementSettings,
   isPositiveDecimal,
   listProjectMemberOptions,
   reportExternalOrder,
   updateProcurementSettings,
+  type ApprovalBandDraft,
+  type BandDraftProblem,
   type ExternalOrderStatus,
   type OrderOwner,
   type Requisition,
@@ -228,6 +232,12 @@ export function ApprovalChainView({ steps }: { steps: RequisitionApprovalStep[] 
           <Badge variant={STEP_VARIANT[s.state]} size="sm">
             {stepLabel(t, s.state)}
           </Badge>
+          {s.band_from && (
+            <span className="text-xs text-content-tertiary" data-testid="approval-step-band">
+              {t('procurement.requisitions.step_band_from', { defaultValue: 'Value band from' })}{' '}
+              <MoneyDisplay amount={s.band_from} currency={s.band_currency ?? undefined} />
+            </span>
+          )}
           {s.decided_at && (
             <span className="text-xs text-content-tertiary">
               <DateDisplay value={s.decided_at} />
@@ -638,6 +648,133 @@ export function ExternalOrderModal({ req, open, onClose, onSaved }: ExternalOrde
 
 /* ── Project settings ───────────────────────────────────────────────────── */
 
+function bandProblemLabel(t: Translate, problem: BandDraftProblem): string {
+  switch (problem) {
+    case 'currency':
+      return t('procurement.requisitions.bands_problem_currency', {
+        defaultValue: 'Enter the band currency as a three-letter code, for example EUR.',
+      });
+    case 'amount':
+      return t('procurement.requisitions.bands_problem_amount', {
+        defaultValue: 'Each band needs a start amount above zero.',
+      });
+    case 'approvers':
+      return t('procurement.requisitions.bands_problem_approvers', {
+        defaultValue: 'Each band needs at least one approver.',
+      });
+    case 'order':
+      return t('procurement.requisitions.bands_problem_order', {
+        defaultValue: 'Band start amounts must rise from one band to the next.',
+      });
+    case 'repeated':
+      return t('procurement.requisitions.bands_problem_repeated', {
+        defaultValue: 'An approver may sit in only one band.',
+      });
+  }
+}
+
+interface ValueBandsEditorProps {
+  projectId: string;
+  currency: string;
+  bands: ApprovalBandDraft[];
+  onCurrencyChange: (currency: string) => void;
+  onBandsChange: (bands: ApprovalBandDraft[]) => void;
+  knownNames: Record<string, string | null>;
+}
+
+/**
+ * Value bands: once a requisition is worth at least a band's start, that
+ * band's approvers sign after the requisition's own, lowest band first.
+ */
+export function ValueBandsEditor({
+  projectId,
+  currency,
+  bands,
+  onCurrencyChange,
+  onBandsChange,
+  knownNames,
+}: ValueBandsEditorProps) {
+  const { t } = useTranslation();
+  const problem = bandDraftProblem(currency, bands);
+  const update = (index: number, patch: Partial<ApprovalBandDraft>) =>
+    onBandsChange(bands.map((b, i) => (i === index ? { ...b, ...patch } : b)));
+  return (
+    <div className="space-y-2" data-testid="value-bands-editor">
+      <p className="text-xs font-medium text-content-secondary">
+        {t('procurement.requisitions.bands_title', { defaultValue: 'Approval by value' })}
+      </p>
+      <p className="text-xs text-content-tertiary">
+        {t('procurement.requisitions.bands_hint', {
+          defaultValue:
+            'When a submitted requisition is worth at least a band start, the approvers of that band sign after its own approvers, lowest band first. Unpriced lines count as zero.',
+        })}
+      </p>
+      {bands.length > 0 && (
+        <div className="flex items-center gap-2">
+          <label className="oe-label" htmlFor="settings-band-currency">
+            {t('procurement.requisitions.bands_currency', { defaultValue: 'Band currency' })}
+          </label>
+          <input
+            id="settings-band-currency"
+            className={`${smallFieldCls} w-20 uppercase`}
+            maxLength={3}
+            value={currency}
+            onChange={(e) => onCurrencyChange(e.target.value.toUpperCase())}
+          />
+        </div>
+      )}
+      {bands.map((band, index) => (
+        <div key={index} className="space-y-2 rounded-md border border-border-light p-2">
+          <div className="flex items-center gap-2">
+            <label className="oe-label" htmlFor={`settings-band-${index}-from`}>
+              {t('procurement.requisitions.bands_from', { defaultValue: 'From value' })}
+            </label>
+            <input
+              id={`settings-band-${index}-from`}
+              className={`${smallFieldCls} w-32 text-right tabular-nums`}
+              inputMode="decimal"
+              value={band.from_amount}
+              onChange={(e) => update(index, { from_amount: e.target.value })}
+            />
+            <span className="text-xs text-content-tertiary">{currency}</span>
+            <button
+              type="button"
+              className="ml-auto text-content-tertiary hover:text-semantic-error"
+              aria-label={t('procurement.requisitions.bands_remove', { defaultValue: 'Remove band' })}
+              onClick={() => onBandsChange(bands.filter((_, i) => i !== index))}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+          <ApproverChainEditor
+            projectId={projectId}
+            value={band.approvers}
+            onChange={(approvers) => update(index, { approvers })}
+            knownNames={knownNames}
+            excluded={bands.filter((_, i) => i !== index).flatMap((b) => b.approvers)}
+            idPrefix={`settings-band-${index}`}
+          />
+        </div>
+      ))}
+      {problem && (
+        <p className="flex items-center gap-1 text-xs text-semantic-error" role="alert">
+          <AlertTriangle size={12} /> {bandProblemLabel(t, problem)}
+        </p>
+      )}
+      {bands.length < 6 && (
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={<Plus size={14} />}
+          onClick={() => onBandsChange([...bands, { from_amount: '', approvers: [] }])}
+        >
+          {t('procurement.requisitions.bands_add', { defaultValue: 'Add value band' })}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 interface SettingsModalProps {
   projectId: string;
   open: boolean;
@@ -656,15 +793,30 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
   });
   const [owner, setOwner] = useState<OrderOwner>('ocerp');
   const [chain, setChain] = useState<string[]>([]);
+  const [bandCurrency, setBandCurrency] = useState('');
+  const [bands, setBands] = useState<ApprovalBandDraft[]>([]);
 
   useEffect(() => {
     if (!open || !data) return;
     setOwner(data.order_owner);
     setChain(data.default_approvers.map((a) => a.user_id));
+    setBandCurrency(data.approval_bands?.currency ?? '');
+    setBands(
+      (data.approval_bands?.bands ?? []).map((b) => ({
+        from_amount: b.from_amount,
+        approvers: b.approvers.map((a) => a.user_id),
+      })),
+    );
   }, [open, data]);
 
+  const bandProblem = bandDraftProblem(bandCurrency, bands);
   const save = useMutation({
-    mutationFn: () => updateProcurementSettings(projectId, { order_owner: owner, default_approval_chain: chain }),
+    mutationFn: () =>
+      updateProcurementSettings(projectId, {
+        order_owner: owner,
+        default_approval_chain: chain,
+        approval_bands: { currency: bands.length ? bandCurrency.trim().toUpperCase() : '', bands },
+      }),
     onSuccess: (saved) => {
       queryClient.setQueryData(['procurement-settings', projectId], saved);
       addToast({
@@ -677,7 +829,11 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
       addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) }),
   });
 
-  const names = Object.fromEntries((data?.default_approvers ?? []).map((a) => [a.user_id, a.name]));
+  const names = Object.fromEntries(
+    [...(data?.default_approvers ?? []), ...(data?.approval_bands?.bands ?? []).flatMap((b) => b.approvers)].map(
+      (a) => [a.user_id, a.name],
+    ),
+  );
   return (
     <WideModal
       open={open}
@@ -690,7 +846,10 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
           <Button variant="secondary" icon={<X size={14} />} onClick={onClose} disabled={save.isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button onClick={() => save.mutate()} disabled={isLoading || !data || save.isPending}>
+          <Button
+            onClick={() => save.mutate()}
+            disabled={isLoading || !data || save.isPending || bandProblem !== null}
+          >
             {save.isPending && <Loader2 size={14} className="mr-1 animate-spin" />}
             {t('common.save', { defaultValue: 'Save' })}
           </Button>
@@ -723,6 +882,14 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
               idPrefix="settings"
             />
           </div>
+          <ValueBandsEditor
+            projectId={projectId}
+            currency={bandCurrency}
+            bands={bands}
+            onCurrencyChange={setBandCurrency}
+            onBandsChange={setBands}
+            knownNames={names}
+          />
         </div>
       )}
     </WideModal>

@@ -825,6 +825,14 @@
       "fail": "第 {line} 行未关联成本行,因此其订单不会显示为对预算的已占用金额",
       "suggestion": "请从 BOQ 生成该行,或在下单前将其关联到成本行"
     },
+    "requisition_value_band_currency": {
+      "fail": "第 {line} 行以 {currency} 计价，但审批金额档位以 {band_currency} 设定，因此该行金额无法决定审批人",
+      "suggestion": "请以金额档位的币种为该行计价，或将其移至单独的请购单"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "第 {line} 行没有价格，因此在决定本请购单审批人的金额中按零计算",
+      "suggestion": "提交前请为该行填写单价"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "第 {line} 行建议的供应商 {vendor} 不在供应商名录中",
       "suggestion": "请从供应商名录中选择建议的供应商,或清除该建议"

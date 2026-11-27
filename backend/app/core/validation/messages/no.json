@@ -825,6 +825,14 @@
       "fail": "Linje {line} er ikke koblet til en kostnadslinje, så bestillingen vises ikke som bundet mot budsjettet",
       "suggestion": "Opprett linjen fra BOQ, eller koble den til en kostnadslinje før bestilling"
     },
+    "requisition_value_band_currency": {
+      "fail": "Linje {line} er priset i {currency}, men verdigrensene for godkjenning er satt i {band_currency}, så verdien kan ikke avgjøre godkjennerne",
+      "suggestion": "Pris linjen i valutaen til verdigrensene, eller flytt den til en egen rekvisisjon"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Linje {line} har ingen pris og teller derfor som null i verdien som avgjør hvem som godkjenner denne rekvisisjonen",
+      "suggestion": "Angi en enhetspris for linjen før innsending"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Linje {line} foreslår leverandøren {vendor}, som ikke finnes i leverandørregisteret",
       "suggestion": "Velg den foreslåtte leverandøren fra leverandørregisteret, eller fjern forslaget"
