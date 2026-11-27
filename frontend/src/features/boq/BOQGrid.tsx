@@ -34,6 +34,8 @@ import {
   ChevronDown,
   ChevronRight,
   BookmarkPlus,
+  ClipboardCheck,
+  RefreshCw,
   ExternalLink,
   Wrench,
   X,
@@ -611,6 +613,10 @@ export interface BOQGridProps {
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
   /** Save a BOQ position as a reusable assembly */
   onSaveAsAssembly?: (positionId: string) => void;
+  /** Save a position as a cost item, refresh its cost item, check its resource composition */
+  onSaveAsCostItem?: (positionId: string) => void;
+  onRefreshCostItem?: (positionId: string) => void;
+  onCheckComposition?: (positionId: string) => void;
   /** Fill an existing position's resources and rate from one of the user's assemblies */
   onInsertAssembly?: (positionId: string) => void;
   /**
@@ -780,6 +786,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   anomalyMap,
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
+  onSaveAsCostItem,
+  onRefreshCostItem,
+  onCheckComposition,
   onInsertAssembly,
   customColumns,
   showResourceSplit,
@@ -3644,6 +3653,24 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     disabled={readOnly}
                     title={readOnly ? t('boq.insert_assembly.read_only', { defaultValue: 'Positions here are read-only, so an assembly cannot be inserted.' }) : undefined}
                     onClick={() => { onInsertAssembly(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {onSaveAsCostItem && !readOnly && (
+                  <CtxItem icon={<BookmarkPlus size={14}/>}
+                    label={t('boq.position_cost.save', { defaultValue: 'Save as cost item' })}
+                    onClick={() => { onSaveAsCostItem(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {onRefreshCostItem && !readOnly && (
+                  <CtxItem icon={<RefreshCw size={14}/>}
+                    label={t('boq.position_cost.refresh', { defaultValue: 'Refresh cost item' })}
+                    onClick={() => { onRefreshCostItem(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {onCheckComposition && (
+                  <CtxItem icon={<ClipboardCheck size={14}/>}
+                    label={t('boq.position_cost.check', { defaultValue: 'Check composition' })}
+                    onClick={() => { onCheckComposition(d.id as string); closeContextMenu(); }}
                   />
                 )}
                 {onSaveAsAssembly && (

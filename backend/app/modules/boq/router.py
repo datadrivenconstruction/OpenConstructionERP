@@ -2703,6 +2703,79 @@ class _ResourceVariantRepickBody(BaseModel):
     )
 
 
+class ResourceReplaceBody(BaseModel):
+    """Confirmed replacement of one resource row by a matched cost item."""
+
+    cost_item_id: uuid.UUID
+    score: float | None = Field(default=None, ge=0, le=1, description="Match confidence the user saw, 0..1")
+    quantity: Decimal | None = Field(default=None, ge=0, description="Keep the old quantity when omitted")
+    version: int | None = Field(default=None, description="Position version the user read (409 when stale)")
+
+
+@router.post(
+    "/positions/{position_id}/resources/{resource_idx}/replace/",
+    response_model=PositionResponse,
+    summary="Replace a resource row by a matched cost item",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def replace_position_resource(
+    position_id: uuid.UUID,
+    resource_idx: int,
+    data: ResourceReplaceBody,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> PositionResponse:
+    """Swap one resource row for a cost item the user picked from the ranked matches.
+
+    Quantity and type of the old row stay; price, unit, name and code come
+    from the cost item. The unit rate of the position is re-derived by the
+    normal update. A locked bill answers 409, an unknown row or an unusable
+    candidate (inactive, negative rate) 422.
+    """
+    from app.modules.boq.resource_replace import CandidateNotUsableError, replacement_row
+
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
+        )
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+    await service._ensure_boq_writable(existing.boq_id)
+    meta = dict(existing.metadata_) if isinstance(existing.metadata_, dict) else {}
+    rows = [dict(r) if isinstance(r, dict) else {} for r in (meta.get("resources") or [])]
+    if resource_idx < 0 or resource_idx >= len(rows):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=f"resource_idx {resource_idx} is out of range"
+        )
+    item = await CostItemRepository(session).get_by_id(data.cost_item_id)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cost item not found")
+    if item.metadata_ and item.metadata_.get("variants"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Cost item has variants, pick one in the cost database",
+        )
+    from app.modules.costs.router import _resolve_currency
+
+    try:
+        rows[resource_idx] = replacement_row(
+            rows[resource_idx],
+            item=item,
+            currency=_resolve_currency(item.currency, getattr(item, "region", None)),
+            score=data.score,
+            quantity=data.quantity,
+        )
+    except CandidateNotUsableError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    meta["resources"] = rows
+    position = await service.update_position(
+        position_id, PositionUpdate(metadata=meta, version=data.version), actor_id=user_id
+    )
+    return _position_to_response(position)
+
+
 @router.patch(
     "/positions/{position_id}/resources/{resource_idx}/variant/",
     response_model=PositionResponse,
