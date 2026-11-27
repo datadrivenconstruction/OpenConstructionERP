@@ -12395,7 +12395,8 @@ class SubcontractAgreementBudgetLine(_SubcontractRule):
 
     rule_id = "subcontract.agreement_budget_line"
     name = "Subcontract Agreement Booked To A Budget Line"
-    severity = Severity.WARNING
+    # Advisory: the budget may not be split yet when an agreement goes live, so activation stays silent.
+    severity = Severity.INFO
     category = RuleCategory.COMPLETENESS
     description = "Flags an agreement with no budget line, or one whose cost type is outside the shared vocabulary."
     check_name = "check_budget_line"
