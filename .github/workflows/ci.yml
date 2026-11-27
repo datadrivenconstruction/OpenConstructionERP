@@ -278,7 +278,8 @@ jobs:
     # inside a 45 minute cap with about 5% to spare, which is not headroom, it
     # is a cancellation waiting for the next module to land. 60.
     # Both selections together take 55-60 minutes, so a 60 minute cap cut the second one off.
-    timeout-minutes: 90
+    # By 27.11 they took 68-89 minutes on main and 90+ with the cost type tests, so 90 cut green runs.
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: backend
