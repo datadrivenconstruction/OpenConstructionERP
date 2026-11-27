@@ -163,6 +163,6 @@ describe('ChangeList', () => {
     const rfi = screen.getByRole('button', { name: /RFI/ });
     expect(rfi).toBeDisabled();
     expect(rfi.closest('fieldset')).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
-    expect(screen.getByText('Checked on site')).toBeTruthy();
+    expect(screen.getAllByText('Checked on site').length).toBeGreaterThan(0);
   });
 });

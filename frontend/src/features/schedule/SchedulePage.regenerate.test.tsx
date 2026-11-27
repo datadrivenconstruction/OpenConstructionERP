@@ -597,7 +597,7 @@ describe('deleting', () => {
     expect(confirm).toHaveTextContent(/2 contract payment instalments follow its milestones/);
   });
 
-  it('shows a viewer the plan with regenerate disabled and the reason, and no clear or archive', async () => {
+  it('shows a viewer the plan with regenerate disabled and the reason, and archive disabled, no clear', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     state.activities = THREE;
     renderDetail();
@@ -606,7 +606,7 @@ describe('deleting', () => {
     expect(regenerate).toBeDisabled();
     expect(regenerate).toHaveAttribute('title', expect.stringMatching(/^Only an? /));
     expect(screen.queryByRole('button', { name: 'Clear all activities' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Archive Main schedule' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Archive Main schedule' })).toBeDisabled();
   });
 
   it('opens no generate dialog for a viewer who follows a BOQ link', async () => {
