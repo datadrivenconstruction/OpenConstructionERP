@@ -98,7 +98,7 @@ describe('ApprovalChainView', () => {
     expect(bands).toHaveLength(1);
     expect(bands[0]!.textContent).toMatch(/Value band from/);
     expect(screen.queryByText(/Anyone with the role/)).toBeNull();
-    expect(bands[0]!.textContent).toMatch(/5[,.\s  ]?000/);
+    expect(bands[0]!.textContent).toMatch(/5[,.\s\u00a0\u202f]?000/);
   });
 });
 
