@@ -2954,5 +2954,31 @@
       "fail": "У {line} категория \"{category}\", которая не является типом затрат",
       "suggestion": "Укажите для строки труд, материалы, технику, субподряд или прочее"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Счёт {invoice} на {excess} больше остатка {remaining} по {commitment}",
+      "suggestion": "Утвердите изменение, увеличивающее обязательство, или исправьте сумму счёта"
+    },
+    "commitment_currency": {
+      "fail": "Счёт {invoice} выставлен в {invoice_currency}, а {commitment} ведётся в {commitment_currency}",
+      "suggestion": "Введите счёт в валюте его заказа или договора субподряда"
+    },
+    "commitment_retention": {
+      "fail": "Счёт {invoice} удерживает {retention}, меньше согласованного по {commitment} удержания {expected} ({percent}%)",
+      "suggestion": "Удержите согласованную сумму или укажите, почему удержание не применяется"
+    },
+    "duplicate_number": {
+      "fail": "Счёт с номером {invoice} от этого поставщика уже введён",
+      "suggestion": "Откройте ранее введённый счёт; отмените этот, если это тот же документ"
+    },
+    "possible_duplicate": {
+      "fail": "У счёта {invoice} тот же поставщик, сумма ({amount}) и дата ({on}), что у счёта {other}",
+      "suggestion": "Проверьте, не введён ли один и тот же счёт дважды под разными номерами"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Оплата запланирована на {scheduled}, раньше даты счёта {invoice_date}",
+      "suggestion": "Запланируйте оплату на дату счёта или позже"
+    }
   }
 }

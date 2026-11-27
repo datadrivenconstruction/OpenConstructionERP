@@ -2954,5 +2954,31 @@
       "fail": "{line} are categoria \"{category}\", care nu este un tip de cost",
       "suggestion": "Setați linia pe manoperă, material, utilaj, subcontractare sau altele"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Factura {invoice} depășește cu {excess} suma de {remaining} rămasă pe {commitment}",
+      "suggestion": "Aprobați o dispoziție de modificare care crește angajamentul sau corectați suma facturii"
+    },
+    "commitment_currency": {
+      "fail": "Factura {invoice} este în {invoice_currency}, dar {commitment} este în {commitment_currency}",
+      "suggestion": "Înregistrați factura în moneda comenzii sau subcontractului"
+    },
+    "commitment_retention": {
+      "fail": "Factura {invoice} reține {retention}, mai puțin decât reținerea de {expected} convenită pe {commitment} ({percent}%)",
+      "suggestion": "Rețineți suma convenită sau notați de ce nu se aplică"
+    },
+    "duplicate_number": {
+      "fail": "Numărul de factură {invoice} de la acest furnizor a fost deja înregistrat",
+      "suggestion": "Deschideți factura anterioară; anulați-o pe aceasta dacă este același document"
+    },
+    "possible_duplicate": {
+      "fail": "Factura {invoice} are același furnizor, aceeași sumă ({amount}) și aceeași dată ({on}) ca factura {other}",
+      "suggestion": "Verificați că nu este aceeași factură înregistrată de două ori cu alt număr"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Plata este programată pentru {scheduled}, înainte de data facturii {invoice_date}",
+      "suggestion": "Programați plata la data facturii sau după"
+    }
   }
 }

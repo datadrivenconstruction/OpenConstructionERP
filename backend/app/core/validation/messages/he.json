@@ -2954,5 +2954,31 @@
       "fail": "ל-{line} יש קטגוריה \"{category}\", שאינה סוג עלות",
       "suggestion": "הגדירו את השורה כעבודה, חומרים, ציוד, קבלנות משנה או אחר"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "החשבונית {invoice} גבוהה ב-{excess} מהסכום {remaining} שעדיין פתוח על {commitment}",
+      "suggestion": "אשרו פקודת שינוי שמגדילה את ההתחייבות, או תקנו את סכום החשבונית"
+    },
+    "commitment_currency": {
+      "fail": "החשבונית {invoice} במטבע {invoice_currency}, אך {commitment} במטבע {commitment_currency}",
+      "suggestion": "הזינו את החשבונית במטבע של ההזמנה או של חוזה קבלן המשנה שלה"
+    },
+    "commitment_retention": {
+      "fail": "החשבונית {invoice} מעכבת {retention}, פחות מהעיכבון המוסכם על {commitment} בסך {expected} ({percent}%)",
+      "suggestion": "עכבו את הסכום המוסכם, או ציינו מדוע אינו חל"
+    },
+    "duplicate_number": {
+      "fail": "מספר החשבונית {invoice} מספק זה כבר הוזן",
+      "suggestion": "פתחו את החשבונית הקודמת; בטלו את זו אם זה אותו מסמך"
+    },
+    "possible_duplicate": {
+      "fail": "לחשבונית {invoice} אותו ספק, אותו סכום ({amount}) ואותו תאריך ({on}) כמו לחשבונית {other}",
+      "suggestion": "בדקו שאין זו אותה חשבונית שהוזנה פעמיים במספר אחר"
+    },
+    "payment_date_before_invoice": {
+      "fail": "התשלום מתוכנן ל-{scheduled}, לפני תאריך החשבונית {invoice_date}",
+      "suggestion": "תכננו את התשלום בתאריך החשבונית או אחריו"
+    }
   }
 }

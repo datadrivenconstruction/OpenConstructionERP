@@ -2954,5 +2954,31 @@
       "fail": "A(z) {line} kategóriája \"{category}\", ez nem költségnem",
       "suggestion": "Állítsa a sort munkadíjra, anyagra, gépre, alvállalkozóra vagy egyébre"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "A(z) {invoice} számla {excess} összeggel meghaladja a(z) {commitment} még nyitott {remaining} összegét",
+      "suggestion": "Hagyjon jóvá a kötelezettséget növelő változtatást, vagy javítsa a számla összegét"
+    },
+    "commitment_currency": {
+      "fail": "A(z) {invoice} számla pénzneme {invoice_currency}, de a(z) {commitment} pénzneme {commitment_currency}",
+      "suggestion": "Rögzítse a számlát a megrendelés vagy alvállalkozás pénznemében"
+    },
+    "commitment_retention": {
+      "fail": "A(z) {invoice} számla {retention} összeget tart vissza, kevesebbet, mint a(z) {commitment} szerinti {expected} visszatartás ({percent}%)",
+      "suggestion": "Tartsa vissza a megállapodott összeget, vagy jegyezze fel, miért nem érvényes"
+    },
+    "duplicate_number": {
+      "fail": "Ennek a szállítónak a(z) {invoice} számú számláját már rögzítették",
+      "suggestion": "Nyissa meg a korábbi számlát; törölje ezt, ha ugyanaz a bizonylat"
+    },
+    "possible_duplicate": {
+      "fail": "A(z) {invoice} számla szállítója, összege ({amount}) és dátuma ({on}) megegyezik a(z) {other} számláéval",
+      "suggestion": "Ellenőrizze, hogy nem ugyanazt a számlát rögzítették-e kétszer más számmal"
+    },
+    "payment_date_before_invoice": {
+      "fail": "A fizetés ütemezett napja {scheduled}, a számla dátuma ({invoice_date}) előtt",
+      "suggestion": "Ütemezze a fizetést a számla dátumára vagy későbbre"
+    }
   }
 }

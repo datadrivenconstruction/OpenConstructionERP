@@ -2954,5 +2954,31 @@
       "fail": "{line} toifasi \"{category}\", bu xarajat turi emas",
       "suggestion": "Qatorga mehnat, materiallar, texnika, subpudrat yoki boshqani belgilang"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "{invoice} hisob-fakturasi {commitment} bo'yicha qolgan {remaining} dan {excess} ga oshadi",
+      "suggestion": "Majburiyatni oshiradigan o'zgartirish buyrug'ini tasdiqlang yoki hisob summasini tuzating"
+    },
+    "commitment_currency": {
+      "fail": "{invoice} hisobi {invoice_currency} valyutasida, lekin {commitment} {commitment_currency} valyutasida",
+      "suggestion": "Hisobni uning buyurtmasi yoki subpudrat shartnomasi valyutasida kiriting"
+    },
+    "commitment_retention": {
+      "fail": "{invoice} hisobi {retention} ushlab qoladi, bu {commitment} bo'yicha kelishilgan {expected} ushlab qolishdan kam ({percent}%)",
+      "suggestion": "Kelishilgan summani ushlab qoling yoki nega qo'llanmasligini yozing"
+    },
+    "duplicate_number": {
+      "fail": "Ushbu yetkazib beruvchining {invoice} raqamli hisobi allaqachon kiritilgan",
+      "suggestion": "Oldingi hisobni oching; agar bu o'sha hujjat bo'lsa, buni bekor qiling"
+    },
+    "possible_duplicate": {
+      "fail": "{invoice} hisobining yetkazib beruvchisi, summasi ({amount}) va sanasi ({on}) {other} hisobi bilan bir xil",
+      "suggestion": "Bir xil hisob boshqa raqam bilan ikki marta kiritilmaganini tekshiring"
+    },
+    "payment_date_before_invoice": {
+      "fail": "To'lov {scheduled} sanasiga, hisob sanasi {invoice_date} dan oldin rejalashtirilgan",
+      "suggestion": "To'lovni hisob sanasida yoki undan keyin rejalashtiring"
+    }
   }
 }

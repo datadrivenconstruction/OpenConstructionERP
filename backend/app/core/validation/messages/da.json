@@ -2954,5 +2954,31 @@
       "fail": "{line} har kategorien \"{category}\", som ikke er en omkostningstype",
       "suggestion": "Sæt linjen til arbejdsløn, materialer, materiel, underentreprise eller andet"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Faktura {invoice} er {excess} mere end de {remaining}, der stadig står åbent på {commitment}",
+      "suggestion": "Godkend en ændringsordre, der hæver forpligtelsen, eller ret fakturabeløbet"
+    },
+    "commitment_currency": {
+      "fail": "Faktura {invoice} er i {invoice_currency}, men {commitment} er i {commitment_currency}",
+      "suggestion": "Registrer fakturaen i valutaen for dens ordre eller underentreprise"
+    },
+    "commitment_retention": {
+      "fail": "Faktura {invoice} tilbageholder {retention}, mindre end den på {commitment} aftalte tilbageholdelse på {expected} ({percent}%)",
+      "suggestion": "Tilbagehold det aftalte beløb, eller noter hvorfor det ikke gælder"
+    },
+    "duplicate_number": {
+      "fail": "Fakturanummer {invoice} fra denne leverandør er allerede registreret",
+      "suggestion": "Åbn den tidligere faktura; annuller denne, hvis det er samme dokument"
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {invoice} har samme leverandør, beløb ({amount}) og dato ({on}) som faktura {other}",
+      "suggestion": "Kontrollér, at det ikke er samme faktura registreret to gange under et andet nummer"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Betalingen er planlagt til {scheduled}, før fakturadatoen {invoice_date}",
+      "suggestion": "Planlæg betalingen på eller efter fakturadatoen"
+    }
   }
 }

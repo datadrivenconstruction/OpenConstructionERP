@@ -2954,5 +2954,31 @@
       "fail": "{line} ma kategorię \"{category}\", która nie jest rodzajem kosztu",
       "suggestion": "Ustaw dla linii robociznę, materiały, sprzęt, podwykonawstwo lub inne"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Faktura {invoice} przekracza o {excess} kwotę {remaining} pozostałą na {commitment}",
+      "suggestion": "Zatwierdź zmianę zwiększającą zobowiązanie lub popraw kwotę faktury"
+    },
+    "commitment_currency": {
+      "fail": "Faktura {invoice} jest w {invoice_currency}, a {commitment} w {commitment_currency}",
+      "suggestion": "Wprowadź fakturę w walucie jej zamówienia lub umowy podwykonawczej"
+    },
+    "commitment_retention": {
+      "fail": "Faktura {invoice} zatrzymuje {retention}, mniej niż uzgodnione na {commitment} zatrzymanie {expected} ({percent}%)",
+      "suggestion": "Zatrzymaj uzgodnioną kwotę lub zanotuj, dlaczego nie ma zastosowania"
+    },
+    "duplicate_number": {
+      "fail": "Numer faktury {invoice} od tego dostawcy został już wprowadzony",
+      "suggestion": "Otwórz wcześniejszą fakturę; anuluj tę, jeśli to ten sam dokument"
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {invoice} ma tego samego dostawcę, kwotę ({amount}) i datę ({on}) co faktura {other}",
+      "suggestion": "Sprawdź, czy ta sama faktura nie została wprowadzona dwa razy pod innym numerem"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Płatność zaplanowano na {scheduled}, przed datą faktury {invoice_date}",
+      "suggestion": "Zaplanuj płatność w dniu faktury lub później"
+    }
   }
 }

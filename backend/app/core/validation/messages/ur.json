@@ -2954,5 +2954,31 @@
       "fail": "{line} کی کیٹیگری \"{category}\" ہے، جو لاگت کی قسم نہیں",
       "suggestion": "لائن کو مزدوری، مواد، آلات، ذیلی ٹھیکہ یا دیگر پر سیٹ کریں"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "انوائس {invoice}، {commitment} پر ابھی باقی {remaining} سے {excess} زیادہ ہے",
+      "suggestion": "ایسا تبدیلی آرڈر منظور کریں جو وابستگی بڑھائے، یا انوائس کی رقم درست کریں"
+    },
+    "commitment_currency": {
+      "fail": "انوائس {invoice} کی کرنسی {invoice_currency} ہے، لیکن {commitment} کی کرنسی {commitment_currency} ہے",
+      "suggestion": "انوائس اس کے آرڈر یا ذیلی ٹھیکے کی کرنسی میں درج کریں"
+    },
+    "commitment_retention": {
+      "fail": "انوائس {invoice} میں {retention} روکا گیا ہے، جو {commitment} پر طے شدہ {expected} ریٹینشن سے کم ہے ({percent}%)",
+      "suggestion": "طے شدہ رقم روکیں، یا نوٹ کریں کہ یہ کیوں لاگو نہیں"
+    },
+    "duplicate_number": {
+      "fail": "اس سپلائر کا انوائس نمبر {invoice} پہلے ہی درج ہو چکا ہے",
+      "suggestion": "پچھلا انوائس کھولیں؛ اگر یہ وہی دستاویز ہے تو اسے منسوخ کریں"
+    },
+    "possible_duplicate": {
+      "fail": "انوائس {invoice} کا سپلائر، رقم ({amount}) اور تاریخ ({on}) انوائس {other} جیسی ہے",
+      "suggestion": "تصدیق کریں کہ وہی انوائس کسی دوسرے نمبر سے دو بار درج نہیں ہوا"
+    },
+    "payment_date_before_invoice": {
+      "fail": "ادائیگی {scheduled} کے لیے طے ہے، انوائس کی تاریخ {invoice_date} سے پہلے",
+      "suggestion": "ادائیگی انوائس کی تاریخ یا اس کے بعد طے کریں"
+    }
   }
 }

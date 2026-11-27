@@ -2954,5 +2954,31 @@
       "fail": "{line} has the category \"{category}\", which is not a cost type",
       "suggestion": "Set the line to labour, material, equipment, subcontract or other"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Invoice {invoice} is {excess} more than the {remaining} still open on {commitment}",
+      "suggestion": "Approve a change order that raises the commitment, or correct the invoice amount"
+    },
+    "commitment_currency": {
+      "fail": "Invoice {invoice} is in {invoice_currency}, but {commitment} is in {commitment_currency}",
+      "suggestion": "Enter the invoice in the currency of its order or subcontract"
+    },
+    "commitment_retention": {
+      "fail": "Invoice {invoice} holds back {retention}, less than the {expected} retention agreed on {commitment} ({percent}%)",
+      "suggestion": "Hold back the agreed retention, or note why it does not apply"
+    },
+    "duplicate_number": {
+      "fail": "Invoice number {invoice} from this supplier has already been entered",
+      "suggestion": "Open the earlier invoice; cancel this one if it is the same document"
+    },
+    "possible_duplicate": {
+      "fail": "Invoice {invoice} has the same supplier, amount ({amount}) and date ({on}) as invoice {other}",
+      "suggestion": "Check that it is not the same invoice entered twice under another number"
+    },
+    "payment_date_before_invoice": {
+      "fail": "The payment is scheduled for {scheduled}, before the invoice date {invoice_date}",
+      "suggestion": "Schedule the payment on or after the invoice date"
+    }
   }
 }

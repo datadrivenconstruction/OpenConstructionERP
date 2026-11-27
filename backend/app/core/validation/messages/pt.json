@@ -2954,5 +2954,31 @@
       "fail": "{line} tem a categoria \"{category}\", que não é um tipo de custo",
       "suggestion": "Defina a linha como mão de obra, material, equipamento, subempreitada ou outros"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "A fatura {invoice} excede em {excess} os {remaining} ainda em aberto em {commitment}",
+      "suggestion": "Aprove uma ordem de alteração que aumente o compromisso ou corrija o valor da fatura"
+    },
+    "commitment_currency": {
+      "fail": "A fatura {invoice} está em {invoice_currency}, mas {commitment} está em {commitment_currency}",
+      "suggestion": "Registe a fatura na moeda da sua encomenda ou subempreitada"
+    },
+    "commitment_retention": {
+      "fail": "A fatura {invoice} retém {retention}, menos do que a retenção de {expected} acordada em {commitment} ({percent}%)",
+      "suggestion": "Retenha o valor acordado ou indique porque não se aplica"
+    },
+    "duplicate_number": {
+      "fail": "O número de fatura {invoice} deste fornecedor já foi registado",
+      "suggestion": "Abra a fatura anterior; cancele esta se for o mesmo documento"
+    },
+    "possible_duplicate": {
+      "fail": "A fatura {invoice} tem o mesmo fornecedor, valor ({amount}) e data ({on}) que a fatura {other}",
+      "suggestion": "Verifique se não é a mesma fatura registada duas vezes com outro número"
+    },
+    "payment_date_before_invoice": {
+      "fail": "O pagamento está agendado para {scheduled}, antes da data da fatura {invoice_date}",
+      "suggestion": "Agende o pagamento na data da fatura ou depois"
+    }
   }
 }

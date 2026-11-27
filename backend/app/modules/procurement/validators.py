@@ -417,7 +417,7 @@ def check_line_budget_type_known(po: dict[str, Any]) -> list[Finding]:
 #
 # The payload is built by ``ProcurementService.invoice_match_payload``:
 #
-#     {"po_number", "currency_code", "po_net", "invoiced_before_net",
+#     {"po_number", "currency_code", "po_net", "approved_changes_net", "invoiced_before_net",
 #      "invoice_net", "invoice_ref", "has_receipts", "received_net",
 #      "lines": [{"label", "unit", "ordered", "received", "invoiced_before",
 #                 "invoiced"}]}
@@ -450,7 +450,8 @@ def _allowance(payload: dict[str, Any], base: Decimal) -> Decimal:
 
 def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
     """The invoice should not exceed what is still open on its order, net of VAT."""
-    po_net = _money(payload.get("po_net"))
+    # Approved change orders that name this order raise what it commits.
+    po_net = _money(payload.get("po_net")) + _money(payload.get("approved_changes_net"))
     before = _money(payload.get("invoiced_before_net"))
     invoice = _money(payload.get("invoice_net"))
     remaining = po_net - before
@@ -468,6 +469,7 @@ def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
             },
             details={
                 "po_net": str(po_net),
+                "approved_changes_net": str(_money(payload.get("approved_changes_net"))),
                 "invoiced_before_net": str(before),
                 "invoice_net": str(invoice),
                 "remaining_net": str(remaining),

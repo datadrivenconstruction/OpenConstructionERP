@@ -144445,6 +144445,8 @@
         "booking_service.py",
         "br_invoice_pdf.py",
         "budget_actuals.py",
+        "commitment.py",
+        "commitment_rules.py",
         "connector_events.py",
         "connector_models.py",
         "connector_schemas.py",
@@ -144550,6 +144552,12 @@
               "nullable": true
             },
             {
+              "name": "subcontract_agreement_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "invoice_number",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -144563,6 +144571,36 @@
             },
             {
               "name": "due_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "scheduled_payment_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "submitted_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "submitted_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "approved_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "approved_at",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -145179,6 +145217,20 @@
           "request_schema": "None"
         },
         {
+          "method": "GET",
+          "path": "/commitments/",
+          "handler": "list_invoice_commitments",
+          "response_model": "list[CommitmentResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/invoices/posting-check/",
+          "handler": "check_invoice_posting",
+          "response_model": "InvoicePostingCheckResponse",
+          "request_schema": "InvoicePostingCheckRequest"
+        },
+        {
           "method": "POST",
           "path": "/",
           "handler": "create_invoice",
@@ -145687,6 +145739,15 @@
               "default": "None"
             },
             {
+              "name": "subcontract_agreement_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "scheduled_payment_date",
+              "type": "str | None"
+            },
+            {
               "name": "line_items",
               "type": "list[InvoiceLineItemCreate]"
             },
@@ -145759,6 +145820,15 @@
               "name": "purchase_order_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "subcontract_agreement_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "scheduled_payment_date",
+              "type": "str | None"
             },
             {
               "name": "line_items",
@@ -145892,6 +145962,11 @@
               "default": "None"
             },
             {
+              "name": "subcontract_agreement_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "invoice_direction",
               "type": "str"
             },
@@ -145905,6 +145980,31 @@
             },
             {
               "name": "due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "scheduled_payment_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "submitted_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "submitted_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approved_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "approved_at",
               "type": "str | None",
               "default": "None"
             },
@@ -145973,6 +146073,163 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoicePostingCheckRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An invoice as it is being entered, weighed against its commitment (read-only).\n\n``invoice_id`` is set when the invoice is already saved, so it is not\ncounted against itself or reported as its own duplicate.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "invoice_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_direction",
+              "type": "str"
+            },
+            {
+              "name": "invoice_number",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_date",
+              "type": "str | None"
+            },
+            {
+              "name": "due_date",
+              "type": "str | None"
+            },
+            {
+              "name": "scheduled_payment_date",
+              "type": "str | None"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "amount_subtotal",
+              "type": "str"
+            },
+            {
+              "name": "retention_amount",
+              "type": "str"
+            },
+            {
+              "name": "amount_total",
+              "type": "str | None"
+            },
+            {
+              "name": "purchase_order_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontract_agreement_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CommitmentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One purchase order or subcontract agreement and what is still open on it, net of VAT.\n\nMoney is Decimal strings in the commitment's own currency. ``remaining``\nis ``original + approved_changes - invoiced``; it goes negative when the\ncommitment is already over-invoiced.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "ref",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "original",
+              "type": "str"
+            },
+            {
+              "name": "approved_changes",
+              "type": "str"
+            },
+            {
+              "name": "revised",
+              "type": "str"
+            },
+            {
+              "name": "invoiced",
+              "type": "str"
+            },
+            {
+              "name": "remaining",
+              "type": "str"
+            },
+            {
+              "name": "paid",
+              "type": "str"
+            },
+            {
+              "name": "retention_percent",
+              "type": "str"
+            },
+            {
+              "name": "invoices_in_other_currency",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "shared_change_orders",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoicePostingCheckResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What approving the invoice would meet: its commitment and the ``invoice_posting`` report.",
+          "fields": [
+            {
+              "name": "commitment",
+              "type": "CommitmentResponse | None",
+              "default": "None"
+            },
+            {
+              "name": "blocking",
+              "type": "bool"
+            },
+            {
+              "name": "report",
+              "type": "dict[str, Any]"
             }
           ]
         },
@@ -148143,6 +148400,7 @@
       "import_dependencies": [
         "ai",
         "boq",
+        "changeorders",
         "contacts",
         "contracts",
         "costmodel",
@@ -345485,10 +345743,10 @@
     },
     {
       "name": "finance",
-      "ts_files": 59,
+      "ts_files": 61,
       "css_files": 0,
-      "test_files": 25,
-      "total_files": 59
+      "test_files": 26,
+      "total_files": 61
     },
     {
       "name": "forms",
@@ -347481,6 +347739,7 @@
     "finance": [
       "ai",
       "boq",
+      "changeorders",
       "contacts",
       "contracts",
       "costmodel",
@@ -348593,13 +348852,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11600,
+    "total_columns": 11606,
     "total_relationships": 264,
-    "total_routes": 5613,
-    "total_schemas": 5246,
-    "total_python_files": 3859,
+    "total_routes": 5615,
+    "total_schemas": 5249,
+    "total_python_files": 3861,
     "frontend_features": 254,
-    "frontend_ts_files": 4595,
+    "frontend_ts_files": 4597,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

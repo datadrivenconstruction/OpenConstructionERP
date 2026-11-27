@@ -2954,5 +2954,31 @@
       "fail": "{line}의 범주는 \"{category}\"이며 원가 유형이 아닙니다",
       "suggestion": "행을 노무비, 재료비, 장비비, 하도급 또는 기타로 설정하세요"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "송장 {invoice}이(가) {commitment}의 잔여 금액 {remaining}을(를) {excess} 초과합니다",
+      "suggestion": "약정을 늘리는 변경 지시를 승인하거나 송장 금액을 수정하십시오"
+    },
+    "commitment_currency": {
+      "fail": "송장 {invoice}은(는) {invoice_currency}이지만 {commitment}은(는) {commitment_currency}입니다",
+      "suggestion": "송장을 해당 발주서 또는 하도급 계약의 통화로 입력하십시오"
+    },
+    "commitment_retention": {
+      "fail": "송장 {invoice}의 유보금은 {retention}으로, {commitment}에서 합의한 유보금 {expected}({percent}%)보다 적습니다",
+      "suggestion": "합의된 유보금을 공제하거나 적용하지 않는 이유를 기록하십시오"
+    },
+    "duplicate_number": {
+      "fail": "이 공급업체의 송장 번호 {invoice}이(가) 이미 입력되어 있습니다",
+      "suggestion": "이전 송장을 여십시오. 같은 문서라면 이 송장을 취소하십시오"
+    },
+    "possible_duplicate": {
+      "fail": "송장 {invoice}은(는) 송장 {other}과(와) 공급업체, 금액({amount}), 날짜({on})가 같습니다",
+      "suggestion": "같은 송장이 다른 번호로 두 번 입력되지 않았는지 확인하십시오"
+    },
+    "payment_date_before_invoice": {
+      "fail": "지급 예정일 {scheduled}이(가) 송장 날짜 {invoice_date}보다 앞섭니다",
+      "suggestion": "지급 예정일을 송장 날짜 이후로 설정하십시오"
+    }
   }
 }

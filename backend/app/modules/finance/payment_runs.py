@@ -98,11 +98,14 @@ def propose(
         balance = open_balance(invoice, as_of=payment_date)
         if balance.due <= _ZERO:
             continue
-        if balance.effective_due_date is not None and balance.effective_due_date > due_by:
+        # A planned payment date wins over the due date: the payer has already
+        # said when this one goes out.
+        pay_on = invoice.scheduled_payment_date or balance.effective_due_date
+        if pay_on is not None and pay_on > due_by:
             continue
         picked.append(
             (
-                balance.effective_due_date or "",
+                pay_on or "",
                 Proposal(
                     invoice_id=invoice.invoice_id,
                     project_id=invoice.project_id,

@@ -2954,5 +2954,31 @@
       "fail": "{line} a la catégorie \"{category}\", qui n'est pas un type de coût",
       "suggestion": "Définissez la ligne en main-d'œuvre, matériaux, matériel, sous-traitance ou autre"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "La facture {invoice} dépasse de {excess} les {remaining} encore ouverts sur {commitment}",
+      "suggestion": "Approuvez un avenant qui augmente l'engagement ou corrigez le montant de la facture"
+    },
+    "commitment_currency": {
+      "fail": "La facture {invoice} est en {invoice_currency}, mais {commitment} est en {commitment_currency}",
+      "suggestion": "Saisissez la facture dans la devise de sa commande ou de son contrat de sous-traitance"
+    },
+    "commitment_retention": {
+      "fail": "La facture {invoice} retient {retention}, moins que la retenue de {expected} convenue sur {commitment} ({percent}%)",
+      "suggestion": "Appliquez la retenue convenue ou indiquez pourquoi elle ne s'applique pas"
+    },
+    "duplicate_number": {
+      "fail": "Le numéro de facture {invoice} de ce fournisseur a déjà été saisi",
+      "suggestion": "Ouvrez la facture précédente ; annulez celle-ci s'il s'agit du même document"
+    },
+    "possible_duplicate": {
+      "fail": "La facture {invoice} a le même fournisseur, le même montant ({amount}) et la même date ({on}) que la facture {other}",
+      "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Le paiement est prévu le {scheduled}, avant la date de facture {invoice_date}",
+      "suggestion": "Prévoyez le paiement à la date de facture ou après"
+    }
   }
 }

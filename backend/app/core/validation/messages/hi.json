@@ -2954,5 +2954,31 @@
       "fail": "{line} की श्रेणी \"{category}\" है, जो लागत प्रकार नहीं है",
       "suggestion": "पंक्ति को श्रम, सामग्री, उपकरण, उप-ठेका या अन्य पर सेट करें"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "चालान {invoice}, {commitment} पर अभी बाकी {remaining} से {excess} अधिक है",
+      "suggestion": "प्रतिबद्धता बढ़ाने वाला परिवर्तन आदेश स्वीकृत करें, या चालान की राशि सुधारें"
+    },
+    "commitment_currency": {
+      "fail": "चालान {invoice} {invoice_currency} में है, लेकिन {commitment} {commitment_currency} में है",
+      "suggestion": "चालान को उसके ऑर्डर या उप-अनुबंध की मुद्रा में दर्ज करें"
+    },
+    "commitment_retention": {
+      "fail": "चालान {invoice} {retention} रोकता है, जो {commitment} पर तय {expected} प्रतिधारण से कम है ({percent}%)",
+      "suggestion": "तय राशि रोकें, या लिखें कि यह क्यों लागू नहीं होती"
+    },
+    "duplicate_number": {
+      "fail": "इस आपूर्तिकर्ता का चालान संख्या {invoice} पहले ही दर्ज हो चुका है",
+      "suggestion": "पहले का चालान खोलें; यदि यह वही दस्तावेज़ है तो इसे रद्द करें"
+    },
+    "possible_duplicate": {
+      "fail": "चालान {invoice} का आपूर्तिकर्ता, राशि ({amount}) और तिथि ({on}) चालान {other} जैसी है",
+      "suggestion": "जाँचें कि वही चालान किसी अन्य संख्या से दो बार दर्ज नहीं हुआ है"
+    },
+    "payment_date_before_invoice": {
+      "fail": "भुगतान {scheduled} के लिए निर्धारित है, चालान तिथि {invoice_date} से पहले",
+      "suggestion": "भुगतान चालान तिथि पर या उसके बाद निर्धारित करें"
+    }
   }
 }

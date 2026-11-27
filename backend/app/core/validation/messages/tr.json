@@ -2954,5 +2954,31 @@
       "fail": "{line} kategorisi \"{category}\", bu bir maliyet türü değil",
       "suggestion": "Satırı işçilik, malzeme, ekipman, taşeron veya diğer olarak ayarlayın"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "{invoice} faturası, {commitment} üzerinde hâlâ açık olan {remaining} tutarını {excess} aşıyor",
+      "suggestion": "Taahhüdü artıran bir değişiklik emrini onaylayın veya fatura tutarını düzeltin"
+    },
+    "commitment_currency": {
+      "fail": "{invoice} faturası {invoice_currency} cinsinden, ancak {commitment} {commitment_currency} cinsinden",
+      "suggestion": "Faturayı siparişinin veya taşeron sözleşmesinin para biriminde girin"
+    },
+    "commitment_retention": {
+      "fail": "{invoice} faturası {retention} kesinti yapıyor; bu, {commitment} üzerinde kararlaştırılan {expected} teminat kesintisinden az ({percent}%)",
+      "suggestion": "Kararlaştırılan kesintiyi uygulayın veya neden uygulanmadığını not edin"
+    },
+    "duplicate_number": {
+      "fail": "Bu tedarikçinin {invoice} numaralı faturası zaten girilmiş",
+      "suggestion": "Önceki faturayı açın; aynı belgeyse bunu iptal edin"
+    },
+    "possible_duplicate": {
+      "fail": "{invoice} faturası, {other} faturasıyla aynı tedarikçiye, tutara ({amount}) ve tarihe ({on}) sahip",
+      "suggestion": "Aynı faturanın başka bir numarayla iki kez girilmediğini kontrol edin"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Ödeme {scheduled} tarihine, {invoice_date} fatura tarihinden önceye planlanmış",
+      "suggestion": "Ödemeyi fatura tarihinde veya sonrasında planlayın"
+    }
   }
 }

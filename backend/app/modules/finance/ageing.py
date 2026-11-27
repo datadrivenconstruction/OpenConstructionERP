@@ -131,6 +131,9 @@ class AgeingInvoice:
     retention_amount: object = _ZERO
     payment_terms_days: str | None = None
     payments: Sequence[AgeingPayment] = ()
+    # When the payment is planned; distinct from the contractual due date and
+    # read by the payment-run proposal, never by the ageing buckets.
+    scheduled_payment_date: str | None = None
 
 
 # -- output records --------------------------------------------------------------

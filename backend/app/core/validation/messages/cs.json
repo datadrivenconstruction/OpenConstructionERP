@@ -2954,5 +2954,31 @@
       "fail": "{line} má kategorii \"{category}\", která není druhem nákladu",
       "suggestion": "Nastavte řádek na práci, materiál, stroje, subdodávku nebo ostatní"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Faktura {invoice} převyšuje o {excess} částku {remaining}, která zbývá na {commitment}",
+      "suggestion": "Schvalte změnu, která navýší závazek, nebo opravte částku faktury"
+    },
+    "commitment_currency": {
+      "fail": "Faktura {invoice} je v {invoice_currency}, ale {commitment} je v {commitment_currency}",
+      "suggestion": "Zadejte fakturu v měně její objednávky nebo subdodávky"
+    },
+    "commitment_retention": {
+      "fail": "Faktura {invoice} zadržuje {retention}, méně než zádržné {expected} sjednané na {commitment} ({percent}%)",
+      "suggestion": "Zadržte sjednanou částku nebo poznamenejte, proč se nepoužije"
+    },
+    "duplicate_number": {
+      "fail": "Číslo faktury {invoice} od tohoto dodavatele již bylo zadáno",
+      "suggestion": "Otevřete dřívější fakturu; tuto zrušte, pokud jde o stejný doklad"
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {invoice} má stejného dodavatele, částku ({amount}) a datum ({on}) jako faktura {other}",
+      "suggestion": "Ověřte, že nejde o stejnou fakturu zadanou dvakrát pod jiným číslem"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Platba je naplánována na {scheduled}, před datem faktury {invoice_date}",
+      "suggestion": "Naplánujte platbu na datum faktury nebo později"
+    }
   }
 }

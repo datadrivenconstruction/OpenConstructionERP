@@ -68,6 +68,7 @@ import { apiGet, apiPost, apiPatch, downloadWithAuth, extractErrorMessageFromBod
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { InvoicePurchaseOrderField } from './InvoicePurchaseOrderField';
+import { InvoiceApprovalGate, InvoiceCommitmentCheck, InvoiceSubcontractField } from './InvoiceCommitmentCheck';
 import { useContractLineOptions } from './contractLineOptions';
 import { InvoiceLinesEditor } from './InvoiceLinesEditor';
 import {
@@ -199,6 +200,14 @@ interface Invoice {
   contact_id?: string | null;
   // The purchase order a payable invoice bills, when one was picked.
   purchase_order_id?: string | null;
+  // Or the subcontract agreement it bills; never both.
+  subcontract_agreement_id?: string | null;
+  // When the payment is planned, beside the contractual due date.
+  scheduled_payment_date?: string | null;
+  submitted_by?: string | null;
+  submitted_at?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
   invoice_date?: string | null;
   currency_code?: string | null;
   notes?: string | null;
@@ -2185,6 +2194,10 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
     status: 'draft',
     // Optional order this payable invoice bills. Empty means not linked.
     purchase_order_id: '',
+    // Or the subcontract agreement it bills. Choosing one clears the other.
+    subcontract_agreement_id: '',
+    // The planned payment date, distinct from the contractual due date.
+    scheduled_payment_date: '',
   });
   const [invoiceErrors, setInvoiceErrors] = useState<Record<string, string>>({});
   const invoiceDateRef = useRef<HTMLInputElement>(null);
@@ -2232,6 +2245,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
       // Shown exactly as stored. A person sees the state the machine wrote.
       status: inv.status || 'draft',
       purchase_order_id: inv.purchase_order_id ?? '',
+      subcontract_agreement_id: inv.subcontract_agreement_id ?? '',
+      scheduled_payment_date: (inv.scheduled_payment_date ?? '').split('T')[0] || '',
     });
     setInvoiceErrors({});
     setEditingInvoice(inv);
@@ -2324,12 +2339,15 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
         metadata: invoiceMetadataWithBuyerReference(null, data.buyer_reference),
         purchase_order_id:
           data.direction === 'payable' && data.purchase_order_id ? data.purchase_order_id : undefined,
+        subcontract_agreement_id:
+          data.direction === 'payable' && data.subcontract_agreement_id ? data.subcontract_agreement_id : undefined,
+        scheduled_payment_date: data.scheduled_payment_date || undefined,
       });
     },
     onSuccess: () => {
       void invalidateFinanceFigures(queryClient);
       setShowCreate(false);
-      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
+      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '', subcontract_agreement_id: '', scheduled_payment_date: '' });
       addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created successfully' }) });
     },
     onError: (e: Error) =>
@@ -2377,6 +2395,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
         // Null unlinks. A receivable invoice never bills a purchase order.
         purchase_order_id:
           data.form.direction === 'payable' && data.form.purchase_order_id ? data.form.purchase_order_id : null,
+        subcontract_agreement_id:
+          data.form.direction === 'payable' && data.form.subcontract_agreement_id
+            ? data.form.subcontract_agreement_id
+            : null,
+        scheduled_payment_date: data.form.scheduled_payment_date || null,
         ...(statusChanged ? { status: data.form.status } : {}),
       });
     },
@@ -2576,7 +2599,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
             size="sm"
             icon={<Plus size={14} />}
             onClick={() => {
-              setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
+              setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '', subcontract_agreement_id: '', scheduled_payment_date: '' });
               setInvoiceErrors({});
               setShowCreate(true);
             }}
@@ -2651,7 +2674,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   ? {
                       label: t('finance.new_invoice', { defaultValue: 'New Invoice' }),
                       onClick: () => {
-                        setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
+                        setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', invoice_number: '', lines: [newEditorLine(defaultVat)], lines_dirty: false, currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '', subcontract_agreement_id: '', scheduled_payment_date: '' });
                         setInvoiceErrors({});
                         setShowCreate(true);
                       },
@@ -2830,22 +2853,45 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                             </Button>
                           )}
                           {inv.status === 'pending' && isManager && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={async () => {
-                                const ok = await confirm({
-                                  title: t('finance.confirm_approve_title', { defaultValue: 'Approve invoice?' }),
-                                  message: t('finance.confirm_approve_msg', { defaultValue: 'This invoice will be approved for payment.' }),
-                                  confirmLabel: t('finance.approve', { defaultValue: 'Approve' }),
-                                  variant: 'warning',
-                                });
-                                if (ok) approveMutation.mutate(inv.id);
+                            <InvoiceApprovalGate
+                              invoice={{
+                                ...inv,
+                                invoice_date: inv.invoice_date ?? inv.issue_date,
+                                currency_code: inv.currency_code ?? inv.currency,
                               }}
-                              loading={approveMutation.isPending}
                             >
-                              {t('finance.approve', { defaultValue: 'Approve' })}
-                            </Button>
+                              {(blocked) => (
+                                <>
+                                {blocked && (
+                                  <span
+                                    className="max-w-[18rem] text-2xs text-semantic-error"
+                                    data-testid={`invoice-approve-blocked-${inv.id}`}
+                                  >
+                                    {blocked}
+                                  </span>
+                                )}
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  disabled={!!blocked}
+                                  title={blocked ?? undefined}
+                                  data-testid={`invoice-approve-${inv.id}`}
+                                  onClick={async () => {
+                                    const ok = await confirm({
+                                      title: t('finance.confirm_approve_title', { defaultValue: 'Approve invoice?' }),
+                                      message: t('finance.confirm_approve_msg', { defaultValue: 'This invoice will be approved for payment.' }),
+                                      confirmLabel: t('finance.approve', { defaultValue: 'Approve' }),
+                                      variant: 'warning',
+                                    });
+                                    if (ok) approveMutation.mutate(inv.id);
+                                  }}
+                                  loading={approveMutation.isPending}
+                                >
+                                  {t('finance.approve', { defaultValue: 'Approve' })}
+                                </Button>
+                                </>
+                              )}
+                            </InvoiceApprovalGate>
                           )}
                           {canMarkPaid(inv.status) && isManager && (
                             <Button
@@ -3305,10 +3351,46 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   projectId={projectId}
                   contactId={invoiceForm.contact_id}
                   value={invoiceForm.purchase_order_id}
-                  onChange={(poId) => setInvoiceForm((f) => ({ ...f, purchase_order_id: poId }))}
+                  onChange={(poId) =>
+                    setInvoiceForm((f) => ({ ...f, purchase_order_id: poId, subcontract_agreement_id: poId ? '' : f.subcontract_agreement_id }))
+                  }
                   amountSubtotal={linesTotals(invoiceForm.lines).subtotal}
                   invoiceId={editingInvoice?.id}
                 />
+                {invoiceForm.contact_id && (
+                  <div className="mt-2">
+                    <InvoiceSubcontractField
+                      projectId={projectId}
+                      contactId={invoiceForm.contact_id}
+                      value={invoiceForm.subcontract_agreement_id}
+                      onChange={(agreementId) =>
+                        setInvoiceForm((f) => ({
+                          ...f,
+                          subcontract_agreement_id: agreementId,
+                          purchase_order_id: agreementId ? '' : f.purchase_order_id,
+                        }))
+                      }
+                    />
+                  </div>
+                )}
+                <div className="mt-2">
+                  <InvoiceCommitmentCheck
+                    input={{
+                      project_id: projectId,
+                      invoice_id: editingInvoice?.id,
+                      contact_id: invoiceForm.contact_id || undefined,
+                      invoice_number: invoiceForm.invoice_number || undefined,
+                      invoice_date: invoiceForm.invoice_date || undefined,
+                      due_date: invoiceForm.due_date || undefined,
+                      scheduled_payment_date: invoiceForm.scheduled_payment_date || undefined,
+                      currency_code: invoiceForm.currency || projectCurrency || '',
+                      amount_subtotal: fmtNumberForInput(linesTotals(invoiceForm.lines).subtotal),
+                      retention_amount: editingInvoice?.retention_amount || '0',
+                      purchase_order_id: invoiceForm.purchase_order_id || undefined,
+                      subcontract_agreement_id: invoiceForm.subcontract_agreement_id || undefined,
+                    }}
+                  />
+                </div>
               </WideModalField>
             )}
 
@@ -3418,6 +3500,23 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                 className={inputCls}
               />
             </WideModalField>
+            {invoiceForm.direction === 'payable' && (
+              <WideModalField
+                label={t('finance.scheduled_payment_date', { defaultValue: 'Scheduled payment date' })}
+                span={2}
+                hint={t('finance.scheduled_payment_date_hint', {
+                  defaultValue: 'When you plan to pay. Payment runs and the cash-flow forecast use it before the due date.',
+                })}
+              >
+                <input
+                  type="date"
+                  value={invoiceForm.scheduled_payment_date}
+                  onChange={(e) => setInvoiceForm((f) => ({ ...f, scheduled_payment_date: e.target.value }))}
+                  className={inputCls}
+                  data-testid="invoice-scheduled-payment-date"
+                />
+              </WideModalField>
+            )}
             <WideModalField
               label={t('finance.notes', { defaultValue: 'Notes / Description' })}
               span={2}

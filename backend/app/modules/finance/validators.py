@@ -2,7 +2,9 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance validation rules.
 
-One rule, registered under the ``finance`` rule set:
+The payable posting rules (``invoice_posting.*``, commitment, duplicates,
+scheduled payment date) live in :mod:`app.modules.finance.commitment_rules`
+and are registered here too. One rule, registered under the ``finance`` rule set:
 
 * ``finance.invoice_agrees_with_certificate`` - ERROR. An invoice raised from a
   certified payment certificate carries the certificate's amount before VAT and
@@ -127,9 +129,12 @@ _FINANCE_RULES: tuple[ValidationRule, ...] = (InvoiceAgreesWithCertificate(),)
 
 def register_finance_rules() -> None:
     """Register the module's validation rules. Idempotent: the registry overwrites by id."""
+    from app.modules.finance.commitment_rules import POSTING_RULES, register_posting_rules
+
     for rule in _FINANCE_RULES:
         rule_registry.register(rule, [FINANCE_RULE_SET])
-    logger.debug("Registered %d finance validation rules", len(_FINANCE_RULES))
+    register_posting_rules()
+    logger.debug("Registered %d finance validation rules", len(_FINANCE_RULES) + len(POSTING_RULES))
 
 
 async def evaluate_claim_invoice(record: dict[str, Any], *, record_id: str = "") -> list[RuleResult]:

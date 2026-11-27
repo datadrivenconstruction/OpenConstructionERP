@@ -2954,5 +2954,31 @@
       "fail": "{line} có danh mục \"{category}\", không phải loại chi phí",
       "suggestion": "Đặt dòng thành nhân công, vật liệu, thiết bị, thầu phụ hoặc khác"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Hóa đơn {invoice} vượt {excess} so với {remaining} còn lại trên {commitment}",
+      "suggestion": "Phê duyệt một lệnh thay đổi để tăng cam kết, hoặc sửa số tiền hóa đơn"
+    },
+    "commitment_currency": {
+      "fail": "Hóa đơn {invoice} bằng {invoice_currency}, nhưng {commitment} bằng {commitment_currency}",
+      "suggestion": "Nhập hóa đơn bằng đơn vị tiền tệ của đơn hàng hoặc hợp đồng thầu phụ"
+    },
+    "commitment_retention": {
+      "fail": "Hóa đơn {invoice} giữ lại {retention}, ít hơn khoản giữ lại {expected} đã thỏa thuận trên {commitment} ({percent}%)",
+      "suggestion": "Giữ lại khoản đã thỏa thuận, hoặc ghi chú lý do không áp dụng"
+    },
+    "duplicate_number": {
+      "fail": "Số hóa đơn {invoice} của nhà cung cấp này đã được nhập",
+      "suggestion": "Mở hóa đơn trước đó; hủy hóa đơn này nếu là cùng một chứng từ"
+    },
+    "possible_duplicate": {
+      "fail": "Hóa đơn {invoice} có cùng nhà cung cấp, số tiền ({amount}) và ngày ({on}) với hóa đơn {other}",
+      "suggestion": "Kiểm tra rằng không phải cùng một hóa đơn được nhập hai lần với số khác"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Thanh toán được lên lịch vào {scheduled}, trước ngày hóa đơn {invoice_date}",
+      "suggestion": "Lên lịch thanh toán vào hoặc sau ngày hóa đơn"
+    }
   }
 }
