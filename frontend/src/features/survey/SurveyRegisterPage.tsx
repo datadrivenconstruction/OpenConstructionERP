@@ -62,7 +62,6 @@ type Tab = 'points' | 'control' | 'sets' | 'traverses' | 'plan';
 const coord = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));
 
 export default function SurveyRegisterPage() {
-  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -88,6 +87,7 @@ export default function SurveyRegisterPage() {
   const [bulkValue, setBulkValue] = useState('');
   const demo = useOpenSurveyDemo('/survey/points');
   const { canWrite } = useSurveyAccess();
+  const canWriteReason = useRoleReason(canWrite, 'editor');
 
   const enabled = !!projectId;
   const crs = useQuery({ queryKey: ['survey', 'crs', projectId], queryFn: () => getProjectCrs(projectId!), enabled });

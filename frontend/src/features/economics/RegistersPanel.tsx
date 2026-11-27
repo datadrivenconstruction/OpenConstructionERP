@@ -437,7 +437,6 @@ function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Reg
 function ProcessCard({ projectId, row, canEdit }: { projectId: string; row: ProcessRow; canEdit: boolean }) {
   const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
-  const day = useDay();
   const save = useEconomicsAction(projectId, (body: Record<string, unknown>) => putProcess(projectId, row.area, body));
   const [owner, setOwner] = useState(row.owner);
   const [description, setDescription] = useState(row.description);

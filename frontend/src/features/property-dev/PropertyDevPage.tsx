@@ -1965,11 +1965,10 @@ function LeadDetailDrawer({
               className={inputCls}
               value={form.lead_score}
               disabled={!canEdit}
-              title={editReason}
               onChange={(e) =>
                 setForm({ ...form, lead_score: e.target.value })
               }
-              title={t('propdev.lead_score_hint', {
+              title={editReason ?? t('propdev.lead_score_hint', {
                 defaultValue:
                   'Your qualification confidence - 0 = cold, 50 = warm, 100 = hot. Drives the Leads list sort order.',
               })}
