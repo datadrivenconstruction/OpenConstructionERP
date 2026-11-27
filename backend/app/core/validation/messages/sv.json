@@ -2952,8 +2952,8 @@
       "suggestion": "Lägg till postens resurser eller flytta beloppet till rätt kostnadsslag"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} har resurser prissatta i en valuta utan växelkurs till projektvalutan, så de deltog inte i fördelningen: {resources}",
+      "suggestion": "Lägg till växelkursen under projektets valutainställningar och generera sedan budgeten på nytt"
     },
     "unknown_type": {
       "fail": "{line} har kategorin \"{category}\", som inte är ett kostnadsslag",

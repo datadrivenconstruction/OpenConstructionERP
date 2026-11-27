@@ -2952,8 +2952,8 @@
       "suggestion": "منابع آیتم را اضافه کنید یا مبلغ را به نوع هزینه درست منتقل کنید"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} منابعی دارد که با ارزی قیمت خورده که نرخ برابری آن با ارز پروژه تعریف نشده، بنابراین در تقسیم‌بندی شرکت نکردند: {resources}",
+      "suggestion": "نرخ برابری را در تنظیمات ارز پروژه اضافه کنید، سپس بودجه را دوباره تولید کنید"
     },
     "unknown_type": {
       "fail": "دسته {line} برابر \"{category}\" است که نوع هزینه نیست",

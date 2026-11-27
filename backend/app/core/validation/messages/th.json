@@ -2952,8 +2952,8 @@
       "suggestion": "เพิ่มทรัพยากรของรายการ หรือย้ายยอดไปยังประเภทต้นทุนที่ถูกต้อง"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} มีทรัพยากรที่ตั้งราคาเป็นสกุลเงินที่ไม่มีอัตราแลกเปลี่ยนเป็นสกุลเงินของโปรเจกต์ จึงไม่ได้ร่วมในการแบ่งงบ: {resources}",
+      "suggestion": "เพิ่มอัตราแลกเปลี่ยนในการตั้งค่าสกุลเงินของโปรเจกต์ แล้วสร้างงบประมาณใหม่อีกครั้ง"
     },
     "unknown_type": {
       "fail": "{line} มีหมวด \"{category}\" ซึ่งไม่ใช่ประเภทต้นทุน",

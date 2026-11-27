@@ -2952,8 +2952,8 @@
       "suggestion": "Tambahkan sumber daya item atau pindahkan jumlahnya ke jenis biaya yang benar"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} memiliki sumber daya yang dihargai dalam mata uang tanpa kurs tukar ke mata uang proyek, sehingga tidak ikut dalam pembagian: {resources}",
+      "suggestion": "Tambahkan kurs tukar di pengaturan mata uang proyek, lalu buat ulang anggaran"
     },
     "unknown_type": {
       "fail": "{line} berkategori \"{category}\", yang bukan jenis biaya",

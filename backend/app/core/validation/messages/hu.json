@@ -2952,8 +2952,8 @@
       "suggestion": "Adja meg a tétel erőforrásait, vagy helyezze át az összeget a megfelelő költségnemre"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "A(z) {line} olyan erőforrásokat tartalmaz, amelyek árát olyan pénznemben adták meg, amelyhez nincs árfolyam a projekt pénznemére, ezért nem vettek részt a felosztásban: {resources}",
+      "suggestion": "Adja meg az árfolyamot a projekt pénznem-beállításaiban, majd generálja újra a költségvetést"
     },
     "unknown_type": {
       "fail": "A(z) {line} kategóriája \"{category}\", ez nem költségnem",

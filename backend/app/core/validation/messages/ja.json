@@ -2952,8 +2952,8 @@
       "suggestion": "項目の資源を追加するか、金額を正しい原価区分に移してください"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} には、プロジェクト通貨への為替レートがない通貨で単価が設定された資源があるため、配分に含まれませんでした: {resources}",
+      "suggestion": "プロジェクト通貨の設定で為替レートを追加してから、予算を再生成してください"
     },
     "unknown_type": {
       "fail": "{line} の区分は「{category}」で、原価区分ではありません",

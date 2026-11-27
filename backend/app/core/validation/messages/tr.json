@@ -2952,8 +2952,8 @@
       "suggestion": "Pozun kaynaklarını ekleyin veya tutarı doğru maliyet türüne taşıyın"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} için proje para birimine çevrim kuru tanımlı olmayan bir para biriminde fiyatlanmış kaynaklar var, bu yüzden dağıtıma dahil edilmediler: {resources}",
+      "suggestion": "Proje para birimi ayarlarına döviz kurunu ekleyin, ardından bütçeyi yeniden oluşturun"
     },
     "unknown_type": {
       "fail": "{line} kategorisi \"{category}\", bu bir maliyet türü değil",

@@ -2952,8 +2952,8 @@
       "suggestion": "Dodajte resurse stavke ili premjestite iznos na pravu vrstu troška"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} ima resurse s cijenom u valuti bez tečaja prema valuti projekta, pa nisu sudjelovali u raspodjeli: {resources}",
+      "suggestion": "Dodajte tečaj u postavkama valute projekta, zatim ponovno generirajte proračun"
     },
     "unknown_type": {
       "fail": "{line} ima kategoriju \"{category}\", koja nije vrsta troška",

@@ -2952,8 +2952,8 @@
       "suggestion": "Lisage positsiooni ressursid või viige summa õigele kuluiigile"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "Real {line} on ressursid, mille hind on määratud valuutas, millel puudub vahetuskurss projekti valuutasse, seetõttu ei osalenud need jaotuses: {resources}",
+      "suggestion": "Lisage vahetuskurss projekti valuutaseadete alt ja seejärel genereerige eelarve uuesti"
     },
     "unknown_type": {
       "fail": "{line} kategooria on \"{category}\", mis ei ole kuluiik",

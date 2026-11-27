@@ -2952,8 +2952,8 @@
       "suggestion": "أضف موارد البند أو انقل المبلغ إلى نوع التكلفة الصحيح"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} يحتوي على موارد مسعّرة بعملة لا يوجد لها سعر صرف إلى عملة المشروع، لذلك لم تدخل في التوزيع: {resources}",
+      "suggestion": "أضف سعر الصرف من إعدادات عملة المشروع، ثم أعد توليد الميزانية"
     },
     "unknown_type": {
       "fail": "فئة {line} هي \"{category}\"، وهي ليست نوع تكلفة",
