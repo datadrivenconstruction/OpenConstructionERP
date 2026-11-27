@@ -15,7 +15,9 @@ What is pinned here:
   60 000 EUR it goes to both, lowest band first;
 * a line priced in another currency blocks submission, and an unpriced line is
   flagged as counting zero;
-* bands switched off restore the one-step approval.
+* bands switched off restore the one-step approval;
+* a band may name a role: any project manager but the requester decides it,
+  and a role that cannot approve requisitions is refused.
 """
 
 from __future__ import annotations
@@ -117,3 +119,32 @@ async def test_a_line_in_another_currency_blocks_and_bands_off_restore_one_step(
         submitted = await c.post(f"{REQ}/{created.json()['id']}/submit")
     assert submitted.status_code == 200, submitted.text
     assert submitted.json()["approval_chain"] == []
+
+
+async def test_a_role_band_is_decided_by_any_holder_of_the_role(world: World) -> None:
+    second = await _member_manager(world)
+    refused = await _set_bands(world, [{"from_amount": "5000", "roles": ["viewer"]}])
+    assert refused.status_code == 422, "a viewer cannot approve requisitions"
+    saved = await _set_bands(world, [{"from_amount": "5000", "roles": ["manager"]}])
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["approval_bands"]["bands"][0]["roles"] == ["manager"]
+
+    async with client_as(world, world.editor, "editor") as c:
+        created = await c.post(f"{REQ}/", json={**_body(world), "approval_chain": []})
+        rid = created.json()["id"]
+        submitted = await c.post(f"{REQ}/{rid}/submit")
+    assert submitted.status_code == 200, submitted.text
+    body = submitted.json()
+    assert [(s["user_id"], s["role"], s["band_from"]) for s in body["approval_chain"]] == [
+        ("role:manager", "manager", "5000")
+    ]
+    assert body["next_approver_id"] is None
+    assert body["next_approver_role"] == "manager"
+
+    async with client_as(world, second, "manager") as c:
+        approved = await c.post(f"{REQ}/{rid}/approve", json={})
+    assert approved.status_code == 200, approved.text
+    out = approved.json()
+    assert out["status"] == "approved"
+    assert out["approval_chain"][0]["state"] == "approved"
+    assert out["approval_chain"][0]["name"], "the step names the manager who decided it"

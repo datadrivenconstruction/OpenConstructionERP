@@ -69,6 +69,7 @@ from app.modules.procurement.approval_bands import (
     banded_chain,
     parse_bands,
     requisition_value,
+    role_of,
 )
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
 from app.modules.procurement.models import (
@@ -965,9 +966,36 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         step = int(req.approval_step or 0)
         return chain[step] if step < len(chain) else None
 
-    def _assert_designated(self, req: MaterialRequisition, user_id: str | None, action: str) -> None:
-        """With designated approvers, only the next one in the chain may decide."""
+    async def _assert_designated(self, req: MaterialRequisition, user_id: str | None, action: str) -> None:
+        """With designated approvers, only the next one in the chain may decide.
+
+        A role step (from a value band) is decided by any project member whose
+        role meets it, ranked as on a purchase order approval route, except the
+        requester, and never by someone who already decided a step this round.
+        """
         expected = self._next_designated(req)
+        role = role_of(expected)
+        if role is not None:
+            meta = req.metadata_ if isinstance(req.metadata_, dict) else {}
+            decided = {str(a.get("user_id")) for a in meta.get("approval_round") or [] if isinstance(a, dict)}
+            actor_role = await self._actor_role(user_id)
+            from app.modules.approval_routes.service import _caller_role_satisfies
+
+            if (
+                user_id is None
+                or str(user_id) == str(req.requester_id or "")
+                or str(user_id) in decided
+                or not _caller_role_satisfies(actor_role, role)
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        f"The next step of this requisition is for the role '{role}'. Only a project member "
+                        f"with that role who is not its requester and has not decided an earlier step may {action} "
+                        "it now."
+                    ),
+                )
+            return
         if expected is not None and str(user_id) != expected:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -975,6 +1003,18 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     f"This requisition has designated approvers. Only the next one in the chain may {action} it now."
                 ),
             )
+
+    async def _actor_role(self, user_id: str | None) -> str | None:
+        """The app role of the deciding user, or None when unknown."""
+        if not user_id:
+            return None
+        from app.modules.users.models import User
+
+        try:
+            uid = uuid.UUID(str(user_id))
+        except ValueError:
+            return None
+        return (await self.session.execute(select(User.role).where(User.id == uid))).scalar_one_or_none()
 
     async def approve(
         self,
@@ -1005,9 +1045,12 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         self._assert_not_own_submission(req, user_id, "approve")
         chain = [str(a) for a in (req.approval_chain or [])]
         step = int(req.approval_step or 0)
-        if chain and user_id and str(user_id) in chain[:step]:
+        round_ids = {
+            str(a.get("user_id")) for a in (req.metadata_ or {}).get("approval_round") or [] if isinstance(a, dict)
+        }
+        if chain and user_id and (str(user_id) in chain[:step] or str(user_id) in round_ids):
             return await self._reload(req.id)
-        self._assert_designated(req, user_id, "approve")
+        await self._assert_designated(req, user_id, "approve")
         report = await self.validate(req, operation="approve")
         if report.has_errors:
             raise HTTPException(
@@ -1057,7 +1100,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     "step": step + 1,
                     "of": len(chain),
                     "final": False,
-                    "next_approver_id": chain[step + 1],
+                    "next_approver_id": None if role_of(chain[step + 1]) else chain[step + 1],
+                    "next_approver_role": role_of(chain[step + 1]),
                 },
             )
             return await self._reload(req.id)
@@ -1096,7 +1140,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 detail="A rejection needs a comment that tells the requester what to change.",
             )
         self._assert_not_own_submission(req, user_id, "reject")
-        self._assert_designated(req, user_id, "reject")
+        await self._assert_designated(req, user_id, "reject")
         req.approver_id = user_id
         req.decided_at = datetime.now(UTC).isoformat()
         req.decision_comment = reason
@@ -1677,6 +1721,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                             RequisitionApprovalStep(user_id=str(a), name=names.get(str(a)), state="waiting")
                             for a in (b.get("approvers") or [])
                         ],
+                        roles=[str(r) for r in (b.get("roles") or [])],
                     )
                     for b in band_rows
                 ],
@@ -1722,6 +1767,32 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             await self._audit_settings(project_id, user_id, before, after)
         return await self.settings_response(project_id)
 
+    @staticmethod
+    def _validated_roles(raw: list[str]) -> list[str]:
+        """Band roles as stored: known app roles that may approve requisitions, each once."""
+        from app.core.permissions import permission_registry
+
+        roles = [str(r).strip().lower() for r in raw]
+        if len(set(roles)) != len(roles):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Each role may appear only once in a band.",
+            )
+        refused = [
+            r
+            for r in roles
+            if not r or not permission_registry.role_has_permission(r, "procurement.approve_requisition")
+        ]
+        if refused:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "These roles are unknown or cannot approve requisitions, so a band step on them could "
+                    f"never be decided: {', '.join(refused) or '(empty)'}."
+                ),
+            )
+        return roles
+
     async def _validated_bands(self, project_id: uuid.UUID, data: ApprovalBandsIn) -> dict[str, Any] | None:
         """Value bands as stored, or None when the list is empty (bands off).
 
@@ -1738,6 +1809,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             {
                 "from_amount": format(band.from_amount, "f"),
                 "approvers": await self._validated_chain(project_id, band.approvers),
+                "roles": self._validated_roles(band.roles),
             }
             for band in sorted(data.bands, key=lambda b: b.from_amount)
         ]
@@ -2268,6 +2340,8 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
     people: set[str] = {r.approver_id for r in reqs if r.approver_id}
     for r in reqs:
         people.update(str(a) for a in (r.approval_chain or []))
+        round_ = (r.metadata_ or {}).get("approval_round") if isinstance(r.metadata_, dict) else None
+        people.update(str(a.get("user_id")) for a in round_ or [] if isinstance(a, dict) and a.get("user_id"))
     user_names = await load_user_names(session, people)
     activities: dict[uuid.UUID, ScheduleActivityOption] = {}
     workflow = RequisitionWorkflowService(session)
@@ -2330,8 +2404,13 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
     routed = meta.get(APPROVAL_VALUE_KEY) if isinstance(meta.get(APPROVAL_VALUE_KEY), dict) else {}
     band_of = {str(k): str(v) for k, v in (routed.get("added") or {}).items()}
     steps: list[RequisitionApprovalStep] = []
+    by_step = {int(a.get("step") or 0): a for a in meta.get("approval_round") or [] if isinstance(a, dict)}
     for index, approver in enumerate(chain):
-        decided = done.get(approver) if index < step else None
+        role = role_of(approver)
+        if role is not None:
+            decided = by_step.get(index + 1) if index < step else None
+        else:
+            decided = done.get(approver) if index < step else None
         if index < step:
             state = "approved"
         elif index == step and req.status == "submitted":
@@ -2341,12 +2420,15 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
         steps.append(
             RequisitionApprovalStep(
                 user_id=approver,
-                name=ctx.user_names.get(approver),
+                name=ctx.user_names.get(str(decided.get("user_id")))
+                if role and decided
+                else ctx.user_names.get(approver),
                 state=state,
                 decided_at=decided.get("at") if decided else None,
                 comment=decided.get("comment") if decided else None,
                 band_from=band_of.get(approver),
                 band_currency=(str(routed.get("currency") or "") or None) if approver in band_of else None,
+                role=role,
             )
         )
     return steps
@@ -2473,7 +2555,9 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
     }
     history = (req.metadata_ or {}).get("history") if isinstance(req.metadata_, dict) else None
     vendor = ctx.vendors.get(req.vendor_id) if req.vendor_id else None
-    next_approver = RequisitionWorkflowService._next_designated(req) if req.status == "submitted" else None
+    next_step = RequisitionWorkflowService._next_designated(req) if req.status == "submitted" else None
+    next_role = role_of(next_step)
+    next_approver = None if next_role is not None else next_step
     return RequisitionResponse(
         id=req.id,
         project_id=req.project_id,
@@ -2503,6 +2587,7 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
         approval_chain=_approval_view(req, ctx),
         approval_step=int(req.approval_step or 0),
         next_approver_id=next_approver,
+        next_approver_role=next_role,
         row_version=int(req.row_version or 0),
         client_request_id=req.client_request_id,
         items=items,

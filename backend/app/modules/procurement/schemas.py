@@ -1356,6 +1356,8 @@ class RequisitionApprovalStep(BaseModel):
     #: Start of the value band that put this approver in the chain, or None for a designated one.
     band_from: str | None = None
     band_currency: str | None = None
+    #: Set on a role step: any project member whose role meets it decides; ``user_id`` is then ``role:<name>``.
+    role: str | None = None
 
 
 class RequisitionResponse(BaseModel):
@@ -1401,6 +1403,8 @@ class RequisitionResponse(BaseModel):
     approval_chain: list[RequisitionApprovalStep] = Field(default_factory=list)
     approval_step: int = 0
     next_approver_id: str | None = None
+    #: With a role step next, the role whose holders may decide now (``next_approver_id`` is then None).
+    next_approver_role: str | None = None
     row_version: int = 0
     client_request_id: str | None = None
     items: list[RequisitionItemResponse] = Field(default_factory=list)
@@ -1544,7 +1548,9 @@ class ApprovalBandIn(BaseModel):
     """One value band: from ``from_amount`` (inclusive) these approvers also sign, in order."""
 
     from_amount: Decimal = Field(..., gt=0, max_digits=18, decimal_places=2)
-    approvers: list[UUID] = Field(..., min_length=1, max_length=5)
+    approvers: list[UUID] = Field(default_factory=list, max_length=5)
+    #: App roles (e.g. ``manager``) whose holders may decide this band's step, after the people.
+    roles: list[str] = Field(default_factory=list, max_length=5)
 
 
 class ApprovalBandsIn(BaseModel):
@@ -1559,6 +1565,7 @@ class ApprovalBandOut(BaseModel):
 
     from_amount: str
     approvers: list[RequisitionApprovalStep] = Field(default_factory=list)
+    roles: list[str] = Field(default_factory=list)
 
 
 class ApprovalBandsOut(BaseModel):

@@ -16,6 +16,7 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
+from fastapi import HTTPException
 
 from app.core.validation.engine import Severity, ValidationContext
 from app.core.validation.rules import (
@@ -29,9 +30,16 @@ from app.modules.procurement.approval_bands import (
     banded_chain,
     parse_bands,
     requisition_value,
+    role_of,
 )
 from app.modules.procurement.models import MaterialRequisition
-from app.modules.procurement.requisition_service import APPROVAL_VALUE_KEY, ResponseContext, _approval_view
+from app.modules.procurement.permissions import register_procurement_permissions
+from app.modules.procurement.requisition_service import (
+    APPROVAL_VALUE_KEY,
+    RequisitionWorkflowService,
+    ResponseContext,
+    _approval_view,
+)
 
 PM = "00000000-0000-4000-8000-0000000000a1"
 DIRECTOR = "00000000-0000-4000-8000-0000000000a2"
@@ -159,3 +167,98 @@ def test_the_approval_view_names_the_band_that_added_an_approver() -> None:
     req.metadata_ = {APPROVAL_VALUE_KEY: {"value": "6818.700", "currency": "EUR", "added": {PM: "5000"}}}
     steps = _approval_view(req, ResponseContext())
     assert [(s.user_id, s.band_from) for s in steps] == [(BUYER, None), (PM, "5000")]
+
+
+class TestRoleApprovers:
+    """A band may name a role, as a purchase order approval route step can."""
+
+    def test_a_role_band_adds_a_role_step_after_its_people(self) -> None:
+        bands = parse_bands(
+            [
+                {"from_amount": "5000", "approvers": [PM]},
+                {"from_amount": "50000", "approvers": [], "roles": ["Manager"]},
+            ]
+        )
+        assert bands[1].approvers == ("role:manager",)
+        out = banded_chain([BUYER], bands, Decimal("72000"), excluded={REQUESTER})
+        assert out.chain == [BUYER, PM, "role:manager"]
+        assert out.added == {PM: "5000", "role:manager": "50000"}
+        assert role_of(out.chain[2]) == "manager"
+        assert role_of(PM) is None
+
+    def test_a_role_band_is_never_unmet_by_the_requester(self) -> None:
+        bands = parse_bands([{"from_amount": "5000", "approvers": [REQUESTER], "roles": ["manager"]}])
+        out = banded_chain([], bands, Decimal("6818.70"), excluded={REQUESTER})
+        assert out.chain == ["role:manager"]
+        assert out.unmet == []
+
+    def test_a_role_in_two_bands_is_refused(self) -> None:
+        with pytest.raises(BandError) as err:
+            parse_bands(
+                [
+                    {"from_amount": "5000", "roles": ["manager"]},
+                    {"from_amount": "50000", "roles": ["manager"]},
+                ]
+            )
+        assert err.value.code == "band_approver_repeated"
+
+    def test_a_band_counts_people_and_roles_together(self) -> None:
+        five = [f"00000000-0000-4000-8000-00000000010{n}" for n in range(5)]
+        with pytest.raises(BandError) as err:
+            parse_bands([{"from_amount": "5000", "approvers": five, "roles": ["manager"]}])
+        assert err.value.code == "band_approvers_count"
+        with pytest.raises(BandError) as err:
+            parse_bands([{"from_amount": "5000", "roles": [" "]}])
+        assert err.value.code == "band_role_invalid"
+
+    def test_settings_accept_roles_that_may_approve_and_refuse_the_rest(self) -> None:
+        register_procurement_permissions()
+        assert RequisitionWorkflowService._validated_roles([" Manager", "admin"]) == ["manager", "admin"]
+        for bad in (["viewer"], ["editor"], ["no_such_role"], ["manager", "manager"]):
+            with pytest.raises(HTTPException) as err:
+                RequisitionWorkflowService._validated_roles(bad)
+            assert err.value.status_code == 422
+
+    @pytest.mark.parametrize(
+        ("actor", "role", "allowed"),
+        [
+            (PM, "manager", True),
+            (PM, "admin", True),
+            (PM, "editor", False),
+            (REQUESTER, "manager", False),
+            (BUYER, "manager", False),
+        ],
+    )
+    async def test_a_role_step_is_decided_by_a_holder_other_than_the_requester_or_an_earlier_approver(
+        self, actor: str, role: str, allowed: bool
+    ) -> None:
+        req = MaterialRequisition(
+            status="submitted", approval_chain=[BUYER, "role:manager"], approval_step=1, requester_id=REQUESTER
+        )
+        req.metadata_ = {"approval_round": [{"user_id": BUYER, "step": 1}]}
+        service = RequisitionWorkflowService.__new__(RequisitionWorkflowService)
+
+        async def actor_role(_user_id: str | None) -> str:
+            return role
+
+        service._actor_role = actor_role  # type: ignore[method-assign]
+        if allowed:
+            await service._assert_designated(req, actor, "approve")
+        else:
+            with pytest.raises(HTTPException) as err:
+                await service._assert_designated(req, actor, "approve")
+            assert err.value.status_code == 403
+
+    def test_the_view_shows_who_decided_a_role_step_and_the_role_still_open(self) -> None:
+        req = MaterialRequisition(
+            status="submitted", approval_chain=["role:manager", "role:admin"], approval_step=1, requester_id=REQUESTER
+        )
+        req.metadata_ = {
+            "approval_round": [{"user_id": PM, "step": 1, "at": "2026-11-27T10:00:00+00:00"}],
+            APPROVAL_VALUE_KEY: {"currency": "EUR", "added": {"role:manager": "5000", "role:admin": "50000"}},
+        }
+        steps = _approval_view(req, ResponseContext(user_names={PM: "Project manager"}))
+        assert [(s.role, s.name, s.state, s.band_from) for s in steps] == [
+            ("manager", "Project manager", "approved", "5000"),
+            ("admin", None, "next", "50000"),
+        ]

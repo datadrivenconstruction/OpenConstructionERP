@@ -175,6 +175,8 @@ export interface RequisitionApprovalStep {
   /** Start of the value band that added this approver; absent for a designated one. */
   band_from?: string | null;
   band_currency?: string | null;
+  /** A role step: any project member with this role decides; ``user_id`` is then ``role:<name>``. */
+  role?: string | null;
 }
 
 export interface RequisitionOrderRef {
@@ -258,6 +260,8 @@ export interface Requisition {
   approval_step?: number;
   /** With designated approvers, the only person who may approve or reject now. */
   next_approver_id?: string | null;
+  /** With a role step next, the role whose holders may decide now. */
+  next_approver_role?: string | null;
   row_version?: number;
 }
 
@@ -317,6 +321,7 @@ export interface ConvertToPOResult {
 export interface ApprovalBand {
   from_amount: string;
   approvers: RequisitionApprovalStep[];
+  roles?: string[];
 }
 
 export interface ApprovalBands {
@@ -327,7 +332,12 @@ export interface ApprovalBands {
 export interface ApprovalBandDraft {
   from_amount: string;
   approvers: string[];
+  /** App roles whose holders may decide the band's step, after its people. */
+  roles?: string[];
 }
+
+/** Roles that may approve requisitions, offered as band approvers (mirrors the backend permission). */
+export const BAND_APPROVER_ROLES = ['manager', 'admin'] as const;
 
 export interface ProcurementSettings {
   project_id: string;
@@ -858,7 +868,7 @@ export function isPositiveDecimal(raw: string | null | undefined): boolean {
  * positive start or without an approver, starts that do not rise, an approver
  * in two bands, or a currency that is not a three-letter code.
  */
-export type BandDraftProblem = 'currency' | 'amount' | 'approvers' | 'order' | 'repeated';
+export type BandDraftProblem = 'currency' | 'amount' | 'approvers' | 'too_many' | 'order' | 'repeated';
 
 export function bandDraftProblem(currency: string, bands: ApprovalBandDraft[]): BandDraftProblem | null {
   if (bands.length === 0) return null;
@@ -867,9 +877,11 @@ export function bandDraftProblem(currency: string, bands: ApprovalBandDraft[]): 
   let previous: number | null = null;
   for (const band of bands) {
     if (!isPositiveDecimal(band.from_amount)) return 'amount';
-    if (band.approvers.length === 0) return 'approvers';
-    if (band.approvers.some((a) => seen.has(a))) return 'repeated';
-    band.approvers.forEach((a) => seen.add(a));
+    const entries = [...band.approvers, ...(band.roles ?? []).map((r) => `role:${r}`)];
+    if (entries.length === 0) return 'approvers';
+    if (entries.length > 5) return 'too_many';
+    if (entries.some((a) => seen.has(a)) || new Set(entries).size !== entries.length) return 'repeated';
+    entries.forEach((a) => seen.add(a));
     // Starts are compared as numbers only for order; the exact text is what is sent.
     const start = Number(band.from_amount.trim());
     if (previous !== null && start <= previous) return 'order';
