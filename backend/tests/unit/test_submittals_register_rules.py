@@ -40,6 +40,9 @@ REGISTER_RULE_IDS = {
     "submittal.long_lead_has_lead_time",
     "submittal.approval_needed_by_not_passed",
     "submittal.material_has_manufacturer",
+    "submittal.ball_in_court_assigned",
+    "submittal.distribution_present",
+    "submittal.people_have_project_access",
 }
 
 
@@ -59,6 +62,8 @@ def _submittal(**overrides: object) -> dict:
         "spec_section": "23 64 00",
         "reviewer_id": REVIEWER,
         "approver_id": APPROVER,
+        "ball_in_court": REVIEWER,
+        "distribution_list": [APPROVER],
         "date_submitted": "2026-10-01",
         "date_required": "2026-10-20",
         "current_revision": 1,
@@ -242,6 +247,33 @@ class TestMaterialHasManufacturer:
         assert (
             checks.check_material_has_manufacturer(_submittal(submittal_type=submittal_type, manufacturer=None)) == []
         )
+
+
+class TestBallInCourtAndDistribution:
+    def test_an_open_submittal_with_a_ball_holder_and_a_list_passes(self) -> None:
+        assert checks.check_ball_in_court_assigned(_submittal()) == []
+        assert checks.check_distribution_present(_submittal()) == []
+
+    @pytest.mark.parametrize("status", ["submitted", "under_review"])
+    def test_an_open_submittal_with_nobody_holding_the_ball_is_flagged(self, status: str) -> None:
+        assert len(checks.check_ball_in_court_assigned(_submittal(status=status, ball_in_court=None))) == 1
+
+    @pytest.mark.parametrize("status", ["submitted", "under_review"])
+    def test_an_open_submittal_with_an_empty_distribution_is_flagged(self, status: str) -> None:
+        assert len(checks.check_distribution_present(_submittal(status=status, distribution_list=[]))) == 1
+        assert len(checks.check_distribution_present(_submittal(status=status, distribution_list=None))) == 1
+
+    @pytest.mark.parametrize("status", ["draft", "approved", "closed", "rejected"])
+    def test_a_submittal_that_is_not_open_is_not_chased(self, status: str) -> None:
+        loose = _submittal(status=status, ball_in_court=None, distribution_list=[])
+        assert checks.check_ball_in_court_assigned(loose) == []
+        assert checks.check_distribution_present(loose) == []
+
+    def test_people_without_project_access_are_flagged_with_their_count(self) -> None:
+        assert checks.check_people_have_project_access(_submittal()) == []
+        findings = checks.check_people_have_project_access(_submittal(people_without_access=[REVIEWER, APPROVER]))
+        assert len(findings) == 1
+        assert findings[0].params == {"count": "2"}
 
 
 # ── Engine contract ───────────────────────────────────────────────────────

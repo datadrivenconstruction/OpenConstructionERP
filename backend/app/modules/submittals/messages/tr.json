@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Bu malzeme onay belgesinde üretici belirtilmemiş; inceleyenin onaylayacağı bir ürün yok",
       "suggestion": "Önerilen üreticiyi veya markayı girin"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Bu açık onay belgesinde top kimsede değil; işlem yapacak kişinin listesinde yer almıyor",
+      "suggestion": "Sıradaki işlemi yapacak kişiyi top sahibi olarak atayın"
+    },
+    "distribution_present": {
+      "fail": "Bu açık onay belgesinin dağıtım listesi boş; kimseye bilgi için iletilmiyor",
+      "suggestion": "Belgeyi alması gereken kişileri dağıtım listesine ekleyin"
+    },
+    "people_have_project_access": {
+      "fail": "Top sahibi veya dağıtım listesinde adı geçen {count} kişi bu projeyi açamıyor",
+      "suggestion": "Onlara projeye erişim verin veya belgeden çıkarın"
     }
   }
 }

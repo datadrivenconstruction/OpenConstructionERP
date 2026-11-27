@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Den här materialinlämningen anger ingen tillverkare, så granskaren har ingen produkt att godkänna",
       "suggestion": "Ange tillverkaren eller varumärket som erbjuds"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Ingen har bollen på denna öppna submittal, så den ligger inte på någons lista för nästa åtgärd",
+      "suggestion": "Utse den person som ska agera härnäst som 'bollen hos' (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Denna öppna submittal har en tom distributionslista, så ingen informeras om den för kännedom",
+      "suggestion": "Lägg till de personer som ska ta emot den i distributionslistan"
+    },
+    "people_have_project_access": {
+      "fail": "Personer som är angivna som 'bollen hos' eller på distributionslistan (antal: {count}) kan inte öppna projektet",
+      "suggestion": "Ge dem åtkomst till projektet eller ta bort dem från submittalen"
     }
   }
 }

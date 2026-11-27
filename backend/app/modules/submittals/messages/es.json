@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Este documento de material no indica ningún fabricante, por lo que el revisor no tiene ningún producto que aprobar",
       "suggestion": "Introduzca el fabricante o la marca que se ofrece"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Nadie tiene el turno en este envío abierto, así que no aparece en la lista de nadie para actuar",
+      "suggestion": "Asigne como responsable en turno a la persona que debe actuar a continuación"
+    },
+    "distribution_present": {
+      "fail": "Este envío abierto tiene la lista de distribución vacía, así que nadie recibe aviso para su conocimiento",
+      "suggestion": "Añada a la lista de distribución a las personas que deben recibirlo"
+    },
+    "people_have_project_access": {
+      "fail": "{count} persona(s) indicada(s) como responsable en turno o en la lista de distribución no pueden abrir este proyecto",
+      "suggestion": "Dé acceso al proyecto a estas personas o retírelas del envío"
     }
   }
 }

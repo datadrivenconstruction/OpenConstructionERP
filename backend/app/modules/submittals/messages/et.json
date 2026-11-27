@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Selles materjali esituses pole tootjat nimetatud, seega ei ole kontrollijal toodet, mida kinnitada",
       "suggestion": "Sisestage pakutav tootja või kaubamärk"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Sellel avatud esitusel pole kellelgi palli, seega pole see ühegi inimese järgmise tegevuse nimekirjas",
+      "suggestion": "Määrake isik, kes peab järgmisena tegutsema, palli omanikuks"
+    },
+    "distribution_present": {
+      "fail": "Sellel avatud esitusel on jaotusnimekiri tühi, seega ei teavitata kedagi selle kohta",
+      "suggestion": "Lisage jaotusnimekirja inimesed, kes peaksid selle saama"
+    },
+    "people_have_project_access": {
+      "fail": "Palli omanikuks või jaotusnimekirja määratud isikutel (arv: {count}) pole sellele projektile juurdepääsu",
+      "suggestion": "Andke neile projektile juurdepääs või eemaldage nad esitusest"
     }
   }
 }

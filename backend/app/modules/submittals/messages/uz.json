@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Bu material taqdimotida ishlab chiqaruvchi ko'rsatilmagan, shuning uchun tekshiruvchida tasdiqlash uchun mahsulot yo'q",
       "suggestion": "Taklif qilinayotgan ishlab chiqaruvchi yoki brendni kiriting"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Bu ochiq submittal'da hech kimda to'p yo'q, shuning uchun keyingi qadamni bajaruvchi hech kim ko'rsatilmagan",
+      "suggestion": "Keyingi qadamni bajarishi kerak bo'lgan shaxsni 'to'p uning qo'lida' (ball in court) deb belgilang"
+    },
+    "distribution_present": {
+      "fail": "Bu ochiq submittal'ning tarqatish ro'yxati bo'sh, shuning uchun uni ma'lumot uchun hech kimga yubormaydi",
+      "suggestion": "Uni olishi kerak bo'lgan shaxslarni tarqatish ro'yxatiga qo'shing"
+    },
+    "people_have_project_access": {
+      "fail": "'To'p uning qo'lida' yoki tarqatish ro'yxatida ko'rsatilgan shaxslar (soni: {count}) bu loyihani ocha olmaydi",
+      "suggestion": "Ularga loyihaga kirish huquqini bering yoki submittal'dan olib tashlang"
     }
   }
 }

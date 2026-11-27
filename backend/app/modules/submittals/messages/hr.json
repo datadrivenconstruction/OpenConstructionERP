@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Ovaj podnesak materijala ne navodi proizvođača, pa revident nema proizvod koji bi odobrio",
       "suggestion": "Unesite ponuđenog proizvođača ili marku"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Nitko nema loptu na ovom otvorenom submittalu, pa nije ni na čijem popisu za sljedeću radnju",
+      "suggestion": "Dodijelite osobi koja sljedeće mora djelovati status 'na potezu' (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Ovaj otvoreni submittal ima prazan popis distribucije, pa nitko nije obaviješten o njemu radi informacije",
+      "suggestion": "Dodajte na popis distribucije osobe koje ga trebaju primiti"
+    },
+    "people_have_project_access": {
+      "fail": "Osobe navedene kao 'na potezu' ili na popisu distribucije (broj: {count}) ne mogu otvoriti ovaj projekt",
+      "suggestion": "Omogućite im pristup projektu ili ih uklonite iz submittala"
     }
   }
 }

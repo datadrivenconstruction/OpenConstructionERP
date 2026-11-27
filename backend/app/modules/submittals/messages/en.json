@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "This material submittal names no manufacturer, so the reviewer has no product to approve",
       "suggestion": "Enter the manufacturer or brand being offered"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Nobody holds the ball on this open submittal, so it is on no one's list to act on",
+      "suggestion": "Assign the person who has to act next as ball in court"
+    },
+    "distribution_present": {
+      "fail": "This open submittal has an empty distribution list, so nobody is told about it for information",
+      "suggestion": "Add the people who should receive it to the distribution list"
+    },
+    "people_have_project_access": {
+      "fail": "{count} person(s) named as ball in court or on the distribution list cannot open this project",
+      "suggestion": "Give them access to the project or take them off the submittal"
     }
   }
 }

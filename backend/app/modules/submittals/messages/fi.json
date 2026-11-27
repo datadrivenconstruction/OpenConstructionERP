@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Tämä materiaalin asiakirja ei nimeä valmistajaa, joten tarkastajalla ei ole tuotetta hyväksyttäväksi",
       "suggestion": "Syötä tarjottu valmistaja tai merkki"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Tässä avoimessa dokumentissa ei ole vuorossa ketään, joten se ei kuulu kenenkään seuraaviin toimiin",
+      "suggestion": "Merkitse seuraavaksi toimivaksi osapuoleksi se henkilö, jonka on toimittava"
+    },
+    "distribution_present": {
+      "fail": "Tällä avoimella dokumentilla on tyhjä jakelulista, joten kukaan ei saa siitä tiedoksi ilmoitusta",
+      "suggestion": "Lisää jakelulistalle ne henkilöt, joiden pitäisi saada dokumentti"
+    },
+    "people_have_project_access": {
+      "fail": "Vuorossa tai jakelulistalla olevilla henkilöillä (määrä: {count}) ei ole pääsyä tähän projektiin",
+      "suggestion": "Anna heille pääsy projektiin tai poista heidät dokumentilta"
     }
   }
 }

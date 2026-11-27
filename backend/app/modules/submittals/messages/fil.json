@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Walang nakasaad na manufacturer sa submittal ng materyal na ito, kaya walang produktong maaaprubahan ang reviewer",
       "suggestion": "Ilagay ang manufacturer o brand na iniaalok"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Walang may hawak ng bola sa bukas na submittal na ito, kaya walang nakatalang kikilos sa susunod",
+      "suggestion": "Italaga ang taong dapat kumilos sa susunod bilang may hawak ng bola (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Walang laman ang distribution list ng bukas na submittal na ito, kaya walang naaabisuhan para sa kaalaman",
+      "suggestion": "Idagdag sa distribution list ang mga taong dapat tumanggap nito"
+    },
+    "people_have_project_access": {
+      "fail": "Hindi mabubuksan ang proyektong ito ng mga taong nakatala bilang may hawak ng bola o sa distribution list (bilang: {count})",
+      "suggestion": "Bigyan sila ng access sa proyekto o alisin sila sa submittal"
     }
   }
 }

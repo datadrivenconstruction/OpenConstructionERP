@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Deze materiaalinzending noemt geen fabrikant, dus de beoordelaar heeft geen product om goed te keuren",
       "suggestion": "Voer de voorgestelde fabrikant of het merk in"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Niemand heeft de bal bij deze openstaande submittal, dus hij staat bij niemand op de lijst voor de volgende actie",
+      "suggestion": "Wijs de persoon die als volgende moet handelen aan als 'bal bij' (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Deze openstaande submittal heeft een lege verdeellijst, dus niemand wordt er ter informatie over ingelicht",
+      "suggestion": "Voeg de personen die hem moeten ontvangen toe aan de verdeellijst"
+    },
+    "people_have_project_access": {
+      "fail": "Personen die als 'bal bij' of op de verdeellijst staan (aantal: {count}) kunnen dit project niet openen",
+      "suggestion": "Geef hen toegang tot het project of haal hen van de submittal af"
     }
   }
 }

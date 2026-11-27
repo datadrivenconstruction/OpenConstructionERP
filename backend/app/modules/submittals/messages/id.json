@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Submittal material ini tidak mencantumkan produsen, sehingga peninjau tidak memiliki produk untuk disetujui",
       "suggestion": "Masukkan produsen atau merek yang ditawarkan"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Tidak ada yang sedang memegang bola pada submittal terbuka ini, sehingga tidak ada yang bertugas untuk tindakan berikutnya",
+      "suggestion": "Tetapkan orang yang harus bertindak berikutnya sebagai pemegang bola (ball in court)"
+    },
+    "distribution_present": {
+      "fail": "Daftar distribusi submittal terbuka ini kosong, sehingga tidak ada yang diberi tahu untuk informasi",
+      "suggestion": "Tambahkan orang yang seharusnya menerima ke daftar distribusi"
+    },
+    "people_have_project_access": {
+      "fail": "Orang yang ditetapkan sebagai pemegang bola atau ada di daftar distribusi (jumlah: {count}) tidak dapat membuka proyek ini",
+      "suggestion": "Berikan mereka akses ke proyek atau hapus dari submittal"
     }
   }
 }

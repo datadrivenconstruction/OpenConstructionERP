@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "Dette materialeindlæg angiver ingen producent, så granskeren har intet produkt at godkende",
       "suggestion": "Angiv den producent eller det mærke, der tilbydes"
+    },
+    "ball_in_court_assigned": {
+      "fail": "Ingen har bolden på dette åbne submittal, så ingen er sat til at handle næste gang",
+      "suggestion": "Tildel den person, der skal handle næste gang, som 'bold på banen'"
+    },
+    "distribution_present": {
+      "fail": "Dette åbne submittal har en tom distributionsliste, så ingen får besked om det til orientering",
+      "suggestion": "Tilføj de personer, der skal modtage det, til distributionslisten"
+    },
+    "people_have_project_access": {
+      "fail": "{count} person(er), der er angivet som 'bold på banen' eller på distributionslisten, kan ikke åbne dette projekt",
+      "suggestion": "Giv dem adgang til projektet, eller fjern dem fra submittalet"
     }
   }
 }

@@ -96,3 +96,33 @@ async def test_distribution_list_is_saved_and_listed(db_session) -> None:  # noq
         assert listed[0]["distribution_list"] == [other]
         bad = await client.patch(f"/v1/submittals/{created['id']}", json={"distribution_list": [str(uuid.uuid4())[:5]]})
         assert bad.status_code == 422, bad.text
+
+
+@pytest.mark.asyncio
+async def test_validation_reports_people_who_cannot_open_the_project(db_session) -> None:  # noqa: F811
+    from app.core.validation.rules import register_builtin_rules
+    from app.modules.submittals.rules import register_submittal_register_rules
+    from app.modules.submittals.service import SubmittalService
+
+    register_builtin_rules()
+    register_submittal_register_rules()
+    owner = await _make_user(db_session)
+    stranger = await _make_user(db_session)
+    project = await _make_project(db_session, owner)
+    async with _client(db_session, owner) as client:
+        sub = await _submitted(client, project, reviewer_id=owner)
+        ok = await SubmittalService(db_session).validate_submittal(uuid.UUID(sub["id"]))
+        rows = {r["rule_id"]: r for r in ok["results"]}
+        assert (
+            rows["submittal.people_have_project_access"]["severity"]
+            and rows["submittal.people_have_project_access"]["passed"]
+        )
+        assert not rows["submittal.distribution_present"]["passed"]
+        await client.patch(
+            f"/v1/submittals/{sub['id']}", json={"ball_in_court": stranger, "distribution_list": [owner, stranger]}
+        )
+        bad = await SubmittalService(db_session).validate_submittal(uuid.UUID(sub["id"]))
+        rows = {r["rule_id"]: r for r in bad["results"]}
+        assert not rows["submittal.people_have_project_access"]["passed"]
+        assert rows["submittal.ball_in_court_assigned"]["passed"]
+        assert rows["submittal.distribution_present"]["passed"]

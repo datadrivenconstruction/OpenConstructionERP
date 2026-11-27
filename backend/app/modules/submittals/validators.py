@@ -397,3 +397,39 @@ def check_material_has_manufacturer(submittal: dict[str, Any]) -> list[Finding]:
     if str(submittal.get("manufacturer") or "").strip():
         return []
     return [Finding(element_ref=_ref(submittal), details={"manufacturer": None})]
+
+
+#: A submittal somebody still has to act on.
+OPEN_STATUSES = frozenset({"submitted", "under_review"})
+
+
+def check_ball_in_court_assigned(submittal: dict[str, Any]) -> list[Finding]:
+    """An open submittal must say whose turn it is."""
+    if submittal.get("status") not in OPEN_STATUSES:
+        return []
+    if str(submittal.get("ball_in_court") or "").strip():
+        return []
+    return [Finding(element_ref=_ref(submittal), details={"ball_in_court": None})]
+
+
+def check_distribution_present(submittal: dict[str, Any]) -> list[Finding]:
+    """An open submittal should say who receives it for information."""
+    if submittal.get("status") not in OPEN_STATUSES:
+        return []
+    listed = submittal.get("distribution_list")
+    if isinstance(listed, list) and any(str(u or "").strip() for u in listed):
+        return []
+    return [Finding(element_ref=_ref(submittal), details={"distribution_list": []})]
+
+
+def check_people_have_project_access(submittal: dict[str, Any]) -> list[Finding]:
+    """Whoever holds the ball or receives the submittal must be able to open the project.
+
+    The service looks the access up (the rule never touches the database) and
+    hands over the user ids that have none as ``people_without_access``.
+    """
+    raw = submittal.get("people_without_access")
+    people = [str(u) for u in raw if str(u or "").strip()] if isinstance(raw, list) else []
+    if not people:
+        return []
+    return [Finding(element_ref=_ref(submittal), params={"count": str(len(people))}, details={"user_ids": people})]

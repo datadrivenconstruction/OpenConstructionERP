@@ -23,6 +23,18 @@
     "material_has_manufacturer": {
       "fail": "该材料送审资料未填写生产厂家，因此审核人没有可供批准的产品",
       "suggestion": "填写拟用的生产厂家或品牌"
+    },
+    "ball_in_court_assigned": {
+      "fail": "此未关闭的送审单当前无人持有“球”，因此没有人被指定为下一步的处理人",
+      "suggestion": "将需要下一步处理的人员指定为“球在其手中”（ball in court）"
+    },
+    "distribution_present": {
+      "fail": "此未关闭的送审单分发列表为空，因此没有人收到知会通知",
+      "suggestion": "将应收到该送审单的人员添加到分发列表"
+    },
+    "people_have_project_access": {
+      "fail": "被指定为“球在其手中”或列在分发列表中的人员（人数：{count}）无法打开此项目",
+      "suggestion": "为其授予项目访问权限，或将其从送审单中移除"
     }
   }
 }
