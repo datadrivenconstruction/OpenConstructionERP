@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "この仕入先の請求書番号 {invoice} はすでに入力されています",
+      "fail_other_project": "この仕入先の請求書番号 {invoice} は別のプロジェクトですでに入力されています",
       "suggestion": "以前の請求書を開いてください。同じ書類であればこちらを取り消してください"
     },
     "possible_duplicate": {

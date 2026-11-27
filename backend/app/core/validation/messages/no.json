@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Fakturanummer {invoice} fra denne leverandøren er allerede registrert",
+      "fail_other_project": "Fakturanummer {invoice} fra denne leverandøren er allerede registrert i et annet prosjekt",
       "suggestion": "Åpne den tidligere fakturaen; kanseller denne hvis det er samme dokument"
     },
     "possible_duplicate": {

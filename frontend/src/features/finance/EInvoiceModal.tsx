@@ -30,7 +30,7 @@ import { EInvoiceCard } from '@/features/einvoice-clearance/EInvoiceCard';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Download, Info, ShieldAlert, Upload } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, ShieldAlert, Upload } from 'lucide-react';
 import { WideModal, WideModalSection, WideModalField } from '@/shared/ui/WideModal';
 import { Button } from '@/shared/ui';
 import { downloadWithAuth, getErrorMessage } from '@/shared/lib/api';
@@ -398,7 +398,7 @@ export function EInvoiceModal({
             loading={downloading === 'xml'}
             aria-describedby={blockedReason ? 'einvoice-blocked-reason' : undefined}
           >
-            <Download size={14} className="mr-1.5" />
+            <Upload size={14} className="mr-1.5" />
             {isTr ? t('einvoice.tr.download') : t('finance.einvoice.downloadXml')}
           </Button>
         </div>

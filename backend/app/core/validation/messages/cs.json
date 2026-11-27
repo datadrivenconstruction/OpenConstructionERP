@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Číslo faktury {invoice} od tohoto dodavatele již bylo zadáno",
+      "fail_other_project": "Číslo faktury {invoice} od tohoto dodavatele již bylo zadáno v jiném projektu",
       "suggestion": "Otevřete dřívější fakturu; tuto zrušte, pokud jde o stejný doklad"
     },
     "possible_duplicate": {

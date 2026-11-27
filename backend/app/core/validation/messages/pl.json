@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Numer faktury {invoice} od tego dostawcy został już wprowadzony",
+      "fail_other_project": "Numer faktury {invoice} od tego dostawcy został już wprowadzony w innym projekcie",
       "suggestion": "Otwórz wcześniejszą fakturę; anuluj tę, jeśli to ten sam dokument"
     },
     "possible_duplicate": {

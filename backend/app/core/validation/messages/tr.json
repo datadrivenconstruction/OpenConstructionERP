@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Bu tedarikçinin {invoice} numaralı faturası zaten girilmiş",
+      "fail_other_project": "Bu tedarikçinin {invoice} numaralı faturası başka bir projede zaten girilmiş",
       "suggestion": "Önceki faturayı açın; aynı belgeyse bunu iptal edin"
     },
     "possible_duplicate": {

@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "מספר החשבונית {invoice} מספק זה כבר הוזן",
+      "fail_other_project": "מספר החשבונית {invoice} מספק זה כבר הוזן בפרויקט אחר",
       "suggestion": "פתחו את החשבונית הקודמת; בטלו את זו אם זה אותו מסמך"
     },
     "possible_duplicate": {

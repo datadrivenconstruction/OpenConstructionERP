@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Le numéro de facture {invoice} de ce fournisseur a déjà été saisi",
+      "fail_other_project": "Le numéro de facture {invoice} de ce fournisseur a déjà été saisi dans un autre projet",
       "suggestion": "Ouvrez la facture précédente ; annulez celle-ci s'il s'agit du même document"
     },
     "possible_duplicate": {

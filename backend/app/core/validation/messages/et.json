@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Selle tarnija arve number {invoice} on juba sisestatud",
+      "fail_other_project": "Selle tarnija arve number {invoice} on juba sisestatud teises projektis",
       "suggestion": "Avage varasem arve; tühistage see, kui tegemist on sama dokumendiga"
     },
     "possible_duplicate": {

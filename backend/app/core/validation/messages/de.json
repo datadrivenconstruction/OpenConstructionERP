@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Die Rechnungsnummer {invoice} dieses Lieferanten wurde bereits erfasst",
+      "fail_other_project": "Die Rechnungsnummer {invoice} dieses Lieferanten wurde bereits in einem anderen Projekt erfasst",
       "suggestion": "Öffnen Sie die frühere Rechnung; stornieren Sie diese, wenn es dasselbe Dokument ist"
     },
     "possible_duplicate": {

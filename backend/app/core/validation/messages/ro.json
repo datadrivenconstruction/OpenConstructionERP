@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Numărul de factură {invoice} de la acest furnizor a fost deja înregistrat",
+      "fail_other_project": "Numărul de factură {invoice} de la acest furnizor a fost deja înregistrat într-un alt proiect",
       "suggestion": "Deschideți factura anterioară; anulați-o pe aceasta dacă este același document"
     },
     "possible_duplicate": {

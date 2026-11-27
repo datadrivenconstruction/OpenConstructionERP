@@ -73,6 +73,7 @@ class Finding:
 
     params: dict[str, Any]
     details: dict[str, Any] = field(default_factory=dict)
+    message_key: str = ""
 
 
 def _ref(payload: dict[str, Any]) -> str:
@@ -180,9 +181,20 @@ def check_duplicate_number(payload: dict[str, Any]) -> list[Finding]:
     if not normalise_number(number) or is_generated_number(number):
         return []
     clashes = [str(n) for n in payload.get("same_number") or []]
-    if not clashes:
-        return []
-    return [Finding(params={"invoice": _ref(payload)}, details={"other_invoice_ids": clashes})]
+    elsewhere = int(payload.get("same_number_other_project") or 0)
+    found: list[Finding] = []
+    if clashes:
+        found.append(Finding(params={"invoice": _ref(payload)}, details={"other_invoice_ids": clashes}))
+    if elsewhere:
+        # No id, number or project of the other invoice: the reader may have no access to that project.
+        found.append(
+            Finding(
+                params={"invoice": _ref(payload)},
+                details={"other_project_count": elsewhere},
+                message_key=f"{RULE_SET}.duplicate_number.fail_other_project",
+            )
+        )
+    return found
 
 
 def check_possible_duplicate(payload: dict[str, Any]) -> list[Finding]:
@@ -318,7 +330,7 @@ class _PostingRule(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=False,
-                message=translate(f"{self.rule_id}.fail", locale=locale, **finding.params),
+                message=translate(finding.message_key or f"{self.rule_id}.fail", locale=locale, **finding.params),
                 element_ref=ref,
                 details=dict(finding.details),
                 suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),

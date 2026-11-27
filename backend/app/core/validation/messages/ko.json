@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "이 공급업체의 송장 번호 {invoice}이(가) 이미 입력되어 있습니다",
+      "fail_other_project": "이 공급업체의 송장 번호 {invoice}이(가) 다른 프로젝트에 이미 입력되어 있습니다",
       "suggestion": "이전 송장을 여십시오. 같은 문서라면 이 송장을 취소하십시오"
     },
     "possible_duplicate": {

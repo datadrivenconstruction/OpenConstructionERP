@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Factuurnummer {invoice} van deze leverancier is al ingevoerd",
+      "fail_other_project": "Factuurnummer {invoice} van deze leverancier is al ingevoerd in een ander project",
       "suggestion": "Open de eerdere factuur; annuleer deze als het hetzelfde document is"
     },
     "possible_duplicate": {

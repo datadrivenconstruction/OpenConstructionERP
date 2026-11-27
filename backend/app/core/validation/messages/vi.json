@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Số hóa đơn {invoice} của nhà cung cấp này đã được nhập",
+      "fail_other_project": "Số hóa đơn {invoice} của nhà cung cấp này đã được nhập trong dự án khác",
       "suggestion": "Mở hóa đơn trước đó; hủy hóa đơn này nếu là cùng một chứng từ"
     },
     "possible_duplicate": {

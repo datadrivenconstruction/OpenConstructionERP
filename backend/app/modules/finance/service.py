@@ -1489,12 +1489,19 @@ class FinanceService:
         )
 
         same_number: list[str] = []
+        same_number_elsewhere = 0
         same_amount_date: list[str] = []
         contact_id = state.get("contact_id")
         if contact_id and state.get("invoice_direction", "payable") == "payable":
             rows = (
                 await self.session.execute(
-                    select(Invoice.id, Invoice.invoice_number, Invoice.amount_total, Invoice.invoice_date).where(
+                    select(
+                        Invoice.id,
+                        Invoice.invoice_number,
+                        Invoice.amount_total,
+                        Invoice.invoice_date,
+                        Invoice.project_id,
+                    ).where(
                         Invoice.contact_id == str(contact_id),
                         Invoice.invoice_direction == "payable",
                         Invoice.status.notin_(("cancelled", "credit_note_issued")),
@@ -1504,19 +1511,27 @@ class FinanceService:
             number = normalise_number(state.get("invoice_number"))
             total = _invoice_amount(payload["amount_total"])
             day = str(state.get("invoice_date") or "")[:10]
-            for row_id, row_number, row_total, row_date in rows:
+            here = str(state.get("project_id") or "")
+            for row_id, row_number, row_total, row_date, row_project in rows:
                 if row_id == exclude_invoice_id:
                     continue
+                on_this_project = bool(here) and str(row_project) == here
                 if number and normalise_number(row_number) == number:
-                    same_number.append(str(row_id))
+                    # An invoice of another project is counted, never named: the caller may not see that project.
+                    if on_this_project:
+                        same_number.append(str(row_id))
+                    else:
+                        same_number_elsewhere += 1
                 elif (
-                    day
+                    on_this_project
+                    and day
                     and str(row_date or "")[:10] == day
                     and total is not None
                     and _invoice_amount(row_total) == total
                 ):
                     same_amount_date.append(str(row_number))
         payload["same_number"] = same_number
+        payload["same_number_other_project"] = same_number_elsewhere
         payload["same_amount_date"] = same_amount_date
         return payload, commitment
 

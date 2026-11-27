@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "El número de factura {invoice} de este proveedor ya se ha registrado",
+      "fail_other_project": "El número de factura {invoice} de este proveedor ya se ha registrado en otro proyecto",
       "suggestion": "Abra la factura anterior; cancele esta si es el mismo documento"
     },
     "possible_duplicate": {

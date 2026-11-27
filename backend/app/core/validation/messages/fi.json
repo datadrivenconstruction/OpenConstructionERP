@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Tämän toimittajan laskunumero {invoice} on jo kirjattu",
+      "fail_other_project": "Tämän toimittajan laskunumero {invoice} on jo kirjattu toiseen projektiin",
       "suggestion": "Avaa aiempi lasku; peru tämä, jos kyseessä on sama asiakirja"
     },
     "possible_duplicate": {

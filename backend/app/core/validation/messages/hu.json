@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Ennek a szállítónak a(z) {invoice} számú számláját már rögzítették",
+      "fail_other_project": "Ennek a szállítónak a(z) {invoice} számú számláját már rögzítették egy másik projektben",
       "suggestion": "Nyissa meg a korábbi számlát; törölje ezt, ha ugyanaz a bizonylat"
     },
     "possible_duplicate": {

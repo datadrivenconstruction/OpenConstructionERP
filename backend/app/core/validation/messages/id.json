@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Nomor faktur {invoice} dari pemasok ini sudah dimasukkan",
+      "fail_other_project": "Nomor faktur {invoice} dari pemasok ini sudah dimasukkan di proyek lain",
       "suggestion": "Buka faktur sebelumnya; batalkan yang ini jika dokumennya sama"
     },
     "possible_duplicate": {

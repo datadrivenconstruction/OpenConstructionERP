@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Broj računa {invoice} ovog dobavljača već je unesen",
+      "fail_other_project": "Broj računa {invoice} ovog dobavljača već je unesen u drugom projektu",
       "suggestion": "Otvorite raniji račun; poništite ovaj ako je riječ o istom dokumentu"
     },
     "possible_duplicate": {

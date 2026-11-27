@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Ushbu yetkazib beruvchining {invoice} raqamli hisobi allaqachon kiritilgan",
+      "fail_other_project": "Ushbu yetkazib beruvchining {invoice} raqamli hisobi boshqa loyihada allaqachon kiritilgan",
       "suggestion": "Oldingi hisobni oching; agar bu o'sha hujjat bo'lsa, buni bekor qiling"
     },
     "possible_duplicate": {

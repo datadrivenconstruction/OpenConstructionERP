@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "该供应商的发票号 {invoice} 已录入",
+      "fail_other_project": "该供应商的发票号 {invoice} 已在其他项目中录入",
       "suggestion": "请打开先前的发票；如为同一单据，请作废本张"
     },
     "possible_duplicate": {

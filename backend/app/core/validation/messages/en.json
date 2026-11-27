@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Invoice number {invoice} from this supplier has already been entered",
+      "fail_other_project": "Invoice number {invoice} from this supplier is already registered on another project.",
       "suggestion": "Open the earlier invoice; cancel this one if it is the same document"
     },
     "possible_duplicate": {

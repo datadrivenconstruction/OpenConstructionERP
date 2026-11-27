@@ -2978,6 +2978,7 @@
     },
     "duplicate_number": {
       "fail": "Naipasok na ang invoice number {invoice} mula sa supplier na ito",
+      "fail_other_project": "Naipasok na ang invoice number {invoice} mula sa supplier na ito sa ibang proyekto",
       "suggestion": "Buksan ang naunang invoice; kanselahin ito kung iisang dokumento"
     },
     "possible_duplicate": {
