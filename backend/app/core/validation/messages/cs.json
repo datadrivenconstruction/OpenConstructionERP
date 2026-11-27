@@ -825,6 +825,14 @@
       "fail": "Řádek {line} není propojen s nákladovou položkou, takže jeho objednávka se nezobrazí jako závazek vůči rozpočtu",
       "suggestion": "Vytvořte řádek z BOQ, nebo ho před objednáním propojte s nákladovou položkou"
     },
+    "requisition_value_band_currency": {
+      "fail": "Řádek {line} je oceněn v {currency}, ale hodnotové prahy schvalování jsou nastaveny v {band_currency}, takže jeho hodnota nemůže určit schvalovatele",
+      "suggestion": "Oceňte řádek v měně prahů nebo jej přesuňte do samostatného požadavku"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Řádek {line} nemá cenu, a proto se počítá jako nula v hodnotě, která určuje schvalovatele tohoto požadavku",
+      "suggestion": "Před odesláním zadejte jednotkovou cenu řádku"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Řádek {line} navrhuje dodavatele {vendor}, který není v adresáři dodavatelů",
       "suggestion": "Vyberte navrhovaného dodavatele z adresáře dodavatelů, nebo návrh smažte"

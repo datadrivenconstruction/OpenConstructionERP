@@ -825,6 +825,14 @@
       "fail": "Hindi nakakabit ang linya {line} sa isang cost line, kaya hindi lalabas ang order nito bilang committed sa budget",
       "suggestion": "Buuin ang linya mula sa BOQ, o ikabit ito sa isang cost line bago mag-order"
     },
+    "requisition_value_band_currency": {
+      "fail": "Ang linya {line} ay may presyo sa {currency}, pero ang mga hangganan ng halaga para sa pag-apruba ay nasa {band_currency}, kaya hindi matutukoy ng halaga nito ang mga aaprubahan",
+      "suggestion": "Lagyan ng presyo ang linya sa currency ng mga hangganan, o ilipat ito sa hiwalay na requisition"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Walang presyo ang linya {line}, kaya binibilang itong zero sa halagang nagpapasya kung sino ang mag-aapruba sa requisition na ito",
+      "suggestion": "Ilagay ang unit cost ng linya bago isumite"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Iminumungkahi ng linya {line} ang supplier na {vendor}, na wala sa Vendor directory",
       "suggestion": "Piliin ang iminungkahing supplier mula sa Vendor directory, o alisin ang mungkahi"

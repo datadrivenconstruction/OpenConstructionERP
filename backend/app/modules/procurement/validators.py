@@ -718,6 +718,52 @@ def check_requisition_line_cost_line(req: dict[str, Any]) -> list[Finding]:
     ]
 
 
+# ── Material requisitions: approval by value ─────────────────────────────────
+#
+# ``value_bands`` is {"currency", "from_amounts"} when the project routes
+# requisitions on value, else None. Lines carry ``extended_cost`` as text.
+
+
+def _line_amount(item: dict[str, Any]) -> Decimal:
+    try:
+        return Decimal(str(item.get("extended_cost") or "0"))
+    except (InvalidOperation, ValueError):
+        return Decimal("0")
+
+
+def check_requisition_value_band_currency(req: dict[str, Any]) -> list[Finding]:
+    """Bands are set in one currency, so a line priced in another cannot be weighed against them."""
+    bands = req.get("value_bands")
+    if not isinstance(bands, dict):
+        return []
+    band_currency = str(bands.get("currency") or "").strip().upper()
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        currency = str(item.get("currency_code") or "").strip().upper()
+        if not currency or not band_currency or currency == band_currency or _line_amount(item) == 0:
+            continue
+        label = line_label(index, item)
+        findings.append(
+            Finding(
+                element_ref=label,
+                params={"line": label, "currency": currency, "band_currency": band_currency},
+                details={"currency": currency, "band_currency": band_currency},
+            )
+        )
+    return findings
+
+
+def check_requisition_unpriced_under_bands(req: dict[str, Any]) -> list[Finding]:
+    """An unpriced line counts as zero in the value that picks the approvers, so it is shown."""
+    if not isinstance(req.get("value_bands"), dict):
+        return []
+    return [
+        Finding(element_ref=line_label(index, item), params={"line": line_label(index, item)})
+        for index, item in enumerate(_items(req))
+        if _line_amount(item) == 0
+    ]
+
+
 # ── Material requisitions: suggested supplier and line dates (issue #516) ────
 #
 # Each line also carries ``suggested_vendor_id`` with ``suggested_vendor``

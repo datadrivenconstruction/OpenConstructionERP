@@ -825,6 +825,14 @@
       "fail": "Rida {line} ei ole seotud kulureaga, seega ei kuvata selle tellimust eelarve vastu kohustusena",
       "suggestion": "Looge rida BOQ-st või siduge see enne tellimist kulureaga"
     },
+    "requisition_value_band_currency": {
+      "fail": "Rida {line} on hinnatud valuutas {currency}, kuid kinnitamise väärtuspiirid on valuutas {band_currency}, seega ei saa selle väärtus kinnitajaid määrata",
+      "suggestion": "Hinnake rida väärtuspiiride valuutas või viige see eraldi tellimusse"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Rial {line} pole hinda, seega loetakse see nulliks väärtuses, mis määrab selle tellimuse kinnitajad",
+      "suggestion": "Sisestage enne esitamist rea ühikuhind"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Rida {line} soovitab tarnijat {vendor}, kes ei ole tarnijate registris",
       "suggestion": "Valige soovitatud tarnija tarnijate registrist või eemaldage soovitus"

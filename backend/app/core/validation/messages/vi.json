@@ -825,6 +825,14 @@
       "fail": "Dòng {line} chưa liên kết với dòng chi phí nên đơn đặt hàng của nó sẽ không hiện là khoản cam kết so với ngân sách",
       "suggestion": "Tạo dòng từ BOQ, hoặc liên kết nó với một dòng chi phí trước khi đặt hàng"
     },
+    "requisition_value_band_currency": {
+      "fail": "Dòng {line} được định giá bằng {currency}, nhưng các ngưỡng giá trị phê duyệt đặt bằng {band_currency}, nên giá trị của dòng không thể quyết định người phê duyệt",
+      "suggestion": "Định giá dòng bằng đơn vị tiền tệ của các ngưỡng, hoặc chuyển dòng sang một phiếu yêu cầu riêng"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Dòng {line} chưa có giá, nên được tính bằng không trong giá trị quyết định ai phê duyệt phiếu yêu cầu này",
+      "suggestion": "Nhập đơn giá cho dòng trước khi gửi"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Dòng {line} đề xuất nhà cung cấp {vendor}, nhưng nhà cung cấp này không có trong danh bạ nhà cung cấp",
       "suggestion": "Chọn nhà cung cấp được đề xuất từ danh bạ nhà cung cấp, hoặc xóa đề xuất"

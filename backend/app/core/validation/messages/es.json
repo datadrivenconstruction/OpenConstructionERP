@@ -843,6 +843,14 @@
       "fail": "La línea {line} no está vinculada a una partida de coste, así que su pedido no aparecerá como comprometido contra el presupuesto",
       "suggestion": "Genere la línea desde el BOQ o vincúlela a una partida de coste antes de pedir"
     },
+    "requisition_value_band_currency": {
+      "fail": "La línea {line} está valorada en {currency}, pero los umbrales de importe de aprobación están en {band_currency}, por lo que su valor no puede decidir los aprobadores",
+      "suggestion": "Valore la línea en la moneda de los umbrales o muévala a una solicitud aparte"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "La línea {line} no tiene precio, por lo que cuenta como cero en el importe que decide quién aprueba esta solicitud",
+      "suggestion": "Introduzca un coste unitario para la línea antes de enviarla"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "La línea {line} sugiere al proveedor {vendor}, que no está en el directorio de proveedores",
       "suggestion": "Elija al proveedor sugerido del directorio de proveedores o borre la sugerencia"

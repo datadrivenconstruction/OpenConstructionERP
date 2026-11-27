@@ -825,6 +825,14 @@
       "fail": "明細 {line} は原価明細に紐付いていないため、その発注は予算に対する発注済み金額として表示されません",
       "suggestion": "内訳書から明細を作成するか、発注前に原価明細に紐付けてください"
     },
+    "requisition_value_band_currency": {
+      "fail": "行 {line} は {currency} で価格設定されていますが、承認の金額区分は {band_currency} で設定されているため、この行の金額では承認者を決められません",
+      "suggestion": "行を金額区分の通貨で価格設定するか、別の購買依頼に移してください"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "行 {line} には価格がないため、この購買依頼の承認者を決める金額ではゼロとして扱われます",
+      "suggestion": "提出前に行の単価を入力してください"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "明細 {line} は仕入先 {vendor} を提案していますが、仕入先台帳にありません",
       "suggestion": "提案された仕入先を仕入先台帳から選ぶか、提案を削除してください"

@@ -825,6 +825,14 @@
       "fail": "{line}. satır bir maliyet satırına bağlı değil, bu yüzden siparişi bütçeye karşı taahhüt olarak görünmez",
       "suggestion": "Satırı BOQ'dan oluşturun veya sipariş vermeden önce bir maliyet satırına bağlayın"
     },
+    "requisition_value_band_currency": {
+      "fail": "{line} satırı {currency} ile fiyatlandırılmış, ancak onay tutar eşikleri {band_currency} cinsinden, bu yüzden değeri onaylayıcıları belirleyemez",
+      "suggestion": "Satırı eşiklerin para biriminde fiyatlandırın veya ayrı bir talebe taşıyın"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "{line} satırının fiyatı yok, bu nedenle bu talebi kimin onaylayacağını belirleyen tutarda sıfır sayılır",
+      "suggestion": "Göndermeden önce satır için birim maliyet girin"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "{line}. satır, tedarikçi rehberinde olmayan {vendor} tedarikçisini öneriyor",
       "suggestion": "Önerilen tedarikçiyi tedarikçi rehberinden seçin veya öneriyi silin"

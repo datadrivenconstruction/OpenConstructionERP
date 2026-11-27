@@ -825,6 +825,14 @@
       "fail": "Regel {line} is niet gekoppeld aan een kostenregel, dus de bestelling verschijnt niet als vastgelegd tegen het budget",
       "suggestion": "Maak de regel aan vanuit de BOQ, of koppel hem vóór het bestellen aan een kostenregel"
     },
+    "requisition_value_band_currency": {
+      "fail": "Regel {line} is geprijsd in {currency}, maar de waardegrenzen voor goedkeuring staan in {band_currency}, dus de waarde kan de goedkeurders niet bepalen",
+      "suggestion": "Prijs de regel in de valuta van de waardegrenzen of verplaats hem naar een aparte aanvraag"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Regel {line} heeft geen prijs en telt daarom als nul in de waarde die bepaalt wie deze aanvraag goedkeurt",
+      "suggestion": "Vul een eenheidsprijs voor de regel in voordat u indient"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Regel {line} stelt leverancier {vendor} voor, die niet in het leveranciersregister staat",
       "suggestion": "Kies de voorgestelde leverancier uit het leveranciersregister of wis het voorstel"

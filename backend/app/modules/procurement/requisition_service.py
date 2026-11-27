@@ -64,6 +64,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
+from app.modules.procurement.approval_bands import (
+    BandError,
+    banded_chain,
+    parse_bands,
+    requisition_value,
+)
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
 from app.modules.procurement.models import (
     MaterialRequisition,
@@ -97,6 +103,9 @@ from app.modules.procurement.requisition_progress import (
     refresh_requisitions,
 )
 from app.modules.procurement.schemas import (
+    ApprovalBandOut,
+    ApprovalBandsIn,
+    ApprovalBandsOut,
     ExternalOrderReport,
     POCreate,
     POItemCreate,
@@ -138,6 +147,10 @@ from app.modules.procurement.service import (
 )
 
 logger = logging.getLogger(__name__)
+
+#: Requisition metadata keys of value routing: the chain someone chose, and what the value added.
+APPROVAL_BASE_KEY = "approval_base_chain"
+APPROVAL_VALUE_KEY = "approval_value"
 
 #: Rule set the submission gate and the validate endpoint run.
 REQUISITION_RULE_SET = "procurement_requisition"
@@ -794,6 +807,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                         "colleague to submit it."
                     ),
                 )
+            # Routed before anything is written, so a refused band leaves the draft untouched.
+            routed = await self._route_on_value(req, chain, submitter=user_id)
             # A fresh submission is a fresh decision: the previous approver's
             # verdict and comment belong to the history, not to this round.
             req.submitted_by = user_id
@@ -803,8 +818,53 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             req.approval_step = 0
             meta = dict(req.metadata_ or {})
             meta["approval_round"] = []
+            meta.pop(APPROVAL_BASE_KEY, None)
+            meta.pop(APPROVAL_VALUE_KEY, None)
+            if routed is not None:
+                meta[APPROVAL_BASE_KEY] = chain
+                meta[APPROVAL_VALUE_KEY] = routed[1]
+                req.approval_chain = routed[0] or None
             req.metadata_ = meta
         return await self._transition(requisition_id, "submitted", user_id=user_id, action="submitted")
+
+    async def _route_on_value(
+        self, req: MaterialRequisition, base: list[str], *, submitter: str | None
+    ) -> tuple[list[str], dict[str, Any]] | None:
+        """The chain the project's value bands give this requisition, or None without bands.
+
+        The bands are read as they stand at submission; a band with nobody left
+        once the requester and the submitter are left out refuses the submission.
+        """
+        row = await load_settings(self.session, req.project_id)
+        stored = row.approval_bands if row is not None and isinstance(row.approval_bands, dict) else None
+        if not stored or not stored.get("bands"):
+            return None
+        try:
+            bands = parse_bands(stored.get("bands"))
+        except BandError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"The project's approval value bands cannot be routed on ({exc}). Save them again in settings.",
+            ) from None
+        value = requisition_value(item.extended_cost for item in req.items)
+        excluded = {str(p) for p in (submitter, req.requester_id) if p}
+        result = banded_chain(base, bands, value, excluded=excluded)
+        currency = str(stored.get("currency") or "").upper()
+        if result.unmet:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    f"This requisition is worth {format(value, 'f')} {currency}, which needs an approver of the "
+                    f"band from {', '.join(result.unmet)} {currency}, and only its requester or submitter is in it. Ask a "
+                    "manager to add a second approver to that band in the requisition settings."
+                ),
+            )
+        return result.chain, {
+            "value": format(value, "f"),
+            "currency": currency,
+            "bands_applied": result.applied,
+            "added": result.added,
+        }
 
     async def withdraw(self, requisition_id: uuid.UUID, *, user_id: str | None) -> MaterialRequisition:
         """Take a submitted or rejected requisition back to draft so it can be edited."""
@@ -814,6 +874,13 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Only a submitted or rejected requisition can be withdrawn; this one is '{req.status}'.",
             )
+        meta = dict(req.metadata_ or {})
+        if APPROVAL_BASE_KEY in meta:
+            # Back in draft the requisition shows only the approvers someone chose;
+            # the value bands are applied again on the next submission.
+            req.approval_chain = list(meta.pop(APPROVAL_BASE_KEY) or []) or None
+            meta.pop(APPROVAL_VALUE_KEY, None)
+            req.metadata_ = meta
         return await self._transition(requisition_id, "draft", user_id=user_id, action="withdrawn")
 
     async def cancel(
@@ -1595,11 +1662,30 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         """The project's order owner and default approvers, with their names."""
         row = await load_settings(self.session, project_id)
         chain = [str(a) for a in ((row.default_approval_chain if row is not None else None) or [])]
-        names = await load_user_names(self.session, set(chain))
+        stored = row.approval_bands if row is not None and isinstance(row.approval_bands, dict) else None
+        band_rows = list((stored or {}).get("bands") or [])
+        band_people = {str(a) for b in band_rows for a in (b.get("approvers") or [])}
+        names = await load_user_names(self.session, set(chain) | band_people)
+        bands_out = None
+        if stored and band_rows:
+            bands_out = ApprovalBandsOut(
+                currency=str(stored.get("currency") or ""),
+                bands=[
+                    ApprovalBandOut(
+                        from_amount=str(b.get("from_amount")),
+                        approvers=[
+                            RequisitionApprovalStep(user_id=str(a), name=names.get(str(a)), state="waiting")
+                            for a in (b.get("approvers") or [])
+                        ],
+                    )
+                    for b in band_rows
+                ],
+            )
         return ProcurementSettingsResponse(
             project_id=project_id,
             order_owner=effective_owner(row.order_owner if row is not None else None),
             default_approvers=[RequisitionApprovalStep(user_id=a, name=names.get(a), state="waiting") for a in chain],
+            approval_bands=bands_out,
         )
 
     async def update_settings(
@@ -1614,17 +1700,52 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         if row is None:
             row = ProcurementProjectSettings(project_id=project_id, order_owner=OCERP, default_approval_chain=[])
             self.session.add(row)
-        before = {"order_owner": row.order_owner, "default_approval_chain": list(row.default_approval_chain or [])}
+        before = {
+            "order_owner": row.order_owner,
+            "default_approval_chain": list(row.default_approval_chain or []),
+            "approval_bands": row.approval_bands,
+        }
         if data.order_owner is not None:
             row.order_owner = data.order_owner
         if data.default_approval_chain is not None:
             row.default_approval_chain = await self._validated_chain(project_id, data.default_approval_chain)
+        if data.approval_bands is not None:
+            row.approval_bands = await self._validated_bands(project_id, data.approval_bands)
         row.updated_by = user_id
         await self.session.flush()
-        after = {"order_owner": row.order_owner, "default_approval_chain": list(row.default_approval_chain or [])}
+        after = {
+            "order_owner": row.order_owner,
+            "default_approval_chain": list(row.default_approval_chain or []),
+            "approval_bands": row.approval_bands,
+        }
         if before != after:
             await self._audit_settings(project_id, user_id, before, after)
         return await self.settings_response(project_id)
+
+    async def _validated_bands(self, project_id: uuid.UUID, data: ApprovalBandsIn) -> dict[str, Any] | None:
+        """Value bands as stored, or None when the list is empty (bands off).
+
+        Every band approver passes the same check as a designated approver.
+        """
+        if not data.bands:
+            return None
+        if len(data.currency) != 3:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Value bands need their currency as a three-letter code, for example EUR.",
+            )
+        stored = [
+            {
+                "from_amount": format(band.from_amount, "f"),
+                "approvers": await self._validated_chain(project_id, band.approvers),
+            }
+            for band in sorted(data.bands, key=lambda b: b.from_amount)
+        ]
+        try:
+            parse_bands(stored)
+        except BandError as exc:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from None
+        return {"currency": data.currency.upper(), "bands": stored}
 
     async def _audit_settings(
         self, project_id: uuid.UUID, actor_id: str | None, before: dict[str, Any], after: dict[str, Any]
@@ -1822,6 +1943,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         progress: dict[uuid.UUID, LineProgress] | None = None,
         covered: Coverage | None = None,
         demand: dict[tuple[str, str], tuple[Decimal, str]] | None = None,
+        value_bands: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """The payload the ``procurement_requisition`` rules read.
 
@@ -1835,6 +1957,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         what the other requisitions hold per BOQ resource and ``demand`` what the
         BOQ needs; both are left out of a source whose figures are unknown or in
         another unit, so the over-allocation rule never compares unlike things.
+        ``value_bands`` is the project's band currency and starts, or None.
         """
         known = suggested_vendors or {}
         starts = activity_starts or {}
@@ -1885,6 +2008,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             "vendor": vendor.as_payload() if vendor is not None else None,
             "requester_id": req.requester_id,
             "approval_chain": [str(a) for a in (req.approval_chain or [])],
+            "value_bands": value_bands,
             "items": [
                 {
                     "description": item.description,
@@ -1893,6 +2017,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     "quantity_ordered": _ordered(item),
                     "order_unit_mismatches": _mismatches(item),
                     "currency_code": item.currency_code,
+                    "extended_cost": format(Decimal(str(item.extended_cost or 0)), "f"),
                     "cost_line_id": str(item.cost_line_id) if item.cost_line_id else None,
                     "required_date": item.required_date,
                     "schedule_activity_id": str(item.schedule_activity_id) if item.schedule_activity_id else None,
@@ -1928,6 +2053,17 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 for unit, quantity in sorted(per_unit.items())
             ],
         )
+
+    async def _band_summary(self, project_id: uuid.UUID) -> dict[str, Any] | None:
+        """The band currency and starts the value rules read, or None without bands."""
+        row = await load_settings(self.session, project_id)
+        stored = row.approval_bands if row is not None and isinstance(row.approval_bands, dict) else None
+        if not stored or not stored.get("bands"):
+            return None
+        return {
+            "currency": str(stored.get("currency") or "").upper(),
+            "from_amounts": [str(b.get("from_amount")) for b in stored["bands"]],
+        }
 
     async def validate(
         self,
@@ -1970,6 +2106,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 progress=progress,
                 covered=covered,
                 demand=demand,
+                value_bands=await self._band_summary(req.project_id),
             ),
             rule_sets=[REQUISITION_RULE_SET],
             target_type="material_requisition",
@@ -2190,6 +2327,8 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
     step = int(req.approval_step or 0)
     meta = req.metadata_ if isinstance(req.metadata_, dict) else {}
     done = {str(a.get("user_id")): a for a in meta.get("approval_round") or [] if isinstance(a, dict)}
+    routed = meta.get(APPROVAL_VALUE_KEY) if isinstance(meta.get(APPROVAL_VALUE_KEY), dict) else {}
+    band_of = {str(k): str(v) for k, v in (routed.get("added") or {}).items()}
     steps: list[RequisitionApprovalStep] = []
     for index, approver in enumerate(chain):
         decided = done.get(approver) if index < step else None
@@ -2206,6 +2345,8 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
                 state=state,
                 decided_at=decided.get("at") if decided else None,
                 comment=decided.get("comment") if decided else None,
+                band_from=band_of.get(approver),
+                band_currency=(str(routed.get("currency") or "") or None) if approver in band_of else None,
             )
         )
     return steps

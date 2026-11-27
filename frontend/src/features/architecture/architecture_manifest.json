@@ -218682,6 +218682,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "approval_bands.py",
         "certificates.py",
         "cost_spine.py",
         "data_paths.py",
@@ -219687,7 +219688,7 @@
         {
           "class_name": "ProcurementProjectSettings",
           "tablename": "oe_procurement_project_settings",
-          "docstring": "Per-project purchasing settings for requisitions (issue #516).\n\n``order_owner`` says where orders for this project's requisitions are\nplaced: ``ocerp`` (purchase orders are raised here) or ``external`` (an\noutside purchasing system orders, and OCERP only reconciles what it\nreports). Award subscribers read it and draft no order when it is\n``external``. ``default_approval_chain`` is copied onto new requisitions.",
+          "docstring": "Per-project purchasing settings for requisitions (issue #516).\n\n``order_owner`` says where orders for this project's requisitions are\nplaced: ``ocerp`` (purchase orders are raised here) or ``external`` (an\noutside purchasing system orders, and OCERP only reconciles what it\nreports). Award subscribers read it and draft no order when it is\n``external``. ``default_approval_chain`` is copied onto new requisitions.\n``approval_bands`` (``{\"currency\", \"bands\": [{\"from_amount\", \"approvers\"}]}``)\nadds approvers at submission once the requisition value crosses a band.",
           "columns": [
             {
               "name": "project_id",
@@ -219704,6 +219705,12 @@
             {
               "name": "default_approval_chain",
               "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "approval_bands",
+              "annotation": "Mapped[dict | None]",
               "sql_type": "JSON",
               "nullable": true
             },
@@ -222497,6 +222504,16 @@
               "name": "comment",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "band_from",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "band_currency",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -223059,6 +223076,74 @@
           ]
         },
         {
+          "class_name": "ApprovalBandIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One value band: from ``from_amount`` (inclusive) these approvers also sign, in order.",
+          "fields": [
+            {
+              "name": "from_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "approvers",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "ApprovalBandsIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The project's value bands in one currency. An empty ``bands`` list switches them off.",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "bands",
+              "type": "list[ApprovalBandIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "ApprovalBandOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One stored value band with its approvers' names.",
+          "fields": [
+            {
+              "name": "from_amount",
+              "type": "str"
+            },
+            {
+              "name": "approvers",
+              "type": "list[RequisitionApprovalStep]"
+            }
+          ]
+        },
+        {
+          "class_name": "ApprovalBandsOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The project's value bands as stored.",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "bands",
+              "type": "list[ApprovalBandOut]"
+            }
+          ]
+        },
+        {
           "class_name": "ProcurementSettingsResponse",
           "bases": [
             "BaseModel"
@@ -223077,6 +223162,11 @@
             {
               "name": "default_approvers",
               "type": "list[RequisitionApprovalStep]"
+            },
+            {
+              "name": "approval_bands",
+              "type": "ApprovalBandsOut | None",
+              "default": "None"
             }
           ]
         },
@@ -223095,6 +223185,11 @@
             {
               "name": "default_approval_chain",
               "type": "list[UUID] | None"
+            },
+            {
+              "name": "approval_bands",
+              "type": "ApprovalBandsIn | None",
+              "default": "None"
             }
           ]
         },
@@ -346657,10 +346752,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 43,
+      "ts_files": 44,
       "css_files": 0,
-      "test_files": 16,
-      "total_files": 43
+      "test_files": 17,
+      "total_files": 44
     },
     {
       "name": "procurement_concept",
@@ -349304,13 +349399,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11607,
+    "total_columns": 11608,
     "total_relationships": 264,
     "total_routes": 5623,
-    "total_schemas": 5253,
-    "total_python_files": 4057,
+    "total_schemas": 5257,
+    "total_python_files": 4058,
     "frontend_features": 254,
-    "frontend_ts_files": 4604,
+    "frontend_ts_files": 4605,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

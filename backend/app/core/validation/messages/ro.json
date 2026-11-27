@@ -825,6 +825,14 @@
       "fail": "Linia {line} nu este legată de o linie de cost, deci comanda ei nu va apărea ca angajată față de buget",
       "suggestion": "Creați linia din BOQ sau legați-o de o linie de cost înainte de comandă"
     },
+    "requisition_value_band_currency": {
+      "fail": "Linia {line} este evaluată în {currency}, dar pragurile valorice de aprobare sunt stabilite în {band_currency}, deci valoarea ei nu poate decide aprobatorii",
+      "suggestion": "Evaluați linia în moneda pragurilor sau mutați-o într-o cerere separată"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Linia {line} nu are preț, deci contează ca zero în valoarea care decide cine aprobă această cerere",
+      "suggestion": "Introduceți un cost unitar pentru linie înainte de trimitere"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Linia {line} sugerează furnizorul {vendor}, care nu este în registrul de furnizori",
       "suggestion": "Alegeți furnizorul sugerat din registrul de furnizori sau ștergeți sugestia"

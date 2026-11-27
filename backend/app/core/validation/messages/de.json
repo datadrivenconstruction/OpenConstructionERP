@@ -843,6 +843,14 @@
       "fail": "Zeile {line} ist mit keiner Kostenzeile verknüpft, ihre Bestellung erscheint daher nicht als Obligo im Budget",
       "suggestion": "Erzeugen Sie die Zeile aus dem LV oder verknüpfen Sie sie vor der Bestellung mit einer Kostenzeile"
     },
+    "requisition_value_band_currency": {
+      "fail": "Position {line} ist in {currency} bepreist, die Wertgrenzen für die Freigabe sind aber in {band_currency} festgelegt, daher kann ihr Wert die Freigebenden nicht bestimmen",
+      "suggestion": "Bepreisen Sie die Position in der Währung der Wertgrenzen oder verschieben Sie sie in eine eigene Anforderung"
+    },
+    "requisition_unpriced_under_bands": {
+      "fail": "Position {line} hat keinen Preis und zählt daher mit null in dem Wert, der über die Freigebenden dieser Anforderung entscheidet",
+      "suggestion": "Geben Sie vor dem Einreichen einen Einheitspreis für die Position ein"
+    },
     "requisition_suggested_vendor_in_directory": {
       "fail": "Position {line} schlägt den Lieferanten {vendor} vor, der nicht im Lieferantenverzeichnis steht",
       "suggestion": "Wählen Sie den vorgeschlagenen Lieferanten aus dem Lieferantenverzeichnis oder entfernen Sie den Vorschlag"
