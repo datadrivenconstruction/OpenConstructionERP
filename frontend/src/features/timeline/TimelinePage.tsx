@@ -13,12 +13,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Download,
   ExternalLink,
   Filter,
   Search,
   User as UserIcon,
   X,
+  Upload,
 } from 'lucide-react';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { Badge, CollapsibleSection, EmptyState } from '@/shared/ui';
@@ -403,7 +403,7 @@ export function TimelinePage() {
                 hover:border-border disabled:opacity-40"
               aria-label={t('timeline.export_csv', { defaultValue: 'Export CSV' })}
             >
-              <Download className="h-3.5 w-3.5" aria-hidden />
+              <Upload className="h-3.5 w-3.5" aria-hidden />
               CSV
             </button>
           </div>

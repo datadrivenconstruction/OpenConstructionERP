@@ -26,7 +26,7 @@ import {
   XCircle,
   AlertTriangle,
   Info,
-  Upload,
+  Download,
   Shield,
   Settings,
   Loader2,
@@ -87,7 +87,7 @@ const ICON_MAP: Record<IconCategory, { icon: typeof CheckCircle2; color: string;
   error: { icon: XCircle, color: 'text-semantic-error', bg: 'bg-semantic-error-bg' },
   warning: { icon: AlertTriangle, color: 'text-semantic-warning', bg: 'bg-semantic-warning-bg' },
   info: { icon: Info, color: 'text-oe-blue-text', bg: 'bg-oe-blue-subtle' },
-  import: { icon: Upload, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
+  import: { icon: Download, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
   validation: { icon: Shield, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/30' },
   system: { icon: Settings, color: 'text-content-tertiary', bg: 'bg-surface-secondary' },
 };

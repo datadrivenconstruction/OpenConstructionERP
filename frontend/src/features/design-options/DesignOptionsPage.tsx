@@ -51,9 +51,9 @@ import {
   FolderOpen,
   Leaf,
   Link2,
-  Download,
   RefreshCw,
   Boxes,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1221,7 +1221,7 @@ function OptionSetDetail({ setId }: { setId: string }) {
             />
           </h2>
           {canCompare && (
-            <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={handleExport}>
+            <Button variant="ghost" size="sm" icon={<Upload size={14} />} onClick={handleExport}>
               {t('designOptions.exportXlsx', { defaultValue: 'Export' })}
             </Button>
           )}

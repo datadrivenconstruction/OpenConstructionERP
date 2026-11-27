@@ -36,7 +36,6 @@ import {
   Map as MapIcon,
   RefreshCw,
   ShieldAlert,
-  Upload,
   XCircle,
 } from 'lucide-react';
 import {
@@ -621,7 +620,7 @@ function LeadsImportCsvSection() {
   return (
     <SectionShell
       title={t('property_dev.bulk.import_leads_csv', { defaultValue: 'Bulk import leads from CSV' })}
-      icon={<Upload size={16} />}
+      icon={<Download size={16} />}
       desc={t('property_dev.bulk.import_leads_desc', { defaultValue: 'Headers required: full_name, email, phone, source, plot_type_interest, budget_min, budget_max, notes.' })}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

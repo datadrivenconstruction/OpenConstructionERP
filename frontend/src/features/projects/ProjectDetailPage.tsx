@@ -51,6 +51,7 @@ import {
   MessagesSquare,
   MapPin,
   DraftingCompass,
+  Download,
 } from 'lucide-react';
 import {
   Button, Card, CardHeader, CardContent, Badge, Skeleton, EmptyState, Breadcrumb,
@@ -1411,7 +1412,7 @@ function ImportDialog({
               </Button>
               <Button
                 variant="primary"
-                icon={<Upload size={16} />}
+                icon={<Download size={16} />}
                 onClick={handleImport}
                 disabled={!selectedFile}
                 loading={mutation.isPending}
@@ -3339,7 +3340,7 @@ export function ProjectDetailPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          icon={<Upload size={14} />}
+                          icon={<Download size={14} />}
                           title={t('boq.import_tooltip', { defaultValue: 'Import GAEB, Excel, or CSV into this BOQ' })}
                           onClick={(e) => {
                             e.stopPropagation();

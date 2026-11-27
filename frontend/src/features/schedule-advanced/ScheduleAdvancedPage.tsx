@@ -24,7 +24,6 @@ import {
   GanttChart,
   Sparkles,
   PlayCircle,
-  Download,
   AlertTriangle,
   Diamond,
   Search,
@@ -34,6 +33,7 @@ import {
   BarChart3,
   Network,
   ArrowRight,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -3908,7 +3908,7 @@ function BaselinesTab({
               <Button
                 size="sm"
                 variant="ghost"
-                icon={<Download size={12} />}
+                icon={<Upload size={12} />}
                 onClick={exportCsv}
                 data-testid="baseline-export-csv"
               >

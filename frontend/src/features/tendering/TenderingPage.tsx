@@ -1345,7 +1345,7 @@ function DistributionPanel({ packageId, projectId }: { packageId: string; projec
           </Button>
           <Button
             variant="ghost"
-            icon={<Upload size={14} />}
+            icon={<Download size={14} />}
             onClick={() => setImportOpen(true)}
             type="button"
           >
@@ -2142,7 +2142,7 @@ function PackageDetail({
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<Upload size={14} />}
+                icon={<Download size={14} />}
                 onClick={() => setShowX84(true)}
                 data-testid="x84-import-open"
               >
@@ -2164,7 +2164,7 @@ function PackageDetail({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   onClick={() => handleDownloadWorkbook('bidder')}
                   title={t('tendering.export_bidder_xlsx_title', {
                     defaultValue:
@@ -2176,7 +2176,7 @@ function PackageDetail({
                 <Button
                   variant="ghost"
                   size="sm"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   onClick={handleDownloadGaeb}
                   title={t('tendering.export_gaeb_unpriced_title', {
                     defaultValue:
@@ -2545,7 +2545,7 @@ function PackageDetail({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={() => handleDownloadWorkbook('comparison')}
               disabled={!comparison || comparison.bid_count === 0}
               title={t('tendering.export_comparison_xlsx_title', {
@@ -2558,7 +2558,7 @@ function PackageDetail({
             <Button
               variant="ghost"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={handleExport}
               title={t('tendering.export_comparison_csv_title', {
                 defaultValue: 'Plain CSV of the unit prices, for other tools',

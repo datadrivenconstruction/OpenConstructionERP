@@ -44,10 +44,10 @@ import {
   ListPlus,
   ShieldCheck,
   Wallet,
-  Download,
   ArrowUpDown,
   RotateCcw,
   FileText,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1916,7 +1916,7 @@ export function MoCPage() {
               size="sm"
               onClick={handleExportCSV}
               disabled={!sorted.length}
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
             >
               {t('moc.export_csv', { defaultValue: 'Export CSV' })}
             </Button>

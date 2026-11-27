@@ -25,12 +25,12 @@ import {
   Sparkles,
   Layers3,
   ArrowRight,
-  Download,
   Filter,
   Table2,
   FileText,
   X,
   RotateCcw,
+  Upload,
 } from 'lucide-react';
 import {
   EmptyState,
@@ -399,7 +399,7 @@ export function QuantitySummaryPanel({
         <Button
           variant="secondary"
           size="sm"
-          icon={<Download size={14} />}
+          icon={<Upload size={14} />}
           onClick={handleExport}
           disabled={rows.length === 0}
         >

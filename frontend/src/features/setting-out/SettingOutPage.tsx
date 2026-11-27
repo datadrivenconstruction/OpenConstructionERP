@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, CircleDashed, FileUp, FileWarning, Plus, Printer, Target, XCircle } from 'lucide-react';
+import { CheckCircle2, CircleDashed, FileWarning, Plus, Printer, Target, XCircle, FileDown } from 'lucide-react';
 import {
   Breadcrumb,
   Button,
@@ -378,7 +378,7 @@ export default function SettingOutPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" icon={<FileUp size={14} />} onClick={() => setImportOpen(true)}>
+                  <Button size="sm" variant="secondary" icon={<FileDown size={14} />} onClick={() => setImportOpen(true)}>
                     {t('survey.setting_out.action.import_design', { defaultValue: 'Import design' })}
                   </Button>
                 </div>

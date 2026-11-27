@@ -7,12 +7,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Download,
   Loader2,
   ListChecks,
   Search,
   X,
   XCircle,
+  Upload,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
@@ -398,7 +398,7 @@ export function JobsPage() {
                             "
                           title={t('jobs.export_result', { defaultValue: 'Download result JSON' })}
                         >
-                          <Download className="h-3.5 w-3.5" aria-hidden />
+                          <Upload className="h-3.5 w-3.5" aria-hidden />
                           JSON
                         </button>
                       )}
@@ -603,7 +603,7 @@ function JobDetailPanel({
               onClick={() => onExport(job)}
               className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
             >
-              <Download className="h-3.5 w-3.5" aria-hidden />
+              <Upload className="h-3.5 w-3.5" aria-hidden />
               {t('jobs.export_result', { defaultValue: 'Download JSON' })}
             </button>
           )}

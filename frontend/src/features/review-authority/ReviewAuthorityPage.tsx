@@ -25,7 +25,7 @@ import {
   ScrollText,
   Scale,
   Pencil,
-  Download,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1119,7 +1119,7 @@ function CycleDetailPanel({ cycleId }: { cycleId: string }) {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               disabled={isExportingDossier}
               onClick={handleExportDossier}
             >

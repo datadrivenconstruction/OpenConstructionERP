@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Layers, Upload } from 'lucide-react';
+import { Layers, Download } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -95,7 +95,7 @@ export function MineEntryDepth({ entry, canWrite }: { entry: MineEntry; canWrite
               e.target.value = '';
             }}
           />
-          <Button size="sm" variant="secondary" icon={<Upload size={14} />} loading={upload.isPending} onClick={() => file.current?.click()}>
+          <Button size="sm" variant="secondary" icon={<Download size={14} />} loading={upload.isPending} onClick={() => file.current?.click()}>
             {t('mine.split.import', { defaultValue: 'Import material polygons (GeoJSON)' })}
           </Button>
           <Button size="sm" variant="ghost" icon={<Layers size={14} />} loading={split.isPending} onClick={() => split.mutate()}>

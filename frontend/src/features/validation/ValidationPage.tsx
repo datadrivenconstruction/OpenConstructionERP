@@ -10,7 +10,7 @@ import {
   XCircle,
   ChevronDown,
   ChevronRight,
-  Download,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, EmptyState, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -975,7 +975,7 @@ export function ValidationPage() {
             <Button
               variant="secondary"
               size="md"
-              icon={<Download size={16} />}
+              icon={<Upload size={16} />}
               onClick={() => handleExport('xlsx')}
               loading={exportPending === 'xlsx'}
               disabled={exportPending !== null}
@@ -987,7 +987,7 @@ export function ValidationPage() {
             <Button
               variant="secondary"
               size="md"
-              icon={<Download size={16} />}
+              icon={<Upload size={16} />}
               onClick={() => handleExport('csv')}
               loading={exportPending === 'csv'}
               disabled={exportPending !== null}
@@ -999,7 +999,7 @@ export function ValidationPage() {
             <Button
               variant="ghost"
               size="md"
-              icon={<Download size={16} />}
+              icon={<Upload size={16} />}
               onClick={handleExportPdf}
               loading={pdfPending}
               disabled={pdfPending}

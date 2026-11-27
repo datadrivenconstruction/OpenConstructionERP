@@ -27,7 +27,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, Download, HardHat, GitMerge } from 'lucide-react';
+import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, HardHat, GitMerge, Upload } from 'lucide-react';
 import {
   Button,
   Card,
@@ -886,7 +886,7 @@ export function CvrPage() {
                   onClick={handleExportCsv}
                   disabled={lines.length === 0}
                 >
-                  <Download size={14} className="mr-1 shrink-0" />
+                  <Upload size={14} className="mr-1 shrink-0" />
                   {t('cvr.export_csv', { defaultValue: 'Export CSV' })}
                 </Button>
               </div>

@@ -11,7 +11,7 @@
  */
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, FileSpreadsheet, FileText, Database } from 'lucide-react';
+import { FileSpreadsheet, FileText, Database, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 import { triggerDownload } from '@/shared/lib/api';
@@ -77,7 +77,7 @@ export function ExportButton({ snapshotId, query }: ExportButtonProps) {
         onClick={() => setOpen((v) => !v)}
         data-testid="export-button-trigger"
       >
-        <Download className="mr-1 h-3 w-3" />
+        <Upload className="mr-1 h-3 w-3" />
         {t('common.export', { defaultValue: 'Export' })}
       </Button>
       {open && (

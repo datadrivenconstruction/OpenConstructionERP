@@ -2818,7 +2818,7 @@ function RequirementsTabContent({
             {importFileMut.isPending ? (
               <Loader2 size={12} className="animate-spin" />
             ) : (
-              <Upload size={12} />
+              <Download size={12} />
             )}
             {t('bim_rules.req_import_btn', { defaultValue: 'Import' })}
             <input
@@ -2870,7 +2870,7 @@ function RequirementsTabContent({
               className="flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-2xs font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue"
               title={t('bim_rules.req_export_xlsx', { defaultValue: 'Export as Excel' })}
             >
-              <Download size={12} />
+              <Upload size={12} />
               {t('common.export')}
             </button>
           )}

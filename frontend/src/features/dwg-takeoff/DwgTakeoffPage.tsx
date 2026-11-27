@@ -6164,7 +6164,7 @@ function SummaryTab({
               defaultValue: 'Export quantities as Excel (.xlsx)',
             })}
           >
-            <Download size={12} />
+            <Upload size={12} />
             {t('dwg_takeoff.export_excel_short', { defaultValue: 'Excel' })}
           </button>
           <button
@@ -6176,7 +6176,7 @@ function SummaryTab({
               defaultValue: 'Export measurements as CSV',
             })}
           >
-            <Download size={12} />
+            <Upload size={12} />
             {t('dwg_takeoff.export_csv_short', { defaultValue: 'CSV' })}
           </button>
           <button
@@ -6188,7 +6188,7 @@ function SummaryTab({
               defaultValue: 'Export current viewport as PDF',
             })}
           >
-            <Download size={12} />
+            <Upload size={12} />
             {t('dwg_takeoff.export_pdf_short', { defaultValue: 'PDF' })}
           </button>
         </div>

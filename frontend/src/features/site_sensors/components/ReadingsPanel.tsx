@@ -9,7 +9,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Trash2, Upload } from 'lucide-react';
+import { Pencil, Trash2, Download } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -373,7 +373,7 @@ export function ReadingsPanel({ devices }: { devices: SensorDevice[] }) {
                   }}
                 />
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Button variant="secondary" size="sm" icon={<Upload size={14} />} onClick={() => fileRef.current?.click()}>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => fileRef.current?.click()}>
                     {t('site_sensors.import.choose_file', { defaultValue: 'Choose file' })}
                   </Button>
                   <Button variant="primary" size="sm" disabled={good.length === 0} loading={importMut.isPending} onClick={() => importMut.mutate()}>

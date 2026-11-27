@@ -9,7 +9,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Eye } from 'lucide-react';
+import { Eye, Upload } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -127,7 +127,7 @@ export function NormBillActions({ projectId, profile }: { projectId: string; pro
           <Button
             variant="secondary"
             size="sm"
-            icon={<Download size={14} />}
+            icon={<Upload size={14} />}
             disabled={!boqId}
             loading={exportMut.isPending}
             onClick={() => exportMut.mutate()}

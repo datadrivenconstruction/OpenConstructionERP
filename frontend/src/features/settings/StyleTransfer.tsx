@@ -131,10 +131,10 @@ export function StyleTransfer() {
         })}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" onClick={download} icon={<Download size={14} />}>
+        <Button variant="secondary" size="sm" onClick={download} icon={<Upload size={14} />}>
           {t('settings.style_export', { defaultValue: 'Download style' })}
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} icon={<Upload size={14} />}>
+        <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} icon={<Download size={14} />}>
           {t('settings.style_import', { defaultValue: 'Load style file' })}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => void copyLink()} icon={<Link2 size={14} />}>

@@ -19,7 +19,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, ClipboardCheck, Download, GitBranch, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ClipboardCheck, GitBranch, XCircle, Upload } from 'lucide-react';
 import { apiGet, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { Badge, Button, Card, EmptyState, SkeletonText } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -379,7 +379,7 @@ function SheetCompletenessResult({
       )}
 
       <Button variant="ghost" size="sm" loading={exportPending} onClick={onExport}>
-        <Download size={14} className="mr-1.5" />
+        <Upload size={14} className="mr-1.5" />
         {t('sheetCompleteness.export', { defaultValue: 'Export findings' })}
       </Button>
     </div>

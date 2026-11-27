@@ -11,7 +11,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { ClipboardCheck, Compass, Download, FileCheck2, FileUp, ListChecks, Map as MapIcon, ShieldCheck } from 'lucide-react';
+import { ClipboardCheck, Compass, FileCheck2, FileUp, ListChecks, Map as MapIcon, ShieldCheck, Upload } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -371,7 +371,7 @@ export function PermitsPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   disabled={exporting}
                   onClick={() => exportRegister(exportTarget, 'pdf')}
                   data-testid="export-pdf"
@@ -381,7 +381,7 @@ export function PermitsPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   disabled={exporting}
                   onClick={() => exportRegister(exportTarget, 'xlsx')}
                   data-testid="export-xlsx"

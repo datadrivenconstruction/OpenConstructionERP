@@ -21,11 +21,11 @@ import {
   ChevronRight,
   FolderTree,
   Pencil,
-  Upload,
   Trash2,
   ListTree,
   Check,
   X,
+  Download,
 } from 'lucide-react';
 
 import { Button, Card, ConfirmDialog, EmptyState, Skeleton } from '@/shared/ui';
@@ -455,7 +455,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
           standard={chosenKey || undefined}
           currency={resolvedCurrency}
         />
-        <Button size="sm" variant="ghost" icon={<Upload size={14} />} onClick={() => setImportOpen(true)}>
+        <Button size="sm" variant="ghost" icon={<Download size={14} />} onClick={() => setImportOpen(true)}>
           {t('costmodel.structure.import_cta', { defaultValue: 'Import code list' })}
         </Button>
         {chosenList?.source === 'custom' && (

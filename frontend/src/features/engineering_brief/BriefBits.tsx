@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { Download, Lock } from 'lucide-react';
+import { Lock, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { useToastStore } from '@/stores/useToastStore';
@@ -95,7 +95,7 @@ export function ExportButtons({ projectId, what }: { projectId: string; what: Ex
           key={format}
           variant="secondary"
           size="sm"
-          icon={<Download size={14} />}
+          icon={<Upload size={14} />}
           loading={download.isPending && download.variables === format}
           onClick={() => download.mutate(format)}
           data-testid={`brief-export-${what}-${format}`}

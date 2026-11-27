@@ -8,11 +8,11 @@ import { useTranslation } from 'react-i18next';
 import {
   X,
   Loader2,
-  Upload,
   AlertTriangle,
   ChevronDown,
   ChevronRight,
   FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -528,7 +528,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
                     : 'border-border-light hover:border-oe-blue hover:bg-oe-blue/5'
                 }`}
               >
-                <Upload size={24} className="text-content-tertiary" />
+                <Download size={24} className="text-content-tertiary" />
                 <span className="text-sm font-medium">
                   {t('boq.import_preview.drop_zone', { defaultValue: 'Drop file here or click to browse' })}
                 </span>

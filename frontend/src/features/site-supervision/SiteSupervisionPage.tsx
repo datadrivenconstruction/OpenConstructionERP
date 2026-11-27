@@ -11,7 +11,6 @@ import {
   Search,
   CalendarDays,
   ClipboardCheck,
-  FileDown,
   Trash2,
   Pencil,
   X,
@@ -20,6 +19,7 @@ import {
   Workflow,
   BarChart3,
   ChevronRight,
+  FileUp,
 } from 'lucide-react';
 
 import {
@@ -1260,7 +1260,7 @@ export function SiteSupervisionPage() {
                         onClick={() => void handleExport(visit)}
                         title={t('site_supervision.export', { defaultValue: 'Export' })}
                       >
-                        <FileDown size={14} />
+                        <FileUp size={14} />
                       </Button>
                       <Button
                         variant="ghost"

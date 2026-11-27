@@ -23,7 +23,7 @@ import {
   ShieldCheck,
   Trash2,
   FileText,
-  Download,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -848,7 +848,7 @@ const SystemCard = React.memo(function SystemCard({
                 defaultValue: 'Download this system as a spreadsheet',
               })}
             >
-              <Download size={14} className="mr-1" />
+              <Upload size={14} className="mr-1" />
               {t('commissioning.export_csv', { defaultValue: 'Export CSV' })}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => onDelete(system)}>
@@ -1375,7 +1375,7 @@ export function CommissioningPage() {
                   defaultValue: 'Download every system in this project as a spreadsheet',
                 })}
               >
-                <Download size={14} className="mr-1" />
+                <Upload size={14} className="mr-1" />
                 {t('commissioning.export_register', { defaultValue: 'Export register' })}
               </Button>
             )}

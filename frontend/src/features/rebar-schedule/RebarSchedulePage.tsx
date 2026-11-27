@@ -19,6 +19,7 @@ import {
   Upload,
   Weight,
   X,
+  FileDown,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
@@ -671,7 +672,7 @@ export function RebarSchedulePage() {
                   onClick={handleConfirmImport}
                   disabled={importing}
                   loading={importing}
-                  icon={<Upload className="h-4 w-4" aria-hidden />}
+                  icon={<Download className="h-4 w-4" aria-hidden />}
                 >
                   {hasErrors
                     ? t('rebar_schedule.import_anyway', { defaultValue: 'Import with errors' })
@@ -765,7 +766,7 @@ export function RebarSchedulePage() {
               <Button
                 variant="secondary"
                 onClick={handleExport}
-                icon={<Download className="h-4 w-4" aria-hidden />}
+                icon={<Upload className="h-4 w-4" aria-hidden />}
               >
                 {t('rebar_schedule.export', { defaultValue: 'Export .abs' })}
               </Button>
@@ -982,7 +983,7 @@ export function RebarSchedulePage() {
           <div className="flex flex-col gap-5 md:flex-row md:items-start">
             <div className="min-w-0 flex-1 space-y-2">
               <h2 id="rebar-import-title" className="oe-card-title flex items-center gap-2">
-                <FileUp className="h-4 w-4 text-oe-blue" aria-hidden />
+                <FileDown className="h-4 w-4 text-oe-blue" aria-hidden />
                 {t('rebar_schedule.import_panel_title', { defaultValue: 'Import a bar bending schedule' })}
               </h2>
               <p className="text-xs text-content-secondary">

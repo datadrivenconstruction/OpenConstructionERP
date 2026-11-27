@@ -1013,7 +1013,7 @@ function ImportContactsModal({
               {isPending ? (
                 <Loader2 size={16} className="animate-spin mr-1.5" />
               ) : (
-                <Upload size={16} className="mr-1.5" />
+                <Download size={16} className="mr-1.5" />
               )}
               <span>{t('contacts.import_btn', { defaultValue: 'Import' })}</span>
             </Button>
@@ -1901,7 +1901,7 @@ export function ContactsPage() {
                 exportMut.isPending ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Download size={14} />
+                  <Upload size={14} />
                 )
               }
               onClick={() => exportMut.mutate()}
@@ -1912,7 +1912,7 @@ export function ContactsPage() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Upload size={14} />}
+              icon={<Download size={14} />}
               onClick={() => setShowImportModal(true)}
             >
               {t('contacts.import', { defaultValue: 'Import' })}

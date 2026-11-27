@@ -18,7 +18,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, ClipboardCheck, Download, MessageSquare, Printer } from 'lucide-react';
+import { ArrowRight, ClipboardCheck, MessageSquare, Printer, Upload } from 'lucide-react';
 
 import { Badge, Button, WideModal } from '@/shared/ui';
 import { statusVariant } from '@/features/bcf/issueStatus';
@@ -126,7 +126,7 @@ export function ReviewSessionSummary({
             onClick={onExportAgenda}
             loading={exporting}
             disabled={agendaSize === 0}
-            icon={<Download size={16} />}
+            icon={<Upload size={16} />}
           >
             {t('bim.review_export_agenda', { defaultValue: 'Export .bcfzip' })}
           </Button>

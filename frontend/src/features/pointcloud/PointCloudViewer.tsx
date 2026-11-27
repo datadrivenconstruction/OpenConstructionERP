@@ -51,7 +51,6 @@ import {
   Copy,
   Crop,
   Crosshair,
-  Download,
   Eye,
   EyeOff,
   Gauge,
@@ -80,6 +79,7 @@ import {
   Triangle,
   Undo2,
   X,
+  Upload,
 } from 'lucide-react';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -2336,7 +2336,7 @@ export function PointCloudViewer({ scanId, scanLabel, pointsPath }: PointCloudVi
                 className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-40"
                 data-testid="pointcloud-measure-export"
               >
-                <Download size={12} />
+                <Upload size={12} />
                 {t('pointcloud.export_csv', { defaultValue: 'Export CSV' })}
               </button>
               <button
@@ -2442,7 +2442,7 @@ export function PointCloudViewer({ scanId, scanLabel, pointsPath }: PointCloudVi
                   className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-40"
                   data-testid="pointcloud-area-export"
                 >
-                  <Download size={12} />
+                  <Upload size={12} />
                   {t('pointcloud.export_csv', { defaultValue: 'Export CSV' })}
                 </button>
                 <button
@@ -2636,7 +2636,7 @@ export function PointCloudViewer({ scanId, scanLabel, pointsPath }: PointCloudVi
                   className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue"
                   data-testid="pointcloud-annotate-export"
                 >
-                  <Download size={12} />
+                  <Upload size={12} />
                   {t('pointcloud.export_csv', { defaultValue: 'Export CSV' })}
                 </button>
                 <button

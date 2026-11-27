@@ -17,13 +17,13 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ArrowRight,
   ClipboardCheck,
-  Download,
   FileCheck2,
   GitBranch,
   Loader2,
   Send,
   ShieldCheck,
   Stamp,
+  Upload,
 } from 'lucide-react';
 
 import {
@@ -282,7 +282,7 @@ function RegisterInner() {
                 exportMut.isPending ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Download size={14} />
+                  <Upload size={14} />
                 )
               }
               onClick={() => exportMut.mutate()}

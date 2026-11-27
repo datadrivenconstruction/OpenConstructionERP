@@ -123,13 +123,13 @@ export default function LandParcelsPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportTarget('parcels')} data-testid="parcels-import" disabled={!canWrite}>
+      <Button variant="primary" icon={<FileDown size={16} />} onClick={() => setImportTarget('parcels')} data-testid="parcels-import" disabled={!canWrite}>
         {t('survey.parcels.btn.import', { defaultValue: 'Import parcels' })}
       </Button>
       <div className="relative">
         <Button
           variant="secondary"
-          icon={<FileDown size={16} />}
+          icon={<FileUp size={16} />}
           onClick={() => setExportOpen((v) => !v)}
           aria-expanded={exportOpen}
           data-testid="parcels-export"

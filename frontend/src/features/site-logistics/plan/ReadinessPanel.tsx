@@ -6,7 +6,7 @@
 // exports for the file, and the catalogue the project's figures come from.
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, CircleAlert, Download, RefreshCw, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CircleAlert, RefreshCw, XCircle, Upload } from 'lucide-react';
 
 import { fmtList } from '@/shared/lib/formatters';
 import { Badge } from '@/shared/ui/Badge';
@@ -227,7 +227,7 @@ export function ReadinessPanel({ projectId, catalogue }: PanelProps) {
                     onClick={() => void download(register, format)}
                     data-testid={`plan-export-${register}-${format}`}
                   >
-                    <Download size={14} className="mr-1" />
+                    <Upload size={14} className="mr-1" />
                     {tx(t, `readiness.${format}`)}
                   </Button>
                 ))}

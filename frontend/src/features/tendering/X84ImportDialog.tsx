@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { Upload } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { Button, Badge, Input } from '@/shared/ui';
 import { WideModal } from '@/shared/ui/WideModal';
 import { fmtList } from '@/shared/lib/formatters';
@@ -121,7 +121,7 @@ export function X84ImportDialog({
           })}
         </p>
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary">
-          <Upload size={14} />
+          <Download size={14} />
           {file ? file.name : t('tendering.import_choose', { defaultValue: 'Choose file' })}
           <input
             type="file"

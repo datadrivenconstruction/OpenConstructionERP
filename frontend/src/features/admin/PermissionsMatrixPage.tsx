@@ -36,7 +36,6 @@ import {
   ChevronRight,
   ChevronsDownUp,
   ChevronsUpDown,
-  Download,
   Loader2,
   Lock,
   MinusSquare,
@@ -45,6 +44,7 @@ import {
   ShieldCheck,
   Square,
   X as XIcon,
+  Upload,
 } from 'lucide-react';
 import { Button, EmptyState } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
@@ -1193,7 +1193,7 @@ export function PermissionsMatrixPage() {
                 type="button"
                 variant="secondary"
                 onClick={handleExportCsv}
-                icon={<Download size={16} aria-hidden />}
+                icon={<Upload size={16} aria-hidden />}
                 data-testid="permissions-matrix-export-csv"
               >
                 {t('admin.permissions.export_csv', { defaultValue: 'Export CSV' })}

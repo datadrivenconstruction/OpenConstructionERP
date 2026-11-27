@@ -49,7 +49,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Download,
   Eye,
   FileJson,
   Filter,
@@ -59,6 +58,7 @@ import {
   ShieldCheck,
   User as UserIcon,
   X,
+  Upload,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, DismissibleInfo, IntroRichText, Button, ModuleGuideButton, SideDrawer } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1025,7 +1025,7 @@ export function AuditLogPage() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={handleExportCsv}
               data-testid="audit-export-csv"
             >

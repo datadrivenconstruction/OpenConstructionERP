@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { AlertTriangle, CheckCircle2, Download, FileUp, Loader2, Ruler, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileUp, Loader2, Ruler, X, Upload } from 'lucide-react';
 import { Badge, Button } from '@/shared/ui';
 import { fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -627,7 +627,7 @@ export function GaebSiteExchangeDialog({
               <Button
                 variant="primary"
                 size="sm"
-                icon={<Download size={14} />}
+                icon={<Upload size={14} />}
                 onClick={() => void handleExport()}
                 disabled={busy}
               >

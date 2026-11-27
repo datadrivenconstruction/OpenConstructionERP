@@ -27,12 +27,12 @@ import {
   ArrowUpRight,
   Box,
   Cuboid,
-  Download,
   Edit3,
   Loader2,
   Package,
   Ruler,
   X,
+  Upload,
 } from 'lucide-react';
 
 import { Badge, Button, KvList, Kv, QtyTile } from '@/shared/ui';
@@ -254,7 +254,7 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
             className="inline-flex items-center gap-1 rounded-md border border-border-medium px-2.5 py-1 text-xs text-content-secondary hover:bg-surface-secondary hover:text-oe-blue"
             title={t('assets.cobie_export', { defaultValue: 'Download COBie (XLSX)' })}
           >
-            <Download size={12} />
+            <Upload size={12} />
             COBie
           </button>
         </div>

@@ -21,12 +21,12 @@ import {
   Pencil,
   Palette,
   Trash2,
-  Download,
   Calculator,
   Plus,
   Box,
   Ruler,
   Layers,
+  Upload,
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
 import { updateElementGroup } from './api';
@@ -563,7 +563,7 @@ export default function BIMGroupsPanel({
                   onClick={() => handleExportCSV(group)}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-2xs text-content-primary hover:bg-surface-secondary"
                 >
-                  <Download size={12} />
+                  <Upload size={12} />
                   {t('bim.groups_export_csv', { defaultValue: 'Export CSV' })}
                 </button>
                 {onUseAsQuantitySource && (

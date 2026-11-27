@@ -30,7 +30,6 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
-  Download,
   FileText,
   History,
   Loader2,
@@ -41,6 +40,7 @@ import {
   ShieldCheck,
   Square,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
 import { getErrorMessage, triggerDownload } from '@/shared/lib/api';
@@ -477,7 +477,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
             variant="secondary"
             onClick={onExport}
             disabled={!draft}
-            icon={<Download className="h-4 w-4" aria-hidden />}
+            icon={<Upload className="h-4 w-4" aria-hidden />}
           >
             {t('estimateBasis.export', { defaultValue: 'Export' })}
           </Button>

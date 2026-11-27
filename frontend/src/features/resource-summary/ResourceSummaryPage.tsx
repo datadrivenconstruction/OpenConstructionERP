@@ -17,7 +17,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Boxes,
   ClipboardList,
-  Download,
   FilePlus,
   HardHat,
   Layers,
@@ -26,6 +25,7 @@ import {
   Truck,
   Users,
   Wrench,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, EmptyState, ErrorState, PageHeader, SkeletonTable, StatCard, TabBar, tabIds } from '@/shared/ui';
 import { CreateRequisitionModal } from './CreateRequisitionModal';
@@ -126,7 +126,7 @@ export function ResourceSummaryPage() {
           <Button
             variant="secondary"
             size="sm"
-            icon={<Download size={14} />}
+            icon={<Upload size={14} />}
             onClick={handleExport}
             disabled={exporting}
           >

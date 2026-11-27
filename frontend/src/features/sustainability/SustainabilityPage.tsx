@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Leaf,
-  Download,
   Zap,
   CheckCircle2,
   AlertTriangle,
@@ -16,6 +15,7 @@ import {
   ChevronUp,
   Plus,
   Settings2,
+  Upload,
 } from 'lucide-react';
 import { Breadcrumb, Card, CardHeader, CardContent, Button, EmptyState, Skeleton, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -870,7 +870,7 @@ export function SustainabilityPage() {
                 });
               })()}
             </div>
-            <Button variant="secondary" size="sm" icon={<Download size={14} />}
+            <Button variant="secondary" size="sm" icon={<Upload size={14} />}
               onClick={handleExportCsv}>
               {t('sustainability.export_csv', 'Export CO2 Report (CSV)')}
             </Button>

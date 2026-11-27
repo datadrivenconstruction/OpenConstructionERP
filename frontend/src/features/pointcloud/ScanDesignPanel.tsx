@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Flame, Layers, Ruler } from 'lucide-react';
+import { Flame, Layers, Ruler, Upload } from 'lucide-react';
 import { Badge, Button, Card, StatCard } from '@/shared/ui';
 import { downloadWithAuth, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -257,10 +257,10 @@ export function ScanDesignPanel({ scanId, projectId, heatReportId, onHeatmap }: 
                   ? t('pointcloud.design.hide_heatmap', { defaultValue: 'Show scan colours' })
                   : t('pointcloud.design.show_heatmap', { defaultValue: 'Show deviation heatmap' })}
               </Button>
-              <Button size="sm" variant="ghost" icon={<Download size={14} />} onClick={() => void downloadWithAuth(deviationExportUrl(report.id, 'pdf', lang), `deviation-${report.surface_code}.pdf`).catch(fail)}>
+              <Button size="sm" variant="ghost" icon={<Upload size={14} />} onClick={() => void downloadWithAuth(deviationExportUrl(report.id, 'pdf', lang), `deviation-${report.surface_code}.pdf`).catch(fail)}>
                 PDF
               </Button>
-              <Button size="sm" variant="ghost" icon={<Download size={14} />} onClick={() => void downloadWithAuth(deviationExportUrl(report.id, 'csv', lang), `deviation-${report.surface_code}.csv`).catch(fail)}>
+              <Button size="sm" variant="ghost" icon={<Upload size={14} />} onClick={() => void downloadWithAuth(deviationExportUrl(report.id, 'csv', lang), `deviation-${report.surface_code}.csv`).catch(fail)}>
                 CSV
               </Button>
             </div>

@@ -574,7 +574,7 @@ export function FieldReportsPage() {
             {exportMut.isPending ? (
               <Loader2 size={14} className="mr-1.5 animate-spin shrink-0" />
             ) : (
-              <Download size={14} className="mr-1.5 shrink-0" />
+              <Upload size={14} className="mr-1.5 shrink-0" />
             )}
             <span className="whitespace-nowrap">{t('fieldreports.export', { defaultValue: 'Export' })}</span>
           </Button>
@@ -584,7 +584,7 @@ export function FieldReportsPage() {
             onClick={() => setShowImportModal(true)}
             className="shrink-0 whitespace-nowrap"
           >
-            <Upload size={14} className="mr-1.5 shrink-0" />
+            <Download size={14} className="mr-1.5 shrink-0" />
             <span className="whitespace-nowrap">{t('fieldreports.import', { defaultValue: 'Import' })}</span>
           </Button>
           <Button
@@ -979,7 +979,7 @@ export function FieldReportsPage() {
                               title={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
                               aria-label={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
                             >
-                              <Download size={16} />
+                              <Upload size={16} />
                             </button>
                             {report.status !== 'approved' && (
                               <button
@@ -1245,7 +1245,7 @@ function ImportFieldReportsModal({
               {isPending ? (
                 <Loader2 size={16} className="animate-spin mr-1.5" />
               ) : (
-                <Upload size={16} className="mr-1.5" />
+                <Download size={16} className="mr-1.5" />
               )}
               <span>{t('fieldreports.import_btn', { defaultValue: 'Import' })}</span>
             </Button>

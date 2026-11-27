@@ -19,8 +19,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   ClipboardPaste,
-  Download,
-  FileUp,
   Loader2,
   PackageOpen,
   Play,
@@ -28,6 +26,8 @@ import {
   Scissors,
   Trash2,
   Warehouse,
+  Upload,
+  FileDown,
 } from 'lucide-react';
 import {
   Badge,
@@ -1208,7 +1208,7 @@ function ImportBar({
         </>
       )}
       {mode && mode !== 'file' && (
-        <Button size="sm" icon={<FileUp size={14} />} disabled={!ready} loading={importMut.isPending} onClick={() => importMut.mutate(undefined)}>
+        <Button size="sm" icon={<FileDown size={14} />} disabled={!ready} loading={importMut.isPending} onClick={() => importMut.mutate(undefined)}>
           {t('cutting.import_run', { defaultValue: 'Import' })}
         </Button>
       )}
@@ -1393,10 +1393,10 @@ function PlanPanel({
           )}
         </h3>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => void downloadPlan(plan.id, 'pdf', locale)}>
+          <Button variant="secondary" size="sm" icon={<Upload size={14} />} onClick={() => void downloadPlan(plan.id, 'pdf', locale)}>
             {t('cutting.export_pdf', { defaultValue: 'Cutting list PDF' })}
           </Button>
-          <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => void downloadPlan(plan.id, 'xlsx', locale)}>
+          <Button variant="secondary" size="sm" icon={<Upload size={14} />} onClick={() => void downloadPlan(plan.id, 'xlsx', locale)}>
             {t('cutting.export_xlsx', { defaultValue: 'Workbook' })}
           </Button>
           {canEdit && (job.boq_position_id || job.procurement_req_item_id) && (

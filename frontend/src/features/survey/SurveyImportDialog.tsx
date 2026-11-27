@@ -8,7 +8,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Upload } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { Button, ConfidenceBadge, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -209,7 +209,7 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
       {step === 1 && (
         <div className="space-y-4">
           <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-light p-8 text-sm cursor-pointer hover:bg-surface-secondary">
-            <Upload size={20} aria-hidden />
+            <Download size={20} aria-hidden />
             <span>{filename || t('survey.import.drop_formats', { defaultValue: 'Choose a CSV, TXT, GeoJSON, GSI-8/16, JobXML or LandXML file' })}</span>
             <input
               type="file"

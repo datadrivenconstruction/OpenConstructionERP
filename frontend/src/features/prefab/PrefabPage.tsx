@@ -9,7 +9,6 @@ import clsx from 'clsx';
 import {
   Boxes,
   AlertTriangle,
-  Download,
   Plus,
   ArrowRight,
   Search,
@@ -22,6 +21,7 @@ import {
   Coins,
   Link2,
   Unlink,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -1291,7 +1291,7 @@ export function PrefabPage() {
               disabled={!projectId || allUnits.length === 0}
               className="shrink-0 whitespace-nowrap"
             >
-              <Download size={14} className="mr-1 shrink-0" />
+              <Upload size={14} className="mr-1 shrink-0" />
               <span>{t('prefab.export_register', { defaultValue: 'Export register (CSV)' })}</span>
             </Button>
             <Button

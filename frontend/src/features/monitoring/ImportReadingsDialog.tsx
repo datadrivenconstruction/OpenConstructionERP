@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { Button, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -94,7 +94,7 @@ export function ImportReadingsDialog({ open, projectId, onClose }: Props) {
       </Button>
       <Button
         variant="primary"
-        icon={<Upload size={16} />}
+        icon={<Download size={16} />}
         disabled={!p || p.readings - p.already_imported <= 0 || run.isPending}
         loading={run.isPending}
         onClick={() => run.mutate()}

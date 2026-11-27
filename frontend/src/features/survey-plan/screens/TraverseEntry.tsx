@@ -13,7 +13,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { BookOpen, FileUp, Plus, Save, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Save, Trash2, FileDown } from 'lucide-react';
 import { Badge, Button, Card } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtNumber } from '@/shared/lib/formatters';
@@ -315,7 +315,7 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
             <Button size="sm" variant="secondary" icon={<BookOpen size={14} />} loading={demo.isPending} onClick={() => demo.mutate()}>
               {t('plan.trav.load_example', { defaultValue: 'Load example' })}
             </Button>
-            <Button size="sm" variant="secondary" icon={<FileUp size={14} />} loading={parse.isPending} onClick={() => fileRef.current?.click()}>
+            <Button size="sm" variant="secondary" icon={<FileDown size={14} />} loading={parse.isPending} onClick={() => fileRef.current?.click()}>
               {t('plan.trav.import', { defaultValue: 'Import book (CSV)' })}
             </Button>
             <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" aria-hidden

@@ -17,13 +17,13 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Download,
   BarChart3,
   Search,
   Database,
   AlertCircle,
   RefreshCw,
   Wallet,
+  Upload,
 } from 'lucide-react';
 import { Breadcrumb, Button, Card, Badge, Skeleton, EmptyState, ModuleGuideButton, TabBar } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -406,7 +406,7 @@ export function AnalyticsPage() {
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<Download size={14} />}
+                icon={<Upload size={14} />}
                 onClick={handleExportCSV}
                 disabled={!sortedProjects.length}
               >

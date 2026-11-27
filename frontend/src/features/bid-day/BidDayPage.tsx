@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Download,
   Lock,
   Phone,
   Plus,
@@ -26,6 +25,7 @@ import {
   Trash2,
   Unlock,
   X,
+  Upload,
 } from 'lucide-react';
 import { Badge, Button, Breadcrumb, EmptyState, PageHeader, SkeletonTable } from '@/shared/ui';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
@@ -963,8 +963,8 @@ export function BidDayPage() {
                       {fmtDate(s.created_at, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} {s.submitted_by_name && `· ${s.submitted_by_name}`}
                     </div>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      <Button variant="ghost" size="sm" icon={<Download size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'pdf')}>PDF</Button>
-                      <Button variant="ghost" size="sm" icon={<Download size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'xlsx')}>Excel</Button>
+                      <Button variant="ghost" size="sm" icon={<Upload size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'pdf')}>PDF</Button>
+                      <Button variant="ghost" size="sm" icon={<Upload size={12} />} onClick={() => void api.exportSnapshot(board.id, s.id, 'xlsx')}>Excel</Button>
                       <Button variant="ghost" size="sm" onClick={() => void previewPush(s.id)}>
                         {s.pushed_at ? t('bid_day.pushed_again', { defaultValue: 'Push to estimate again' }) : t('bid_day.push', { defaultValue: 'Push to estimate' })}
                       </Button>

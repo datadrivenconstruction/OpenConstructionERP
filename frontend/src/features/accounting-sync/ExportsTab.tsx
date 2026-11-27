@@ -7,7 +7,7 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { Button, Card } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -88,7 +88,7 @@ export function ExportsTab({
               <Button
                 key={kind}
                 variant="secondary"
-                icon={<Download size={14} />}
+                icon={<Upload size={14} />}
                 loading={exportMut.isPending && busyKind === kind}
                 disabled={exportMut.isPending}
                 data-testid={`export-${kind}`}

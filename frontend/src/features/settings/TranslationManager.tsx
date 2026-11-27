@@ -364,7 +364,7 @@ export function TranslationManager() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Upload size={14} />}
+              icon={<Download size={14} />}
               onClick={handleImportClick}
               data-testid="tm-import-btn"
             >
@@ -373,7 +373,7 @@ export function TranslationManager() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               onClick={handleExport}
               data-testid="tm-export-btn"
             >

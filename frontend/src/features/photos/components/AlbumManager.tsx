@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, FolderPlus, Images, Trash2 } from 'lucide-react';
+import { FolderPlus, Images, Trash2, Upload } from 'lucide-react';
 import { Button, ConfirmDialog, EmptyState, ErrorState } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -92,7 +92,7 @@ export function AlbumManager({ projectId, onOpen, onExport }: AlbumManagerProps)
                   className="rounded p-1.5 hover:bg-surface-secondary disabled:opacity-40"
                   aria-label={t('photoArchive.export.album')}
                 >
-                  <Download className="h-4 w-4" />
+                  <Upload className="h-4 w-4" />
                 </button>
                 <button
                   type="button"

@@ -32,11 +32,11 @@ import {
   ChevronDown,
   ChevronRight,
   FileCheck2,
-  Download,
   Loader2,
   CheckCircle2,
   AlertTriangle,
   ExternalLink,
+  Upload,
 } from 'lucide-react';
 
 import { Button, Badge, ConfirmDialog } from '@/shared/ui';
@@ -328,7 +328,7 @@ export function HandoverDocumentsSection({
                     exporting ? (
                       <Loader2 size={12} className="animate-spin" />
                     ) : (
-                      <Download size={12} />
+                      <Upload size={12} />
                     )
                   }
                   onClick={handleExport}

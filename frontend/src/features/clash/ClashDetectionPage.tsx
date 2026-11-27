@@ -3240,7 +3240,7 @@ export function ClashDetectionPage() {
                       variant="secondary"
                       size="sm"
                       loading={importBcfMut.isPending}
-                      icon={<FileUp className="h-4 w-4" />}
+                      icon={<FileDown className="h-4 w-4" />}
                       onClick={() => bcfFileInputRef.current?.click()}
                     >
                       {t('clash.import_bcf', {
@@ -3254,7 +3254,7 @@ export function ClashDetectionPage() {
                       }
                       size="sm"
                       loading={exportMut.isPending}
-                      icon={<FileDown className="h-4 w-4" />}
+                      icon={<FileUp className="h-4 w-4" />}
                       onClick={() =>
                         exportMut.mutate(
                           selResults.size ? [...selResults] : null,
@@ -4632,7 +4632,7 @@ function HowClashWorks() {
       }),
     },
     {
-      icon: <FileDown className="h-3.5 w-3.5 text-oe-blue" />,
+      icon: <FileUp className="h-3.5 w-3.5 text-oe-blue" />,
       title: t('clash.flow_5_title', { defaultValue: 'Export BCF' }),
       desc: t('clash.flow_5_desc', {
         defaultValue: 'Share issues as BCF for coordination with the rest of the team.',

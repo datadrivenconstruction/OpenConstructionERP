@@ -8,7 +8,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 import { Badge, type BadgeVariant } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
@@ -240,10 +240,10 @@ export function ExportButtons({ download }: { download: (format: ExportFormat) =
   };
   return (
     <span className="inline-flex gap-1">
-      <Button variant="ghost" size="sm" icon={<Download size={14} />} loading={busy === 'pdf'} onClick={() => run('pdf')}>
+      <Button variant="ghost" size="sm" icon={<Upload size={14} />} loading={busy === 'pdf'} onClick={() => run('pdf')}>
         {t('staffing.export.pdf', { defaultValue: 'Export PDF' })}
       </Button>
-      <Button variant="ghost" size="sm" icon={<Download size={14} />} loading={busy === 'xlsx'} onClick={() => run('xlsx')}>
+      <Button variant="ghost" size="sm" icon={<Upload size={14} />} loading={busy === 'xlsx'} onClick={() => run('xlsx')}>
         {t('staffing.export.xlsx', { defaultValue: 'Export Excel' })}
       </Button>
     </span>

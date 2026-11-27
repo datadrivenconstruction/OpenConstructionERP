@@ -8,7 +8,7 @@
 import { useId, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, ExternalLink, LayoutDashboard, Map as MapIcon, Network, List as ListIcon, Users } from 'lucide-react';
+import { ExternalLink, LayoutDashboard, Map as MapIcon, Network, List as ListIcon, Users, Upload } from 'lucide-react';
 
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { TabBar } from '@/shared/ui/TabBar';
@@ -269,7 +269,7 @@ function ExportMenu({ model }: { model: FlowModel }) {
   const label = t('data_paths.export', { defaultValue: 'Export' });
   return (
     <div className="flex items-center gap-1" role="group" aria-label={label}>
-      <Download size={14} className="text-content-tertiary" aria-hidden />
+      <Upload size={14} className="text-content-tertiary" aria-hidden />
       <Button variant="ghost" size="sm" onClick={() => download(`${base}.svg`, new Blob([svg()], { type: 'image/svg+xml' }))}>
         SVG
       </Button>

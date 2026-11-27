@@ -380,7 +380,7 @@ export function FileActionsBar({
           onClick={onImport}
           className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg border border-border-light text-content-secondary hover:bg-surface-secondary"
         >
-          <Upload size={14} />
+          <Download size={14} />
           {t('files.actions.import', { defaultValue: 'Import' })}
         </button>
         <button
@@ -388,7 +388,7 @@ export function FileActionsBar({
           onClick={onExport}
           className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue-hover"
         >
-          <Download size={14} />
+          <Upload size={14} />
           {t('files.actions.export', { defaultValue: 'Export' })}
         </button>
       </div>

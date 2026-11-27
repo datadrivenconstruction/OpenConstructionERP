@@ -9,7 +9,7 @@
 import { Fragment, Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, FileDown, Gauge, Layers, Mountain, Pickaxe, Plus, Scale, Send, Truck, Upload } from 'lucide-react';
+import { CheckCircle2, FileDown, Gauge, Layers, Mountain, Pickaxe, Plus, Scale, Send, Truck, Download } from 'lucide-react';
 import { Badge, Breadcrumb, Button, Card, CollapsibleSection, DismissibleInfo, EmptyState, ErrorState, KpiBand, Skeleton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { ModuleGuideButton } from '@/shared/ui/ModuleGuideButton';
@@ -300,7 +300,7 @@ export default function MinePage() {
                             </Button>
                           )}
                           {!claimed && e.actual != null && (
-                            <Button size="sm" variant="secondary" icon={<Upload size={14} />} onClick={() => setTrucksFor(e)} data-testid="mine-trucks">
+                            <Button size="sm" variant="secondary" icon={<Download size={14} />} onClick={() => setTrucksFor(e)} data-testid="mine-trucks">
                               {t('mine.action.import_trucks', { defaultValue: 'Import truck loads' })}
                             </Button>
                           )}

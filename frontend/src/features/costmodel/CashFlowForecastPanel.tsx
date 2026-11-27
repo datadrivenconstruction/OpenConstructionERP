@@ -22,7 +22,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AlertTriangle, Download, Inbox, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Inbox, TrendingDown, Upload } from 'lucide-react';
 
 import { Badge, Button, Card, EmptyState, Skeleton } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
@@ -132,7 +132,7 @@ export function CashFlowForecastPanel({ projectId }: CashFlowForecastPanelProps)
         <Button
           variant="secondary"
           size="sm"
-          icon={<Download size={14} />}
+          icon={<Upload size={14} />}
           loading={exporting}
           disabled={!data?.has_inputs}
           onClick={onExport}

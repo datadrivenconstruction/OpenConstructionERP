@@ -1443,7 +1443,7 @@ export function TasksPage() {
                 exportMut.isPending ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Download size={14} />
+                  <Upload size={14} />
                 )
               }
               onClick={() => exportMut.mutate()}
@@ -1454,7 +1454,7 @@ export function TasksPage() {
             <Button
               variant="secondary"
               size="sm"
-              icon={<Upload size={14} />}
+              icon={<Download size={14} />}
               onClick={() => {
                 setShowImportModal(true);
                 setImportFile(null);
@@ -2022,7 +2022,7 @@ export function TasksPage() {
                   input.click();
                 }}
               >
-                <Upload size={24} className="text-content-tertiary mb-2" />
+                <Download size={24} className="text-content-tertiary mb-2" />
                 <p className="text-sm text-content-secondary text-center">
                   {importFile
                     ? importFile.name
@@ -2084,7 +2084,7 @@ export function TasksPage() {
                   {importPending ? (
                     <Loader2 size={16} className="animate-spin mr-1.5" />
                   ) : (
-                    <Upload size={16} className="mr-1.5" />
+                    <Download size={16} className="mr-1.5" />
                   )}
                   <span>{t('tasks.import_btn', { defaultValue: 'Import' })}</span>
                 </Button>

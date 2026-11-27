@@ -18,11 +18,11 @@ import {
   Copy,
   Pencil,
   Trash2,
-  Download,
   FileText,
   Layers,
   ChevronRight,
   Loader2,
+  Upload,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Button, Card, Badge, EmptyState, TabBar, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
@@ -604,7 +604,7 @@ function SubmissionRow({
       <div className="flex shrink-0 items-center gap-0.5">
         {completed && (
           <CardIconBtn label={t('forms.export_pdf', { defaultValue: 'Export PDF' })} onClick={onExport}>
-            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
           </CardIconBtn>
         )}
         <CardIconBtn label={t('common.delete', { defaultValue: 'Delete' })} danger onClick={onDelete}>

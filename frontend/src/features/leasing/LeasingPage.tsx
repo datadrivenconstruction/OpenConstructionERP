@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { AlarmClock, ArrowRight, Download, FileSignature, KeyRound, Network, Plus, Receipt, Wallet } from 'lucide-react';
+import { AlarmClock, ArrowRight, FileSignature, KeyRound, Network, Plus, Receipt, Wallet, Upload } from 'lucide-react';
 import { Badge, Button, Card, CollapsibleSection, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
@@ -306,7 +306,7 @@ export function LeasingPage() {
             <div className="flex flex-wrap items-center gap-2">
               <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
               {exportProfiles.map((p) => (
-                <Button key={p} variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => void downloadExport(projectId, p)} data-testid={`leasing-export-${p}`}>
+                <Button key={p} variant="ghost" size="sm" icon={<Upload size={14} />} onClick={() => void downloadExport(projectId, p)} data-testid={`leasing-export-${p}`}>
                   {isNationalProfile(profilesQ.data, p)
                     ? t('leasing.export_for', { defaultValue: 'Export for {{name}}', name: p.charAt(0).toUpperCase() + p.slice(1) })
                     : t('leasing.export_as', { defaultValue: 'Export {{format}}', format: p.toUpperCase() })}

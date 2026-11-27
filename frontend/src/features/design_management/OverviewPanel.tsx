@@ -8,7 +8,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle2, CircleAlert, Download, Gauge } from 'lucide-react';
+import { CheckCircle2, CircleAlert, Download, Gauge, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { fmtList } from '@/shared/lib/formatters';
@@ -133,7 +133,7 @@ export function OverviewPanel({ ctx, onOpenGovernance }: { ctx: DesignContext; o
                 <Button
                   size="sm"
                   variant="ghost"
-                  icon={<Download size={14} />}
+                  icon={<Upload size={14} />}
                   disabled={download.isPending}
                   onClick={() => download.mutate({ register, format: 'pdf' })}
                   data-testid={`export-${register}-pdf`}

@@ -19,11 +19,11 @@ import {
   Trash2,
   PlayCircle,
   AlertTriangle,
-  Download,
   LayoutList,
   GitBranch,
   Users,
   Layers,
+  Upload,
 } from 'lucide-react';
 import {
   Button,
@@ -435,7 +435,7 @@ export function TaktSchedulePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        icon={<Download size={14} />}
+                        icon={<Upload size={14} />}
                         onClick={exportPDF}
                         disabled={!lob}
                       >

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectName } from '@/shared/hooks/useProjectName';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { Compass, Download, Grid3x3, Plus, ShieldAlert, Stamp, Users } from 'lucide-react';
+import { Compass, Grid3x3, Plus, ShieldAlert, Stamp, Users, Upload } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -317,7 +317,7 @@ export function CommitmentReleasePage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    icon={<Download size={14} />}
+                    icon={<Upload size={14} />}
                     loading={exportFile.isPending && exportFile.variables === 'pdf'}
                     onClick={() => exportFile.mutate('pdf')}
                     data-testid="export-pdf"
@@ -327,7 +327,7 @@ export function CommitmentReleasePage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    icon={<Download size={14} />}
+                    icon={<Upload size={14} />}
                     loading={exportFile.isPending && exportFile.variables === 'xlsx'}
                     onClick={() => exportFile.mutate('xlsx')}
                     data-testid="export-xlsx"

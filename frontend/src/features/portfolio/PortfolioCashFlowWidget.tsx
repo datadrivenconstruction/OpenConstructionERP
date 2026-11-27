@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Download, TrendingDown } from 'lucide-react';
+import { TrendingDown, Upload } from 'lucide-react';
 
 import { Badge, Button, Card, Skeleton } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
@@ -59,7 +59,7 @@ export function PortfolioCashFlowWidget() {
         <Button
           variant="secondary"
           size="sm"
-          icon={<Download size={14} />}
+          icon={<Upload size={14} />}
           loading={exporting}
           disabled={!data || data.currencies.length === 0}
           onClick={onExport}

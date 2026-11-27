@@ -11,7 +11,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { Download, Loader2, Lock, LockOpen, Plus, RefreshCw, Coins } from 'lucide-react';
+import { Loader2, Lock, LockOpen, Plus, RefreshCw, Coins, Upload } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, WideModal } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui/Badge';
 import { useToastStore } from '@/stores/useToastStore';
@@ -510,7 +510,7 @@ export function PayrollPeriodsSection({ projectId }: { projectId: string }) {
                 disabled={exportMut.isPending || lodasNeedsNumbers || (columnsApply && columns.length === 0)}
                 onClick={() => exportMut.mutate(detail.id)}
               >
-                {exportMut.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download size={14} className="mr-1.5" />}
+                {exportMut.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload size={14} className="mr-1.5" />}
                 {t('payroll.period_export', { defaultValue: 'Export period' })}
               </Button>
             </div>

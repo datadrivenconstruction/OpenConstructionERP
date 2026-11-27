@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -31,7 +31,7 @@ export function PointExportControl({ projectId, ids = [] }: { projectId: string;
         <option value="dxf">DXF</option>
         <option value="landxml">LandXML</option>
       </select>
-      <Button variant="secondary" icon={<Download size={16} />} loading={run.isPending} onClick={() => run.mutate()} data-testid="survey-export">
+      <Button variant="secondary" icon={<Upload size={16} />} loading={run.isPending} onClick={() => run.mutate()} data-testid="survey-export">
         {ids.length > 0
           ? t('survey.export.selection', { defaultValue: 'Export {{count}} selected', count: ids.length })
           : t('survey.export.all', { defaultValue: 'Export points' })}

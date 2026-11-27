@@ -9,7 +9,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crosshair, Database, FileUp, Grid3x3, Link2, ListChecks, MapPin, Route } from 'lucide-react';
+import { Crosshair, Database, Grid3x3, Link2, ListChecks, MapPin, Route, FileDown } from 'lucide-react';
 import { SurveyLinksPanel } from '@/features/survey-calc/SurveyLinksPanel';
 import {
   Breadcrumb,
@@ -210,7 +210,7 @@ export default function SurveyRegisterPage() {
     <div className="flex flex-wrap gap-2">
       {canWrite && (
       <>
-      <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
+      <Button variant="primary" icon={<FileDown size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
         {t('survey.action.import_points', { defaultValue: 'Import points' })}
       </Button>
       <Button
