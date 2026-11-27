@@ -64,6 +64,7 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.costs import base_registry, base_state
+from app.modules.costs.from_position import CostItemFromPositionRequest, CostItemRefreshRequest
 from app.modules.costs.intelligence import (
     CostCertaintyService,
     CostUsageRecorder,
@@ -600,6 +601,124 @@ async def create_cost_item(
         is_admin = (user or {}).get("role") == "admin"
         await catalog_service.get_owned_catalog(data.catalog_id, owner_id=owner_id, is_admin=is_admin)
     item = await service.create_cost_item(data)
+    return CostItemResponse.model_validate(item)
+
+
+# ── From a BOQ position ───────────────────────────────────────────────────
+
+
+async def _position_for_cost_item(
+    position_id: uuid.UUID,
+    user_id: str,
+    payload: dict[str, Any] | None,
+    session: AsyncSession,
+) -> tuple[Any, str]:
+    """Load a position the caller may read, and its project currency (empty when unknown)."""
+    from sqlalchemy import select
+
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.boq.router import _verify_boq_owner
+    from app.modules.projects.models import Project
+
+    position = await session.get(Position, position_id)
+    if position is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, position.boq_id, user_id, payload)
+    currency = (
+        await session.execute(
+            select(Project.currency).join(BOQ, BOQ.project_id == Project.id).where(BOQ.id == position.boq_id)
+        )
+    ).scalar_one_or_none()
+    return position, str(currency or "").strip()[:3].upper()
+
+
+def _fields_or_422(position: Any, currency: str) -> dict[str, Any]:
+    from app.modules.costs.from_position import PositionNotSavableError, cost_item_fields_from_position
+
+    try:
+        fields = cost_item_fields_from_position(
+            position_id=position.id,
+            description=position.description,
+            unit=position.unit,
+            unit_rate=position.unit_rate,
+            metadata=position.metadata_,
+        )
+    except PositionNotSavableError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    if not fields["currency"]:
+        fields["currency"] = currency
+    return fields
+
+
+@router.post(
+    "/from-boq-position/{position_id}/",
+    response_model=CostItemResponse,
+    status_code=201,
+    summary="Save a BOQ position as a cost item",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def create_cost_item_from_boq_position(
+    position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    user: CurrentUserPayload,
+    session: SessionDep,
+    data: CostItemFromPositionRequest | None = None,
+    service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
+) -> CostItemResponse:
+    """Create a cost item from a priced position: description, unit, rate and resource components.
+
+    The code defaults to one derived from the position id, so saving the same
+    position twice answers 409 instead of creating a second item. A section
+    (no unit) is refused with 422.
+    """
+    from app.modules.costs.from_position import default_code, resolve_region
+
+    data = data or CostItemFromPositionRequest()
+    position, currency = await _position_for_cost_item(position_id, user_id, user, session)
+    fields = _fields_or_422(position, currency)
+    if data.catalog_id is not None:
+        await catalog_service.get_owned_catalog(
+            data.catalog_id,
+            owner_id=_parse_user_uuid((user or {}).get("sub")),
+            is_admin=(user or {}).get("role") == "admin",
+        )
+    create = CostItemCreate(
+        code=data.code or default_code(position.id),
+        region=resolve_region(data.region, position.metadata_),
+        source="custom",
+        catalog_id=data.catalog_id,
+        **fields,
+    )
+    item = await service.create_cost_item(create)
+    return CostItemResponse.model_validate(item)
+
+
+@router.put(
+    "/from-boq-position/{cost_item_id}/",
+    response_model=CostItemResponse,
+    summary="Refresh a cost item from a BOQ position",
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def update_cost_item_from_boq_position(
+    cost_item_id: uuid.UUID,
+    data: CostItemRefreshRequest,
+    user_id: CurrentUserId,
+    user: CurrentUserPayload,
+    session: SessionDep,
+    service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
+) -> CostItemResponse:
+    """Overwrite description, unit, rate and components of a cost item with the position's current values.
+
+    The code and region stay. The same catalog ownership gate as a plain
+    update applies.
+    """
+    existing = await service.get_cost_item(cost_item_id)
+    await _enforce_item_catalog_ownership(existing, user, catalog_service)
+    position, currency = await _position_for_cost_item(data.position_id, user_id, user, session)
+    fields = _fields_or_422(position, currency)
+    item = await service.update_cost_item(cost_item_id, CostItemUpdate(**fields))
     return CostItemResponse.model_validate(item)
 
 

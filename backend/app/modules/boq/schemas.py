@@ -3148,6 +3148,27 @@ class PriceAlignmentRow(BaseModel):
         return str(v)
 
 
+class CompositionComponent(BaseModel):
+    """One resource row of a position and what is wrong with it."""
+
+    index: int
+    name: str
+    quantity: str
+    unit_rate: str
+    issues: list[str] = Field(default_factory=list)
+
+
+class PositionComposition(BaseModel):
+    """Stored unit rate of a position against the rate its resource rows derive."""
+
+    stored_unit_rate: str
+    derived_unit_rate: str
+    delta: str
+    coherent: bool
+    fx_missing: list[str] = Field(default_factory=list)
+    components: list[CompositionComponent] = Field(default_factory=list)
+
+
 class PriceAlignmentPreview(BaseModel):
     """Dry run of aligning a bill with a region's resource price sheet."""
 
