@@ -966,6 +966,34 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         step = int(req.approval_step or 0)
         return chain[step] if step < len(chain) else None
 
+    @staticmethod
+    def decision_block(req: MaterialRequisition, user_id: str | None, user_role: str | None) -> str | None:
+        """Why this user may not decide the requisition's current step, or None when they may.
+
+        The same answer guards approve and reject and is shown on the step, so
+        the screen never ranks roles on its own. ``own_submission``: they
+        submitted it; ``not_designated``: the step names someone else;
+        ``requester``, ``decided`` and ``role`` apply to a role step.
+        """
+        submitter = req.submitted_by or req.requester_id
+        if submitter and user_id and str(submitter) == str(user_id):
+            return "own_submission"
+        expected = RequisitionWorkflowService._next_designated(req)
+        role = role_of(expected)
+        if role is None:
+            return "not_designated" if expected is not None and str(user_id) != expected else None
+        from app.modules.approval_routes.service import _caller_role_satisfies
+
+        meta = req.metadata_ if isinstance(req.metadata_, dict) else {}
+        decided = {str(a.get("user_id")) for a in meta.get("approval_round") or [] if isinstance(a, dict)}
+        if user_id is None or str(user_id) == str(req.requester_id or ""):
+            return "requester"
+        if str(user_id) in decided:
+            return "decided"
+        if not _caller_role_satisfies(user_role, role):
+            return "role"
+        return None
+
     async def _assert_designated(self, req: MaterialRequisition, user_id: str | None, action: str) -> None:
         """With designated approvers, only the next one in the chain may decide.
 
@@ -976,17 +1004,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         expected = self._next_designated(req)
         role = role_of(expected)
         if role is not None:
-            meta = req.metadata_ if isinstance(req.metadata_, dict) else {}
-            decided = {str(a.get("user_id")) for a in meta.get("approval_round") or [] if isinstance(a, dict)}
-            actor_role = await self._actor_role(user_id)
-            from app.modules.approval_routes.service import _caller_role_satisfies
-
-            if (
-                user_id is None
-                or str(user_id) == str(req.requester_id or "")
-                or str(user_id) in decided
-                or not _caller_role_satisfies(actor_role, role)
-            ):
+            block = self.decision_block(req, user_id, await self._actor_role(user_id))
+            if block is not None:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=(
@@ -2291,6 +2310,8 @@ class ResponseContext:
         user_names: dict[str, str] | None = None,
         activities: dict[uuid.UUID, ScheduleActivityOption] | None = None,
         progress: dict[uuid.UUID, LineProgress] | None = None,
+        viewer_id: str | None = None,
+        viewer_role: str | None = None,
     ) -> None:
         self.vendors = vendors or {}
         self.po_numbers = po_numbers or {}
@@ -2298,6 +2319,9 @@ class ResponseContext:
         self.user_names = user_names or {}
         self.activities = activities or {}
         self.progress = progress or {}
+        #: The signed-in user, so the deciding step can say whether they may decide it.
+        self.viewer_id = viewer_id
+        self.viewer_role = viewer_role
 
 
 async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str, str]:
@@ -2316,7 +2340,9 @@ async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str,
     return {parsed[row.id]: row.full_name for row in rows if row.full_name}
 
 
-async def build_response_context(session: AsyncSession, reqs: list[MaterialRequisition]) -> ResponseContext:
+async def build_response_context(
+    session: AsyncSession, reqs: list[MaterialRequisition], viewer_id: str | None = None
+) -> ResponseContext:
     """Vendor names, order numbers, live order progress, approver names and schedule activities."""
     vendor_ids = {r.vendor_id for r in reqs if r.vendor_id is not None}
     for r in reqs:
@@ -2354,7 +2380,8 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
             if item.schedule_activity_id is not None
         }
         activities.update(await workflow.load_activities(project_id, wanted))
-    return ResponseContext(vendors, po_numbers, {}, user_names, activities, progress)
+    viewer_role = await RequisitionWorkflowService(session)._actor_role(viewer_id) if viewer_id else None
+    return ResponseContext(vendors, po_numbers, {}, user_names, activities, progress, viewer_id, viewer_role)
 
 
 def _vendor_ref(vendor_id: uuid.UUID, ctx: ResponseContext) -> RequisitionVendorRef:
@@ -2405,6 +2432,11 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
     band_of = {str(k): str(v) for k, v in (routed.get("added") or {}).items()}
     steps: list[RequisitionApprovalStep] = []
     by_step = {int(a.get("step") or 0): a for a in meta.get("approval_round") or [] if isinstance(a, dict)}
+    block = (
+        RequisitionWorkflowService.decision_block(req, ctx.viewer_id, ctx.viewer_role)
+        if ctx.viewer_id and req.status == "submitted"
+        else None
+    )
     for index, approver in enumerate(chain):
         role = role_of(approver)
         if role is not None:
@@ -2429,6 +2461,8 @@ def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[Requi
                 band_from=band_of.get(approver),
                 band_currency=(str(routed.get("currency") or "") or None) if approver in band_of else None,
                 role=role,
+                can_decide=(block is None) if state == "next" and ctx.viewer_id else None,
+                decide_reason=block if state == "next" and ctx.viewer_id else None,
             )
         )
     return steps

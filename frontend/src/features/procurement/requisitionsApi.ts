@@ -177,6 +177,21 @@ export interface RequisitionApprovalStep {
   band_currency?: string | null;
   /** A role step: any project member with this role decides; ``user_id`` is then ``role:<name>``. */
   role?: string | null;
+  /** On the step that decides now: whether the signed-in user may approve or reject it (the server ranks roles). */
+  can_decide?: boolean | null;
+  decide_reason?: DecideBlock | null;
+}
+
+/** Why the signed-in user may not decide the current step, as the server answers it. */
+export type DecideBlock = 'own_submission' | 'not_designated' | 'requester' | 'decided' | 'role';
+
+/** The step deciding now and why the signed-in user may not decide it, or null when nothing blocks them. */
+export function nextStepBlock(
+  steps: RequisitionApprovalStep[] | undefined,
+): { block: DecideBlock; role: string | null } | null {
+  const next = (steps ?? []).find((s) => s.state === 'next');
+  if (!next || next.can_decide !== false || !next.decide_reason) return null;
+  return { block: next.decide_reason, role: next.role ?? null };
 }
 
 export interface RequisitionOrderRef {

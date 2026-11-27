@@ -140,8 +140,14 @@ async def test_a_role_band_is_decided_by_any_holder_of_the_role(world: World) ->
     ]
     assert body["next_approver_id"] is None
     assert body["next_approver_role"] == "manager"
+    assert (body["approval_chain"][0]["can_decide"], body["approval_chain"][0]["decide_reason"]) == (
+        False,
+        "own_submission",
+    ), "the submitter sees why the step is not theirs"
 
     async with client_as(world, second, "manager") as c:
+        seen = (await c.get(f"{REQ}/{rid}")).json()
+        assert seen["approval_chain"][0]["can_decide"] is True
         approved = await c.post(f"{REQ}/{rid}/approve", json={})
     assert approved.status_code == 200, approved.text
     out = approved.json()

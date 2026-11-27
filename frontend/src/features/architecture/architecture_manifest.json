@@ -222534,6 +222534,16 @@
               "name": "role",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "can_decide",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "decide_reason",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
