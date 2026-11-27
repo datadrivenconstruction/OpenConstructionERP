@@ -2960,8 +2960,8 @@
       "suggestion": "Pozitsiya resurslarini qo'shing yoki summani to'g'ri xarajat turiga o'tkazing"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} da loyiha valyutasiga kurs belgilanmagan valyutada narxlangan resurslar bor, shuning uchun ular taqsimotda qatnashmadi: {resources}",
+      "suggestion": "Loyiha valyutasi sozlamalarida valyuta kursini qo'shing, so'ng byudjetni qayta yarating"
     },
     "unknown_type": {
       "fail": "{line} toifasi \"{category}\", bu xarajat turi emas",

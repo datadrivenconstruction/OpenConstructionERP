@@ -2960,8 +2960,8 @@
       "suggestion": "Adicione os recursos do item ou mova o valor para o tipo de custo correto"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} tem recursos precificados numa moeda sem taxa de câmbio para a moeda do projeto, por isso não entraram na divisão: {resources}",
+      "suggestion": "Adicione a taxa de câmbio nas configurações de moeda do projeto e depois gere o orçamento novamente"
     },
     "unknown_type": {
       "fail": "{line} tem a categoria \"{category}\", que não é um tipo de custo",

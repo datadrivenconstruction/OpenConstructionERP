@@ -2960,8 +2960,8 @@
       "suggestion": "Doplňte zdroje položky nebo přesuňte částku na správný druh nákladu"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} má zdroje oceněné v měně bez směnného kurzu k měně projektu, proto se nezapočítaly do rozdělení: {resources}",
+      "suggestion": "Doplňte směnný kurz v nastavení měny projektu a pak rozpočet vygenerujte znovu"
     },
     "unknown_type": {
       "fail": "{line} má kategorii \"{category}\", která není druhem nákladu",

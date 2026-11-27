@@ -2960,8 +2960,8 @@
       "suggestion": "Legg til postens ressurser, eller flytt beløpet til riktig kostnadstype"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} har ressurser priset i en valuta uten valutakurs til prosjektvalutaen, så de deltok ikke i fordelingen: {resources}",
+      "suggestion": "Legg til valutakursen under innstillingene for prosjektvaluta, og generer budsjettet på nytt"
     },
     "unknown_type": {
       "fail": "{line} har kategorien \"{category}\", som ikke er en kostnadstype",

@@ -2960,8 +2960,8 @@
       "suggestion": "Thêm tài nguyên của hạng mục hoặc chuyển số tiền sang đúng loại chi phí"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} có tài nguyên được định giá bằng một loại tiền không có tỷ giá sang tiền tệ của dự án, nên chúng không được tính vào phân bổ: {resources}",
+      "suggestion": "Thêm tỷ giá trong phần cài đặt tiền tệ của dự án, sau đó tạo lại ngân sách"
     },
     "unknown_type": {
       "fail": "{line} có danh mục \"{category}\", không phải loại chi phí",

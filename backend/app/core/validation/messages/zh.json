@@ -2960,8 +2960,8 @@
       "suggestion": "请补充清单项的资源，或将金额移到正确的成本类型"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} 中有以无项目货币汇率的货币计价的资源，因此它们未参与拆分：{resources}",
+      "suggestion": "请在项目货币设置中添加汇率，然后重新生成预算"
     },
     "unknown_type": {
       "fail": "{line} 的类别为“{category}”，不是成本类型",

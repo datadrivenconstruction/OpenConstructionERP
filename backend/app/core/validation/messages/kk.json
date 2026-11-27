@@ -2960,8 +2960,8 @@
       "suggestion": "Позицияның ресурстарын қосыңыз немесе соманы дұрыс шығын түріне ауыстырыңыз"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} жобаның валютасына бағамы жоқ валютада бағаланған ресурстарға ие, сондықтан олар бөлуге қатыспады: {resources}",
+      "suggestion": "Жоба валютасының параметрлерінде валюта бағамын қосыңыз, содан кейін бюджетті қайта жасаңыз"
     },
     "unknown_type": {
       "fail": "{line} санаты \"{category}\", бұл шығын түрі емес",

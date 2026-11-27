@@ -2960,8 +2960,8 @@
       "suggestion": "آئٹم کے وسائل شامل کریں یا رقم درست لاگت کی قسم میں منتقل کریں"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} میں ایسے وسائل ہیں جن کی قیمت ایسی کرنسی میں ہے جس کا پروجیکٹ کرنسی سے ایکسچینج ریٹ موجود نہیں، اس لیے وہ تقسیم میں شامل نہیں ہوئے: {resources}",
+      "suggestion": "پروجیکٹ کرنسی کی ترتیبات میں ایکسچینج ریٹ شامل کریں، پھر بجٹ دوبارہ بنائیں"
     },
     "unknown_type": {
       "fail": "{line} کی کیٹیگری \"{category}\" ہے، جو لاگت کی قسم نہیں",

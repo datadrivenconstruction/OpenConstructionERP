@@ -2960,8 +2960,8 @@
       "suggestion": "הוסיפו את משאבי הסעיף או העבירו את הסכום לסוג העלות הנכון"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "לשורה {line} יש משאבים מתומחרים במטבע ללא שער חליפין למטבע הפרויקט, לכן הם לא השתתפו בחלוקה: {resources}",
+      "suggestion": "הוסיפו את שער החליפין בהגדרות מטבע הפרויקט, ואז הפיקו את התקציב מחדש"
     },
     "unknown_type": {
       "fail": "ל-{line} יש קטגוריה \"{category}\", שאינה סוג עלות",

@@ -2960,8 +2960,8 @@
       "suggestion": "मद के संसाधन जोड़ें या राशि को सही लागत प्रकार में ले जाएँ"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} में ऐसे संसाधन हैं जिनकी कीमत उस मुद्रा में है जिसका प्रोजेक्ट की मुद्रा से कोई विनिमय दर नहीं है, इसलिए वे विभाजन में शामिल नहीं हुए: {resources}",
+      "suggestion": "प्रोजेक्ट मुद्रा सेटिंग्स में विनिमय दर जोड़ें, फिर बजट दोबारा बनाएं"
     },
     "unknown_type": {
       "fail": "{line} की श्रेणी \"{category}\" है, जो लागत प्रकार नहीं है",

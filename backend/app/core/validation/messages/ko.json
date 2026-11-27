@@ -2960,8 +2960,8 @@
       "suggestion": "항목의 자원을 추가하거나 금액을 올바른 원가 유형으로 옮기세요"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line}에 프로젝트 통화로 환산할 환율이 없는 통화로 단가가 매겨진 자원이 있어 배분에 포함되지 않았습니다: {resources}",
+      "suggestion": "프로젝트 통화 설정에서 환율을 추가한 뒤 예산을 다시 생성하세요"
     },
     "unknown_type": {
       "fail": "{line}의 범주는 \"{category}\"이며 원가 유형이 아닙니다",

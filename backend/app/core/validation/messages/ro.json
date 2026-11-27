@@ -2960,8 +2960,8 @@
       "suggestion": "Adăugați resursele articolului sau mutați suma pe tipul de cost corect"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} are resurse prețuite într-o monedă fără curs de schimb către moneda proiectului, deci nu au intrat în repartizare: {resources}",
+      "suggestion": "Adăugați cursul de schimb în setările de monedă ale proiectului, apoi generați din nou bugetul"
     },
     "unknown_type": {
       "fail": "{line} are categoria \"{category}\", care nu este un tip de cost",

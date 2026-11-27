@@ -2960,8 +2960,8 @@
       "suggestion": "আইটেমের সম্পদ যোগ করুন বা অর্থ সঠিক খরচের ধরনে সরান"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line}-এর কিছু রিসোর্স এমন মুদ্রায় দাম নির্ধারিত যার প্রকল্পের মুদ্রার সঙ্গে কোনো বিনিময় হার নেই, তাই সেগুলো ভাগাভাগিতে অংশ নেয়নি: {resources}",
+      "suggestion": "প্রকল্পের মুদ্রা সেটিংসে বিনিময় হার যোগ করুন, তারপর বাজেট আবার তৈরি করুন"
     },
     "unknown_type": {
       "fail": "{line}-এর শ্রেণি \"{category}\", যা খরচের ধরন নয়",

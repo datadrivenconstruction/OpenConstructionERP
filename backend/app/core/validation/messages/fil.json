@@ -2960,8 +2960,8 @@
       "suggestion": "Idagdag ang resources ng item, o ilipat ang halaga sa tamang uri ng gastos"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "May mga resource ang {line} na may presyong nasa pera na walang exchange rate sa pera ng proyekto, kaya hindi sila kasama sa paghahati: {resources}",
+      "suggestion": "Idagdag ang exchange rate sa mga setting ng pera ng proyekto, saka muling buuin ang badyet"
     },
     "unknown_type": {
       "fail": "Ang {line} ay may kategoryang \"{category}\", na hindi uri ng gastos",

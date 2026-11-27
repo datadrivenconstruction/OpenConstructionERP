@@ -2960,8 +2960,8 @@
       "suggestion": "Додайте ресурси позиції або перенесіть суму на потрібний тип витрат"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} має ресурси з цінами у валюті без курсу обміну до валюти проєкту, тому вони не увійшли до розподілу: {resources}",
+      "suggestion": "Додайте курс обміну в налаштуваннях валюти проєкту, потім згенеруйте бюджет знову"
     },
     "unknown_type": {
       "fail": "У {line} категорія \"{category}\", яка не є типом витрат",

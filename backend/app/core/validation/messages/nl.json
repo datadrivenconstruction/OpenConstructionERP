@@ -2960,8 +2960,8 @@
       "suggestion": "Voeg de middelen van de post toe of verplaats het bedrag naar de juiste kostensoort"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} heeft resources met een prijs in een valuta zonder wisselkoers naar de projectvaluta, daarom zijn ze niet meegenomen in de verdeling: {resources}",
+      "suggestion": "Voeg de wisselkoers toe onder de instellingen van de projectvaluta en genereer daarna het budget opnieuw"
     },
     "unknown_type": {
       "fail": "{line} heeft de categorie \"{category}\", die geen kostensoort is",

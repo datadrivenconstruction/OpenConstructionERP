@@ -2960,8 +2960,8 @@
       "suggestion": "Добавете ресурсите на позицията или преместете сумата към правилния вид разход"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "{line} има ресурси, оценени във валута без обменен курс към валутата на проекта, затова не участваха в разпределението: {resources}",
+      "suggestion": "Добавете обменния курс в настройките на валутата на проекта, след което генерирайте бюджета отново"
     },
     "unknown_type": {
       "fail": "{line} има категория \"{category}\", която не е вид разход",

@@ -2960,8 +2960,8 @@
       "suggestion": "Προσθέστε τους πόρους του άρθρου ή μεταφέρετε το ποσό στο σωστό είδος κόστους"
     },
     "resources_unpriced": {
-      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
-      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
+      "fail": "Η {line} έχει πόρους τιμολογημένους σε νόμισμα χωρίς συναλλαγματική ισοτιμία προς το νόμισμα του έργου, γι' αυτό δεν συμμετείχαν στην κατανομή: {resources}",
+      "suggestion": "Προσθέστε τη συναλλαγματική ισοτιμία στις ρυθμίσεις νομίσματος του έργου και έπειτα δημιουργήστε ξανά τον προϋπολογισμό"
     },
     "unknown_type": {
       "fail": "Το {line} έχει κατηγορία \"{category}\", που δεν είναι είδος κόστους",
