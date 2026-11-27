@@ -183,6 +183,16 @@ class InvoiceCreate(BaseModel):
     # order must be on the same project and, when both name one, with the same
     # supplier. Optional: most small payables have no order behind them.
     purchase_order_id: UUID | None = None
+    # The subcontract agreement a subcontractor's invoice bills against. An
+    # invoice names an order or an agreement, never both.
+    subcontract_agreement_id: UUID | None = None
+    # When the payment is planned, distinct from the contractual due date.
+    scheduled_payment_date: str | None = Field(
+        default=None,
+        pattern=r"^(\d{4}-\d{2}-\d{2})?$",
+        max_length=20,
+        examples=["2026-05-15"],
+    )
     line_items: list[InvoiceLineItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -229,6 +239,13 @@ class InvoiceUpdate(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     # Send null to unlink the invoice from its purchase order.
     purchase_order_id: UUID | None = None
+    # Send null to unlink the invoice from its subcontract agreement.
+    subcontract_agreement_id: UUID | None = None
+    scheduled_payment_date: str | None = Field(
+        default=None,
+        pattern=r"^(\d{4}-\d{2}-\d{2})?$",
+        max_length=20,
+    )
     line_items: list[InvoiceLineItemCreate] | None = None
     metadata: dict[str, Any] | None = None
 
@@ -295,10 +312,18 @@ class InvoiceResponse(BaseModel):
     # the ``metadata.po_id`` stamp an order-created invoice carried before the
     # column existed (see ``finance.po_link``).
     purchase_order_id: UUID | None = None
+    # The subcontract agreement: the column, or the ``metadata.agreement_id``
+    # a payment-application payable carries (see ``finance.commitment``).
+    subcontract_agreement_id: UUID | None = None
     invoice_direction: str
     invoice_number: str
     invoice_date: str
     due_date: str | None = None
+    scheduled_payment_date: str | None = None
+    submitted_by: UUID | None = None
+    submitted_at: str | None = None
+    approved_by: UUID | None = None
+    approved_at: str | None = None
     currency_code: str = ""
     amount_subtotal: str = "0"
     tax_amount: str = "0"
@@ -328,7 +353,73 @@ class InvoiceResponse(BaseModel):
             from app.modules.finance.po_link import invoice_po_link
 
             self.purchase_order_id = invoice_po_link(None, self.metadata)
+        if self.subcontract_agreement_id is None:
+            from app.modules.finance.commitment import invoice_agreement_link
+
+            self.subcontract_agreement_id = invoice_agreement_link(None, self.metadata)
         return self
+
+
+class InvoicePostingCheckRequest(BaseModel):
+    """An invoice as it is being entered, weighed against its commitment (read-only).
+
+    ``invoice_id`` is set when the invoice is already saved, so it is not
+    counted against itself or reported as its own duplicate.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    invoice_id: UUID | None = None
+    contact_id: str | None = Field(default=None, max_length=36)
+    invoice_direction: str = Field(default="payable", pattern=r"^(payable|receivable)$")
+    invoice_number: str | None = Field(default=None, max_length=50)
+    invoice_date: str | None = Field(default=None, max_length=20)
+    due_date: str | None = Field(default=None, max_length=20)
+    scheduled_payment_date: str | None = Field(default=None, max_length=20)
+    currency_code: str = Field(default="", max_length=10)
+    amount_subtotal: str = Field(default="0", max_length=50)
+    retention_amount: str = Field(default="0", max_length=50)
+    amount_total: str | None = Field(default=None, max_length=50)
+    purchase_order_id: UUID | None = None
+    subcontract_agreement_id: UUID | None = None
+
+    @field_validator("amount_subtotal", "retention_amount")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
+
+class CommitmentResponse(BaseModel):
+    """One purchase order or subcontract agreement and what is still open on it, net of VAT.
+
+    Money is Decimal strings in the commitment's own currency. ``remaining``
+    is ``original + approved_changes - invoiced``; it goes negative when the
+    commitment is already over-invoiced.
+    """
+
+    kind: str
+    id: UUID
+    ref: str
+    status: str
+    currency_code: str
+    original: str
+    approved_changes: str
+    revised: str
+    invoiced: str
+    remaining: str
+    paid: str
+    retention_percent: str
+    invoices_in_other_currency: int = 0
+    shared_change_orders: int = 0
+
+
+class InvoicePostingCheckResponse(BaseModel):
+    """What approving the invoice would meet: its commitment and the ``invoice_posting`` report."""
+
+    commitment: CommitmentResponse | None = None
+    blocking: bool
+    report: dict[str, Any]
 
 
 class InvoiceListResponse(BaseModel):

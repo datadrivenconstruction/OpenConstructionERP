@@ -2954,5 +2954,31 @@
       "fail": "Kohteen {line} luokka \"{category}\" ei ole kustannuslaji",
       "suggestion": "Aseta riville työ, materiaali, kalusto, aliurakka tai muu"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Lasku {invoice} ylittää kohteessa {commitment} vielä avoinna olevan summan {remaining} määrällä {excess}",
+      "suggestion": "Hyväksy sitoumusta korottava muutostilaus tai korjaa laskun summa"
+    },
+    "commitment_currency": {
+      "fail": "Lasku {invoice} on valuutassa {invoice_currency}, mutta {commitment} on valuutassa {commitment_currency}",
+      "suggestion": "Kirjaa lasku sen tilauksen tai aliurakan valuutassa"
+    },
+    "commitment_retention": {
+      "fail": "Lasku {invoice} pidättää {retention}, vähemmän kuin kohteessa {commitment} sovittu pidätys {expected} ({percent}%)",
+      "suggestion": "Pidätä sovittu summa tai kirjaa, miksi se ei koske tätä"
+    },
+    "duplicate_number": {
+      "fail": "Tämän toimittajan laskunumero {invoice} on jo kirjattu",
+      "suggestion": "Avaa aiempi lasku; peru tämä, jos kyseessä on sama asiakirja"
+    },
+    "possible_duplicate": {
+      "fail": "Laskulla {invoice} on sama toimittaja, summa ({amount}) ja päivä ({on}) kuin laskulla {other}",
+      "suggestion": "Tarkista, ettei samaa laskua ole kirjattu kahdesti eri numerolla"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Maksu on ajoitettu päivälle {scheduled}, ennen laskun päivää {invoice_date}",
+      "suggestion": "Ajoita maksu laskun päivälle tai myöhemmäksi"
+    }
   }
 }

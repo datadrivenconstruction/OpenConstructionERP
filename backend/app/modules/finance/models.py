@@ -33,6 +33,7 @@ class Invoice(Base):
         # "What has been invoiced against this order?" - the PO view and the
         # invoice-to-order match both ask it per order.
         Index("ix_invoice_purchase_order", "purchase_order_id"),
+        Index("ix_invoice_subcontract_agreement", "subcontract_agreement_id"),
     )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
@@ -60,9 +61,24 @@ class Invoice(Base):
     # ``invoice_po_link``), because a running install gains the column on boot
     # without a backfill.
     purchase_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The subcontract agreement a subcontractor's invoice bills against, the
+    # other kind of commitment beside an order. Plain GUID, no cross-module FK,
+    # for the same reasons as ``purchase_order_id``. An invoice names one
+    # commitment or none. Payables raised from a payment application carry the
+    # link as ``metadata_["agreement_id"]`` too (see ``finance.commitment``).
+    subcontract_agreement_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     invoice_number: Mapped[str] = mapped_column(String(50), nullable=False)
     invoice_date: Mapped[str] = mapped_column(String(40), nullable=False)
     due_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # When we plan to pay, as opposed to ``due_date``, the date the terms make
+    # it payable. Payment runs and the cash-flow forecast read this first.
+    scheduled_payment_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # Who sent the invoice for approval (usually the engineer who coded it) and
+    # who approved it, with when. ISO-8601 timestamps, like the change orders.
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    submitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    approved_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     # Phase 2e: money columns back to NUMERIC on PG while staying VARCHAR
     # on SQLite for dev-DB compatibility. Python always sees ``Decimal``.

@@ -2954,5 +2954,31 @@
       "fail": "У {line} категорія \"{category}\", яка не є типом витрат",
       "suggestion": "Вкажіть для рядка працю, матеріали, техніку, субпідряд або інше"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Рахунок {invoice} на {excess} більший за залишок {remaining} за {commitment}",
+      "suggestion": "Затвердьте зміну, що збільшує зобов'язання, або виправте суму рахунку"
+    },
+    "commitment_currency": {
+      "fail": "Рахунок {invoice} виставлено в {invoice_currency}, а {commitment} ведеться в {commitment_currency}",
+      "suggestion": "Введіть рахунок у валюті його замовлення або договору субпідряду"
+    },
+    "commitment_retention": {
+      "fail": "Рахунок {invoice} утримує {retention}, менше за погоджене за {commitment} утримання {expected} ({percent}%)",
+      "suggestion": "Утримайте погоджену суму або зазначте, чому утримання не застосовується"
+    },
+    "duplicate_number": {
+      "fail": "Рахунок з номером {invoice} від цього постачальника вже введено",
+      "suggestion": "Відкрийте раніше введений рахунок; скасуйте цей, якщо це той самий документ"
+    },
+    "possible_duplicate": {
+      "fail": "Рахунок {invoice} має того самого постачальника, суму ({amount}) і дату ({on}), що й рахунок {other}",
+      "suggestion": "Перевірте, чи не введено той самий рахунок двічі під іншим номером"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Оплату заплановано на {scheduled}, раніше за дату рахунку {invoice_date}",
+      "suggestion": "Заплануйте оплату на дату рахунку або пізніше"
+    }
   }
 }

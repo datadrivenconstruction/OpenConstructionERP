@@ -2954,5 +2954,31 @@
       "fail": "{line} hat die Kategorie \"{category}\", die keine Kostenart ist",
       "suggestion": "Setzen Sie die Zeile auf Lohn, Material, Gerät, Nachunternehmer oder Sonstiges"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Rechnung {invoice} übersteigt die auf {commitment} noch offenen {remaining} um {excess}",
+      "suggestion": "Genehmigen Sie einen Nachtrag, der die Verpflichtung erhöht, oder korrigieren Sie den Rechnungsbetrag"
+    },
+    "commitment_currency": {
+      "fail": "Rechnung {invoice} lautet auf {invoice_currency}, {commitment} jedoch auf {commitment_currency}",
+      "suggestion": "Erfassen Sie die Rechnung in der Währung ihrer Bestellung oder ihres Nachunternehmervertrags"
+    },
+    "commitment_retention": {
+      "fail": "Rechnung {invoice} behält {retention} ein, weniger als der auf {commitment} vereinbarte Einbehalt von {expected} ({percent}%)",
+      "suggestion": "Behalten Sie den vereinbarten Einbehalt ein oder vermerken Sie, warum er nicht gilt"
+    },
+    "duplicate_number": {
+      "fail": "Die Rechnungsnummer {invoice} dieses Lieferanten wurde bereits erfasst",
+      "suggestion": "Öffnen Sie die frühere Rechnung; stornieren Sie diese, wenn es dasselbe Dokument ist"
+    },
+    "possible_duplicate": {
+      "fail": "Rechnung {invoice} hat denselben Lieferanten, Betrag ({amount}) und dasselbe Datum ({on}) wie Rechnung {other}",
+      "suggestion": "Prüfen Sie, ob nicht dieselbe Rechnung unter anderer Nummer doppelt erfasst wurde"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Die Zahlung ist für {scheduled} geplant, vor dem Rechnungsdatum {invoice_date}",
+      "suggestion": "Planen Sie die Zahlung am oder nach dem Rechnungsdatum"
+    }
   }
 }

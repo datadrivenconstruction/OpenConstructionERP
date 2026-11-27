@@ -2954,5 +2954,31 @@
       "fail": "دسته {line} برابر \"{category}\" است که نوع هزینه نیست",
       "suggestion": "ردیف را روی دستمزد، مصالح، ماشین‌آلات، پیمانکار جزء یا سایر تنظیم کنید"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "فاکتور {invoice} به میزان {excess} از مبلغ باقیمانده {remaining} روی {commitment} بیشتر است",
+      "suggestion": "یک دستور تغییر که تعهد را افزایش می‌دهد تأیید کنید، یا مبلغ فاکتور را اصلاح کنید"
+    },
+    "commitment_currency": {
+      "fail": "فاکتور {invoice} به {invoice_currency} است، اما {commitment} به {commitment_currency} است",
+      "suggestion": "فاکتور را به ارز سفارش یا قرارداد پیمانکاری جزء آن ثبت کنید"
+    },
+    "commitment_retention": {
+      "fail": "فاکتور {invoice} مبلغ {retention} کسر می‌کند، کمتر از کسورات توافق‌شده {expected} روی {commitment} ({percent}%)",
+      "suggestion": "کسورات توافق‌شده را کسر کنید، یا دلیل عدم اعمال آن را یادداشت کنید"
+    },
+    "duplicate_number": {
+      "fail": "شماره فاکتور {invoice} از این تأمین‌کننده قبلاً ثبت شده است",
+      "suggestion": "فاکتور قبلی را باز کنید؛ اگر همان سند است این یکی را لغو کنید"
+    },
+    "possible_duplicate": {
+      "fail": "فاکتور {invoice} همان تأمین‌کننده، مبلغ ({amount}) و تاریخ ({on}) فاکتور {other} را دارد",
+      "suggestion": "بررسی کنید که همان فاکتور دو بار با شماره‌ای دیگر ثبت نشده باشد"
+    },
+    "payment_date_before_invoice": {
+      "fail": "پرداخت برای {scheduled} برنامه‌ریزی شده، پیش از تاریخ فاکتور {invoice_date}",
+      "suggestion": "پرداخت را در تاریخ فاکتور یا پس از آن برنامه‌ریزی کنید"
+    }
   }
 }

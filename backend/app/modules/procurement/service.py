@@ -2084,10 +2084,21 @@ class ProcurementService:
                         gr_item.quantity_received
                     )
 
+        approved_changes = Decimal("0")
+        try:
+            from app.modules.finance.commitment import load_commitment
+
+            commitment = await load_commitment(self.session, purchase_order_id=po_id)
+            if commitment is not None:
+                approved_changes = commitment.approved_changes
+        except ImportError:  # pragma: no cover - finance is optional for procurement
+            pass
+
         return {
             "po_number": po.po_number,
             "currency_code": po.currency_code or "",
             "po_net": po.amount_subtotal,
+            "approved_changes_net": str(approved_changes),
             "invoiced_before_net": str(invoiced_before_net),
             "invoice_net": str(invoice_net or "0"),
             "invoice_ref": invoice_ref or "",

@@ -2954,5 +2954,31 @@
       "fail": "{line} มีหมวด \"{category}\" ซึ่งไม่ใช่ประเภทต้นทุน",
       "suggestion": "ตั้งรายการเป็นค่าแรง วัสดุ เครื่องจักร ผู้รับเหมาช่วง หรืออื่นๆ"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "ใบแจ้งหนี้ {invoice} เกินยอด {remaining} ที่ยังคงค้างอยู่ใน {commitment} เป็นจำนวน {excess}",
+      "suggestion": "อนุมัติคำสั่งเปลี่ยนแปลงที่เพิ่มภาระผูกพัน หรือแก้ไขยอดใบแจ้งหนี้"
+    },
+    "commitment_currency": {
+      "fail": "ใบแจ้งหนี้ {invoice} เป็นสกุล {invoice_currency} แต่ {commitment} เป็นสกุล {commitment_currency}",
+      "suggestion": "บันทึกใบแจ้งหนี้ในสกุลเงินของใบสั่งซื้อหรือสัญญาช่วง"
+    },
+    "commitment_retention": {
+      "fail": "ใบแจ้งหนี้ {invoice} หักเงินประกัน {retention} น้อยกว่า {expected} ที่ตกลงไว้ใน {commitment} ({percent}%)",
+      "suggestion": "หักเงินประกันตามที่ตกลง หรือบันทึกเหตุผลที่ไม่ใช้"
+    },
+    "duplicate_number": {
+      "fail": "หมายเลขใบแจ้งหนี้ {invoice} ของผู้ขายรายนี้ถูกบันทึกแล้ว",
+      "suggestion": "เปิดใบแจ้งหนี้ก่อนหน้า ยกเลิกใบนี้หากเป็นเอกสารเดียวกัน"
+    },
+    "possible_duplicate": {
+      "fail": "ใบแจ้งหนี้ {invoice} มีผู้ขาย ยอดเงิน ({amount}) และวันที่ ({on}) เดียวกับใบแจ้งหนี้ {other}",
+      "suggestion": "ตรวจสอบว่าไม่ใช่ใบแจ้งหนี้เดียวกันที่บันทึกซ้ำด้วยหมายเลขอื่น"
+    },
+    "payment_date_before_invoice": {
+      "fail": "กำหนดชำระเงินวันที่ {scheduled} ก่อนวันที่ใบแจ้งหนี้ {invoice_date}",
+      "suggestion": "กำหนดการชำระเงินในวันที่ใบแจ้งหนี้หรือหลังจากนั้น"
+    }
   }
 }

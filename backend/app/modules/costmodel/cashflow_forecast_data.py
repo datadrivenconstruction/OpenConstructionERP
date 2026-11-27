@@ -188,6 +188,7 @@ async def _receivables(session: AsyncSession, inp: ProjectInputs, today: date) -
                 amount_total=inv.amount_total,
                 retention_amount=inv.retention_amount,
                 payment_terms_days=inv.payment_terms_days,
+                scheduled_payment_date=getattr(inv, "scheduled_payment_date", None),
                 payments=[
                     AgeingPayment(
                         amount=p.amount,
@@ -201,7 +202,9 @@ async def _receivables(session: AsyncSession, inp: ProjectInputs, today: date) -
             ),
             as_of=today.isoformat(),
         )
-        due_on = _day(bal.effective_due_date) or _day(inv.invoice_date) or today
+        # A payable with a planned payment date leaves the account on that date.
+        planned = _day(getattr(inv, "scheduled_payment_date", None)) if direction == "out" else None
+        due_on = planned or _day(bal.effective_due_date) or _day(inv.invoice_date) or today
         source = "receivable_invoice" if direction == "in" else "payable_invoice"
         inp.lines.append(
             CashLine(

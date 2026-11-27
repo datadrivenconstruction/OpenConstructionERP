@@ -2954,5 +2954,31 @@
       "fail": "{line} berkategori \"{category}\", yang bukan jenis biaya",
       "suggestion": "Atur baris menjadi upah, material, peralatan, subkontrak, atau lainnya"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Faktur {invoice} melebihi {remaining} yang masih terbuka pada {commitment} sebesar {excess}",
+      "suggestion": "Setujui perintah perubahan yang menaikkan komitmen, atau perbaiki jumlah faktur"
+    },
+    "commitment_currency": {
+      "fail": "Faktur {invoice} dalam {invoice_currency}, tetapi {commitment} dalam {commitment_currency}",
+      "suggestion": "Masukkan faktur dalam mata uang pesanan atau subkontraknya"
+    },
+    "commitment_retention": {
+      "fail": "Faktur {invoice} menahan {retention}, kurang dari retensi {expected} yang disepakati pada {commitment} ({percent}%)",
+      "suggestion": "Tahan jumlah yang disepakati, atau catat alasan tidak berlaku"
+    },
+    "duplicate_number": {
+      "fail": "Nomor faktur {invoice} dari pemasok ini sudah dimasukkan",
+      "suggestion": "Buka faktur sebelumnya; batalkan yang ini jika dokumennya sama"
+    },
+    "possible_duplicate": {
+      "fail": "Faktur {invoice} memiliki pemasok, jumlah ({amount}) dan tanggal ({on}) yang sama dengan faktur {other}",
+      "suggestion": "Periksa bahwa ini bukan faktur yang sama dimasukkan dua kali dengan nomor lain"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Pembayaran dijadwalkan pada {scheduled}, sebelum tanggal faktur {invoice_date}",
+      "suggestion": "Jadwalkan pembayaran pada atau setelah tanggal faktur"
+    }
   }
 }

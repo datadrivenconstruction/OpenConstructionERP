@@ -29,6 +29,13 @@ from app.modules.finance.ageing import (
     AgeingReport,
     build_ageing,
 )
+from app.modules.finance.commitment import (
+    UNLINKABLE_AGREEMENT_STATUSES,
+    Commitment,
+    invoice_agreement_link,
+    list_commitments,
+    load_commitment,
+)
 from app.modules.finance.models import (
     EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS,
     EVMSnapshot,
@@ -241,6 +248,36 @@ _VALID_INVOICE_STATUSES = set(_INVOICE_STATUS_TRANSITIONS.keys())
 #: the invoice has been approved, sent, paid or cancelled, and what it charges,
 #: to whom and in which currency is the record.
 _INVOICE_EDITABLE_STATUSES: frozenset[str] = frozenset({"draft", "pending"})
+
+#: Statuses that post a payable: entering one runs the ``invoice_posting`` rules
+#: and an ERROR refuses it (commitment, duplicate number, payment date).
+_INVOICE_POSTING_STATUSES: frozenset[str] = frozenset({"approved", "sent"})
+
+#: The invoice fields the ``invoice_posting`` rules read.
+_POSTING_FIELDS: tuple[str, ...] = (
+    "project_id",
+    "contact_id",
+    "invoice_direction",
+    "invoice_number",
+    "invoice_date",
+    "due_date",
+    "scheduled_payment_date",
+    "currency_code",
+    "amount_subtotal",
+    "retention_amount",
+    "amount_total",
+    "purchase_order_id",
+    "subcontract_agreement_id",
+)
+
+
+def _actor_uuid(actor_id: str | None) -> uuid.UUID | None:
+    """The acting user as a UUID, or ``None`` when the id is not one."""
+    try:
+        return uuid.UUID(str(actor_id)) if actor_id else None
+    except ValueError:
+        return None
+
 
 #: The amounts an issued invoice keeps. Exact Decimal equality permits a form
 #: to resend equivalent spellings without hiding changes below one cent.
@@ -856,15 +893,44 @@ class FinanceService:
                 direction=data.invoice_direction,
                 contact_id=data.contact_id,
             )
+        if data.subcontract_agreement_id is not None:
+            if data.purchase_order_id is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="An invoice bills a purchase order or a subcontract agreement, not both.",
+                )
+            await self._check_agreement_link(
+                data.subcontract_agreement_id,
+                project_id=data.project_id,
+                direction=data.invoice_direction,
+                contact_id=data.contact_id,
+            )
+        if data.status in _INVOICE_POSTING_STATUSES:
+            await self._enforce_posting_rules(
+                {
+                    **data.model_dump(),
+                    "invoice_number": invoice_number,
+                    "amount_total": computed_total,
+                },
+                exclude_invoice_id=None,
+            )
+        actor = _actor_uuid(user_id)
+        now = _utcnow_iso()
 
         invoice = Invoice(
             project_id=data.project_id,
             contact_id=data.contact_id,
             invoice_direction=data.invoice_direction,
             purchase_order_id=data.purchase_order_id,
+            subcontract_agreement_id=data.subcontract_agreement_id,
             invoice_number=invoice_number,
             invoice_date=data.invoice_date,
             due_date=data.due_date,
+            scheduled_payment_date=data.scheduled_payment_date or None,
+            submitted_by=actor if data.status == "pending" else None,
+            submitted_at=now if data.status == "pending" else None,
+            approved_by=actor if data.status in _INVOICE_POSTING_STATUSES else None,
+            approved_at=now if data.status in _INVOICE_POSTING_STATUSES else None,
             currency_code=data.currency_code,
             amount_subtotal=data.amount_subtotal,
             tax_amount=data.tax_amount,
@@ -1007,11 +1073,15 @@ class FinanceService:
         self,
         invoice_id: uuid.UUID,
         data: InvoiceUpdate,
+        *,
+        actor_id: str | None = None,
     ) -> Invoice:
         """Update invoice fields and optionally replace line items.
 
         Validates status transitions and recomputes amount_total when
-        subtotal or tax are changed.
+        subtotal or tax are changed. A move into ``approved`` or ``sent`` runs
+        the ``invoice_posting`` rules on the invoice as the patch leaves it,
+        and records who sent it for approval or approved it.
         """
         invoice = await self.get_invoice(invoice_id)  # 404 check
 
@@ -1108,6 +1178,41 @@ class FinanceService:
                     direction=fields.get("invoice_direction") or invoice.invoice_direction,
                     contact_id=fields.get("contact_id", invoice.contact_id),
                 )
+
+        # The subcontract link: same shape, its legacy spelling is the
+        # ``agreement_id`` a payment-application payable carries.
+        if "subcontract_agreement_id" in fields and fields["subcontract_agreement_id"] is None:
+            meta = dict(fields.get("metadata_", invoice.metadata_) or {})
+            if meta.pop("agreement_id", None) is not None:
+                fields["metadata_"] = meta
+        if "subcontract_agreement_id" in fields or parties_moved:
+            current_sa = invoice_agreement_link(invoice.subcontract_agreement_id, invoice.metadata_)
+            target_sa = fields.get("subcontract_agreement_id", current_sa)
+            target_po = invoice_po_link(
+                fields.get("purchase_order_id", invoice.purchase_order_id), fields.get("metadata_", invoice.metadata_)
+            )
+            if target_sa is not None and target_po is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="An invoice bills a purchase order or a subcontract agreement, not both.",
+                )
+            if target_sa is not None and (target_sa != current_sa or parties_moved):
+                await self._check_agreement_link(
+                    target_sa,
+                    project_id=invoice.project_id,
+                    direction=fields.get("invoice_direction") or invoice.invoice_direction,
+                    contact_id=fields.get("contact_id", invoice.contact_id),
+                )
+
+        new_status = fields.get("status")
+        if new_status and new_status != invoice.status:
+            if new_status in _INVOICE_POSTING_STATUSES and invoice.status not in _INVOICE_POSTING_STATUSES:
+                await self._enforce_posting_rules(self._posting_state(invoice, fields), exclude_invoice_id=invoice_id)
+                fields["approved_by"] = _actor_uuid(actor_id)
+                fields["approved_at"] = _utcnow_iso()
+            elif new_status == "pending":
+                fields["submitted_by"] = _actor_uuid(actor_id)
+                fields["submitted_at"] = _utcnow_iso()
 
         if fields:
             await self.invoices.update(invoice_id, **fields)
@@ -1217,6 +1322,217 @@ class FinanceService:
             return
         await check_payment_release(self.session, po_id, invoice_ref=getattr(invoice, "invoice_number", "") or "")
 
+    async def _check_agreement_link(
+        self,
+        agreement_id: uuid.UUID,
+        *,
+        project_id: uuid.UUID,
+        direction: str,
+        contact_id: str | None,
+    ) -> None:
+        """Refuse a subcontract-agreement link the agreement cannot back.
+
+        The same rule as :meth:`_check_po_link`: a payable, an agreement on the
+        same project that is past draft, and the same subcontractor when both
+        name one.
+        """
+        if direction != "payable":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Only a supplier (payable) invoice can be linked to a subcontract agreement.",
+            )
+        commitment = await load_commitment(self.session, subcontract_agreement_id=agreement_id)
+        if commitment is None or commitment.project_id != project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="The subcontract agreement does not exist on this project.",
+            )
+        if commitment.status in UNLINKABLE_AGREEMENT_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="A draft subcontract agreement cannot be invoiced; activate it first.",
+            )
+        if contact_id and commitment.vendor_contact_id and str(contact_id) != commitment.vendor_contact_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="The subcontract agreement is with a different subcontractor than this invoice.",
+            )
+
+    async def commitments_for(self, project_id: uuid.UUID, contact_id: str | None) -> list[Commitment]:
+        """The orders and agreements an invoice from ``contact_id`` on this project may bill."""
+        return await list_commitments(self.session, project_id, contact_id)
+
+    async def posting_payload(
+        self,
+        state: dict[str, Any],
+        *,
+        exclude_invoice_id: uuid.UUID | None = None,
+    ) -> tuple[dict[str, Any], Commitment | None]:
+        """What the ``invoice_posting`` rules read for one invoice, and its commitment.
+
+        ``state`` is the invoice as it will be (the row with the patch laid
+        over it, or the create request). The commitment's figures leave
+        ``exclude_invoice_id`` out, so a saved invoice is not counted twice.
+        """
+        from app.modules.finance.commitment_rules import normalise_number
+
+        meta = state.get("metadata") if isinstance(state.get("metadata"), dict) else {}
+        po_id = invoice_po_link(state.get("purchase_order_id"), meta)
+        agreement_id = None if po_id else invoice_agreement_link(state.get("subcontract_agreement_id"), meta)
+        commitment = await load_commitment(
+            self.session,
+            purchase_order_id=po_id,
+            subcontract_agreement_id=agreement_id,
+            exclude_invoice_id=exclude_invoice_id,
+        )
+        payload: dict[str, Any] = {
+            key: (str(state.get(key)) if state.get(key) is not None else None) for key in _POSTING_FIELDS
+        }
+        if payload.get("amount_total") in (None, ""):
+            payload["amount_total"] = str(
+                _compute_invoice_total(str(state.get("amount_subtotal") or "0"), str(state.get("tax_amount") or "0"))
+            )
+        payload["commitment"] = (
+            None
+            if commitment is None
+            else {
+                "kind": commitment.kind,
+                "ref": commitment.ref,
+                "currency_code": commitment.currency_code,
+                "original": str(commitment.original),
+                "approved_changes": str(commitment.approved_changes),
+                "invoiced": str(commitment.invoiced),
+                "tolerance": str(commitment.tolerance()),
+                "retention_percent": str(commitment.retention_percent),
+                "retain_on_receipt": commitment.retain_on_receipt,
+            }
+        )
+
+        same_number: list[str] = []
+        same_amount_date: list[str] = []
+        contact_id = state.get("contact_id")
+        if contact_id and state.get("invoice_direction", "payable") == "payable":
+            rows = (
+                await self.session.execute(
+                    select(Invoice.id, Invoice.invoice_number, Invoice.amount_total, Invoice.invoice_date).where(
+                        Invoice.contact_id == str(contact_id),
+                        Invoice.invoice_direction == "payable",
+                        Invoice.status.notin_(("cancelled", "credit_note_issued")),
+                    )
+                )
+            ).all()
+            number = normalise_number(state.get("invoice_number"))
+            total = _invoice_amount(payload["amount_total"])
+            day = str(state.get("invoice_date") or "")[:10]
+            for row_id, row_number, row_total, row_date in rows:
+                if row_id == exclude_invoice_id:
+                    continue
+                if number and normalise_number(row_number) == number:
+                    same_number.append(str(row_id))
+                elif (
+                    day
+                    and str(row_date or "")[:10] == day
+                    and total is not None
+                    and _invoice_amount(row_total) == total
+                ):
+                    same_amount_date.append(str(row_number))
+        payload["same_number"] = same_number
+        payload["same_amount_date"] = same_amount_date
+        return payload, commitment
+
+    async def _posting_report(self, state: dict[str, Any], *, exclude_invoice_id: uuid.UUID | None) -> Any:
+        from app.core.i18n import get_locale
+        from app.core.validation.engine import validation_engine
+        from app.modules.finance.commitment_rules import PAYLOAD_KEY, RULE_SET, register_posting_rules
+
+        register_posting_rules()
+        payload, commitment = await self.posting_payload(state, exclude_invoice_id=exclude_invoice_id)
+        report = await validation_engine.validate(
+            data={PAYLOAD_KEY: payload},
+            rule_sets=[RULE_SET],
+            target_type="invoice",
+            target_id=str(exclude_invoice_id or ""),
+            project_id=str(state.get("project_id") or ""),
+            metadata={"locale": get_locale(), "operation": "invoice_posting"},
+        )
+        return report, commitment
+
+    async def posting_check(
+        self,
+        state: dict[str, Any],
+        *,
+        exclude_invoice_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
+        """Run the ``invoice_posting`` rules for an invoice being entered (read-only).
+
+        Returns the commitment figures, whether approval would be refused and
+        the full report, so the form says why before anyone presses Approve.
+        """
+        report, commitment = await self._posting_report(state, exclude_invoice_id=exclude_invoice_id)
+        summary = report.summary()
+        return {
+            "commitment": commitment.as_dict() if commitment is not None else None,
+            "blocking": bool(report.has_errors),
+            "report": {
+                "status": summary["status"],
+                "score": summary["score"],
+                "counts": summary["counts"],
+                "results": [
+                    {
+                        "rule_id": r.rule_id,
+                        "rule_name": r.rule_name,
+                        "severity": r.severity.value,
+                        "category": r.category.value,
+                        "passed": r.passed,
+                        "message": r.message,
+                        "element_ref": r.element_ref,
+                        "suggestion": r.suggestion,
+                    }
+                    for r in report.results
+                ],
+            },
+        }
+
+    async def _enforce_posting_rules(self, state: dict[str, Any], *, exclude_invoice_id: uuid.UUID | None) -> None:
+        """Refuse (422) posting a payable that an ERROR ``invoice_posting`` rule fails.
+
+        The detail leads with the first failure in the caller's language, so
+        the person approving reads the reason, and lists every failure.
+        """
+        if state.get("invoice_direction") != "payable":
+            return
+        report, _ = await self._posting_report(state, exclude_invoice_id=exclude_invoice_id)
+        if not report.has_errors:
+            return
+        errors = list(report.errors)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": errors[0].message,
+                "remediation": errors[0].suggestion or "",
+                "rule_id": errors[0].rule_id,
+                "errors": [
+                    {
+                        "rule_id": r.rule_id,
+                        "message": r.message,
+                        "element_ref": r.element_ref,
+                        "suggestion": r.suggestion,
+                        "details": r.details,
+                    }
+                    for r in errors
+                ],
+            },
+        )
+
+    @staticmethod
+    def _posting_state(invoice: Invoice, fields: dict[str, Any] | None = None) -> dict[str, Any]:
+        """The invoice as a patch would leave it, in the shape the posting rules read."""
+        fields = fields or {}
+        state = {key: fields.get(key, getattr(invoice, key, None)) for key in _POSTING_FIELDS}
+        state["metadata"] = fields.get("metadata_", invoice.metadata_)
+        state["tax_amount"] = fields.get("tax_amount", invoice.tax_amount)
+        return state
+
     async def approve_invoice(
         self,
         invoice_id: uuid.UUID,
@@ -1243,7 +1559,13 @@ class FinanceService:
                 detail=f"Cannot approve invoice in status '{prior}'",
             )
         await self._check_payment_release(invoice)
-        await self.invoices.update(invoice_id, status="approved")
+        await self._enforce_posting_rules(self._posting_state(invoice), exclude_invoice_id=invoice_id)
+        await self.invoices.update(
+            invoice_id,
+            status="approved",
+            approved_by=_actor_uuid(actor_id),
+            approved_at=_utcnow_iso(),
+        )
         # FSM audit row - see :mod:`app.core.fsm.registry` for the invoice
         # lifecycle. Best-effort: an audit failure must NOT roll back the
         # status change, but it MUST surface as a warning so audit-log
@@ -3233,6 +3555,7 @@ class FinanceService:
                 amount_total=inv.amount_total,
                 retention_amount=inv.retention_amount,
                 payment_terms_days=inv.payment_terms_days,
+                scheduled_payment_date=inv.scheduled_payment_date,
                 payments=[
                     AgeingPayment(
                         amount=pay.amount,

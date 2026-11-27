@@ -2954,5 +2954,31 @@
       "fail": "{line} ima kategoriju \"{category}\", koja nije vrsta troška",
       "suggestion": "Postavite stavku na rad, materijal, opremu, podugovor ili ostalo"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Račun {invoice} premašuje za {excess} iznos od {remaining} koji je još otvoren na {commitment}",
+      "suggestion": "Odobrite promjenu koja povećava obvezu ili ispravite iznos računa"
+    },
+    "commitment_currency": {
+      "fail": "Račun {invoice} je u {invoice_currency}, ali {commitment} je u {commitment_currency}",
+      "suggestion": "Unesite račun u valuti njegove narudžbe ili podugovora"
+    },
+    "commitment_retention": {
+      "fail": "Račun {invoice} zadržava {retention}, manje od zadržavanja od {expected} ugovorenog na {commitment} ({percent}%)",
+      "suggestion": "Zadržite ugovoreni iznos ili zabilježite zašto se ne primjenjuje"
+    },
+    "duplicate_number": {
+      "fail": "Broj računa {invoice} ovog dobavljača već je unesen",
+      "suggestion": "Otvorite raniji račun; poništite ovaj ako je riječ o istom dokumentu"
+    },
+    "possible_duplicate": {
+      "fail": "Račun {invoice} ima istog dobavljača, iznos ({amount}) i datum ({on}) kao račun {other}",
+      "suggestion": "Provjerite da isti račun nije unesen dvaput pod drugim brojem"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Plaćanje je zakazano za {scheduled}, prije datuma računa {invoice_date}",
+      "suggestion": "Zakažite plaćanje na datum računa ili kasnije"
+    }
   }
 }

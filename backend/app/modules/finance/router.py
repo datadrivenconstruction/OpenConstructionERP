@@ -102,12 +102,15 @@ from app.modules.finance.schemas import (
     BudgetUpdate,
     CashFlowResponse,
     ClaimInvoiceRequest,
+    CommitmentResponse,
     EVMListResponse,
     EVMSnapshotCreate,
     EVMSnapshotResponse,
     IncomeStatementResponse,
     InvoiceCreate,
     InvoiceListResponse,
+    InvoicePostingCheckRequest,
+    InvoicePostingCheckResponse,
     InvoiceResponse,
     InvoiceUpdate,
     JournalEntryCreate,
@@ -436,6 +439,60 @@ async def list_invoices(
         offset=offset,
         limit=limit,
     )
+
+
+@router.get(
+    "/commitments/",
+    response_model=list[CommitmentResponse],
+    summary="Purchase orders and subcontract agreements an invoice may bill",
+)
+async def list_invoice_commitments(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    contact_id: str | None = Query(default=None, max_length=36),
+    _perm: None = Depends(RequirePermission("finance.read")),
+    service: FinanceService = Depends(_get_service),
+) -> list[CommitmentResponse]:
+    """The project's orders and agreements with this supplier, with what is still open on each, net of VAT.
+
+    Agreements are listed only where the subcontractors module is installed.
+    """
+    await _require_project_access(session, project_id, user_id)
+    found = await service.commitments_for(project_id, contact_id)
+    return [CommitmentResponse.model_validate(c.as_dict()) for c in found]
+
+
+@router.post(
+    "/invoices/posting-check/",
+    response_model=InvoicePostingCheckResponse,
+    summary="Check an invoice against its commitment before approval (read-only)",
+)
+async def check_invoice_posting(
+    data: InvoicePostingCheckRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.read")),
+    service: FinanceService = Depends(_get_service),
+) -> InvoicePostingCheckResponse:
+    """Run the ``invoice_posting`` rules for an invoice as typed; nothing is saved.
+
+    Says what is still open on the linked order or subcontract and whether
+    approving would be refused, and why, in the caller's language.
+    """
+    await _require_project_access(session, data.project_id, user_id)
+    exclude = None
+    metadata: dict[str, Any] = {}
+    if data.invoice_id is not None:
+        await _require_invoice_access(session, data.invoice_id, user_id)
+        saved = await service.get_invoice(data.invoice_id)
+        if saved.project_id != data.project_id:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The invoice is not on this project.")
+        exclude = saved.id
+        metadata = dict(saved.metadata_ or {})
+    state = {**data.model_dump(exclude={"invoice_id"}), "metadata": metadata}
+    result = await service.posting_check(state, exclude_invoice_id=exclude)
+    return InvoicePostingCheckResponse.model_validate(result)
 
 
 @router.post(
@@ -2870,7 +2927,7 @@ async def update_invoice(
 ) -> InvoiceResponse:
     """Update an invoice."""
     await _require_invoice_access(session, invoice_id, user_id)
-    invoice = await service.update_invoice(invoice_id, data)
+    invoice = await service.update_invoice(invoice_id, data, actor_id=str(user_id) if user_id else None)
     names = await _fetch_counterparty_names(session, [invoice.contact_id])
     return _invoice_to_response(invoice, names)
 

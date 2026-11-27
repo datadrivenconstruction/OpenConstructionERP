@@ -2954,5 +2954,31 @@
       "fail": "Ang {line} ay may kategoryang \"{category}\", na hindi uri ng gastos",
       "suggestion": "Itakda ang linya sa paggawa, materyales, kagamitan, subkontrata o iba pa"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Ang invoice {invoice} ay lampas nang {excess} sa {remaining} na bukas pa sa {commitment}",
+      "suggestion": "Aprubahan ang change order na nagtataas ng commitment, o itama ang halaga ng invoice"
+    },
+    "commitment_currency": {
+      "fail": "Ang invoice {invoice} ay nasa {invoice_currency}, pero ang {commitment} ay nasa {commitment_currency}",
+      "suggestion": "Ilagay ang invoice sa currency ng order o subcontract nito"
+    },
+    "commitment_retention": {
+      "fail": "Ang invoice {invoice} ay nagpipigil ng {retention}, mas mababa sa napagkasunduang retention na {expected} sa {commitment} ({percent}%)",
+      "suggestion": "Pigilin ang napagkasunduang halaga, o itala kung bakit hindi ito naaangkop"
+    },
+    "duplicate_number": {
+      "fail": "Naipasok na ang invoice number {invoice} mula sa supplier na ito",
+      "suggestion": "Buksan ang naunang invoice; kanselahin ito kung iisang dokumento"
+    },
+    "possible_duplicate": {
+      "fail": "Ang invoice {invoice} ay may parehong supplier, halaga ({amount}) at petsa ({on}) gaya ng invoice {other}",
+      "suggestion": "Tiyaking hindi ito parehong invoice na naipasok nang dalawang beses sa ibang numero"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Nakatakda ang bayad sa {scheduled}, bago ang petsa ng invoice na {invoice_date}",
+      "suggestion": "Itakda ang bayad sa petsa ng invoice o pagkatapos"
+    }
   }
 }

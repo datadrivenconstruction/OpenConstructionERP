@@ -2954,5 +2954,31 @@
       "fail": "{line} heeft de categorie \"{category}\", die geen kostensoort is",
       "suggestion": "Zet de regel op arbeid, materiaal, materieel, onderaanneming of overig"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Factuur {invoice} is {excess} hoger dan de {remaining} die nog openstaat op {commitment}",
+      "suggestion": "Keur een wijzigingsopdracht goed die de verplichting verhoogt, of corrigeer het factuurbedrag"
+    },
+    "commitment_currency": {
+      "fail": "Factuur {invoice} is in {invoice_currency}, maar {commitment} is in {commitment_currency}",
+      "suggestion": "Voer de factuur in de valuta van de bestelling of onderaanneming in"
+    },
+    "commitment_retention": {
+      "fail": "Factuur {invoice} houdt {retention} in, minder dan de op {commitment} afgesproken inhouding van {expected} ({percent}%)",
+      "suggestion": "Houd de afgesproken inhouding in of noteer waarom die niet geldt"
+    },
+    "duplicate_number": {
+      "fail": "Factuurnummer {invoice} van deze leverancier is al ingevoerd",
+      "suggestion": "Open de eerdere factuur; annuleer deze als het hetzelfde document is"
+    },
+    "possible_duplicate": {
+      "fail": "Factuur {invoice} heeft dezelfde leverancier, hetzelfde bedrag ({amount}) en dezelfde datum ({on}) als factuur {other}",
+      "suggestion": "Controleer of niet dezelfde factuur twee keer onder een ander nummer is ingevoerd"
+    },
+    "payment_date_before_invoice": {
+      "fail": "De betaling is gepland op {scheduled}, vóór de factuurdatum {invoice_date}",
+      "suggestion": "Plan de betaling op of na de factuurdatum"
+    }
   }
 }

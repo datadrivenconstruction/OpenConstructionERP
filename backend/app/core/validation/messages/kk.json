@@ -2954,5 +2954,31 @@
       "fail": "{line} санаты \"{category}\", бұл шығын түрі емес",
       "suggestion": "Жолға еңбек, материалдар, техника, қосалқы мердігер немесе басқаны белгілеңіз"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "{invoice} шот-фактурасы {commitment} бойынша қалған {remaining} сомасынан {excess} артық",
+      "suggestion": "Міндеттемені ұлғайтатын өзгеріс бұйрығын бекітіңіз немесе шот сомасын түзетіңіз"
+    },
+    "commitment_currency": {
+      "fail": "{invoice} шоты {invoice_currency} валютасында, ал {commitment} {commitment_currency} валютасында",
+      "suggestion": "Шотты оның тапсырысы немесе қосалқы мердігерлік шарты валютасында енгізіңіз"
+    },
+    "commitment_retention": {
+      "fail": "{invoice} шоты {retention} ұстайды, бұл {commitment} бойынша келісілген {expected} ұстаудан аз ({percent}%)",
+      "suggestion": "Келісілген соманы ұстаңыз немесе неге қолданылмайтынын жазыңыз"
+    },
+    "duplicate_number": {
+      "fail": "Бұл жеткізушінің {invoice} нөмірлі шоты бұрын енгізілген",
+      "suggestion": "Бұрынғы шотты ашыңыз; бұл сол құжат болса, оны жойыңыз"
+    },
+    "possible_duplicate": {
+      "fail": "{invoice} шотының жеткізушісі, сомасы ({amount}) және күні ({on}) {other} шотымен бірдей",
+      "suggestion": "Бір шоттың басқа нөмірмен екі рет енгізілмегенін тексеріңіз"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Төлем {scheduled} күніне, шот күні {invoice_date} бұрын жоспарланған",
+      "suggestion": "Төлемді шот күніне немесе одан кейін жоспарлаңыз"
+    }
   }
 }

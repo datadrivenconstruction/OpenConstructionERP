@@ -2954,5 +2954,31 @@
       "fail": "{line} の区分は「{category}」で、原価区分ではありません",
       "suggestion": "行を労務費、材料費、機械費、外注費、その他のいずれかに設定してください"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "請求書 {invoice} は {commitment} の未請求残高 {remaining} を {excess} 超えています",
+      "suggestion": "コミットメントを増やす変更指示を承認するか、請求額を修正してください"
+    },
+    "commitment_currency": {
+      "fail": "請求書 {invoice} は {invoice_currency} ですが、{commitment} は {commitment_currency} です",
+      "suggestion": "請求書は発注書または下請契約の通貨で入力してください"
+    },
+    "commitment_retention": {
+      "fail": "請求書 {invoice} の留保額は {retention} で、{commitment} で合意した留保額 {expected}（{percent}%）を下回っています",
+      "suggestion": "合意した留保額を差し引くか、適用しない理由を記録してください"
+    },
+    "duplicate_number": {
+      "fail": "この仕入先の請求書番号 {invoice} はすでに入力されています",
+      "suggestion": "以前の請求書を開いてください。同じ書類であればこちらを取り消してください"
+    },
+    "possible_duplicate": {
+      "fail": "請求書 {invoice} は請求書 {other} と仕入先、金額（{amount}）、日付（{on}）が同じです",
+      "suggestion": "同じ請求書が別の番号で二重に入力されていないか確認してください"
+    },
+    "payment_date_before_invoice": {
+      "fail": "支払予定日 {scheduled} が請求日 {invoice_date} より前になっています",
+      "suggestion": "支払予定日は請求日以降に設定してください"
+    }
   }
 }

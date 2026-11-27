@@ -2954,5 +2954,31 @@
       "fail": "فئة {line} هي \"{category}\"، وهي ليست نوع تكلفة",
       "suggestion": "اجعل السطر عمالة أو مواد أو معدات أو مقاولة من الباطن أو أخرى"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "تتجاوز الفاتورة {invoice} المبلغ المتبقي {remaining} على {commitment} بمقدار {excess}",
+      "suggestion": "اعتمد أمر تغيير يرفع الالتزام، أو صحّح مبلغ الفاتورة"
+    },
+    "commitment_currency": {
+      "fail": "الفاتورة {invoice} بعملة {invoice_currency}، لكن {commitment} بعملة {commitment_currency}",
+      "suggestion": "أدخل الفاتورة بعملة أمر الشراء أو عقد الباطن الخاص بها"
+    },
+    "commitment_retention": {
+      "fail": "تحتجز الفاتورة {invoice} مبلغ {retention}، وهو أقل من المحتجز المتفق عليه في {commitment} وقدره {expected} ({percent}%)",
+      "suggestion": "احتجز المبلغ المتفق عليه، أو دوّن سبب عدم انطباقه"
+    },
+    "duplicate_number": {
+      "fail": "رقم الفاتورة {invoice} من هذا المورّد مُدخل مسبقًا",
+      "suggestion": "افتح الفاتورة السابقة؛ وألغِ هذه إن كانت المستند نفسه"
+    },
+    "possible_duplicate": {
+      "fail": "للفاتورة {invoice} المورّد نفسه والمبلغ نفسه ({amount}) والتاريخ نفسه ({on}) مثل الفاتورة {other}",
+      "suggestion": "تحقق من أنها ليست الفاتورة نفسها مُدخلة مرتين برقم آخر"
+    },
+    "payment_date_before_invoice": {
+      "fail": "الدفع مجدول في {scheduled}، قبل تاريخ الفاتورة {invoice_date}",
+      "suggestion": "جدول الدفع في تاريخ الفاتورة أو بعده"
+    }
   }
 }

@@ -2954,5 +2954,31 @@
       "fail": "{line} категориясы \"{category}\", бул чыгым түрү эмес",
       "suggestion": "Сапка эмгек, материалдар, техника, субподряд же башканы коюңуз"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "{invoice} эсеп-фактурасы {commitment} боюнча калган {remaining} суммасынан {excess} ашык",
+      "suggestion": "Милдеттенмени көбөйтүүчү өзгөртүү буйругун бекитиңиз же эсептин суммасын оңдоңуз"
+    },
+    "commitment_currency": {
+      "fail": "{invoice} эсеби {invoice_currency} валютасында, ал эми {commitment} {commitment_currency} валютасында",
+      "suggestion": "Эсепти анын буйрутмасынын же субподряд келишиминин валютасында киргизиңиз"
+    },
+    "commitment_retention": {
+      "fail": "{invoice} эсеби {retention} кармайт, бул {commitment} боюнча макулдашылган {expected} кармоодон аз ({percent}%)",
+      "suggestion": "Макулдашылган сумманы кармаңыз же эмне үчүн колдонулбай турганын жазыңыз"
+    },
+    "duplicate_number": {
+      "fail": "Бул жеткирүүчүнүн {invoice} номерлүү эсеби мурда киргизилген",
+      "suggestion": "Мурунку эсепти ачыңыз; бул ошол эле документ болсо, муну жокко чыгарыңыз"
+    },
+    "possible_duplicate": {
+      "fail": "{invoice} эсебинин жеткирүүчүсү, суммасы ({amount}) жана күнү ({on}) {other} эсебиндей",
+      "suggestion": "Бир эле эсеп башка номер менен эки жолу киргизилбегенин текшериңиз"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Төлөм {scheduled} күнүнө, эсептин күнү {invoice_date} мурун пландалган",
+      "suggestion": "Төлөмдү эсептин күнүнө же андан кийин пландаңыз"
+    }
   }
 }

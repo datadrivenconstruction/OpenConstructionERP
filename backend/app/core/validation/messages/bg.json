@@ -2954,5 +2954,31 @@
       "fail": "{line} има категория \"{category}\", която не е вид разход",
       "suggestion": "Задайте за реда труд, материали, механизация, подизпълнител или други"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Фактура {invoice} надвишава с {excess} оставащите {remaining} по {commitment}",
+      "suggestion": "Одобрете промяна, която увеличава задължението, или коригирайте сумата на фактурата"
+    },
+    "commitment_currency": {
+      "fail": "Фактура {invoice} е в {invoice_currency}, а {commitment} е в {commitment_currency}",
+      "suggestion": "Въведете фактурата във валутата на поръчката или подизпълнителския договор"
+    },
+    "commitment_retention": {
+      "fail": "Фактура {invoice} задържа {retention}, по-малко от уговореното по {commitment} задържане {expected} ({percent}%)",
+      "suggestion": "Задръжте уговорената сума или отбележете защо не се прилага"
+    },
+    "duplicate_number": {
+      "fail": "Фактура с номер {invoice} от този доставчик вече е въведена",
+      "suggestion": "Отворете по-ранната фактура; анулирайте тази, ако е същият документ"
+    },
+    "possible_duplicate": {
+      "fail": "Фактура {invoice} има същия доставчик, сума ({amount}) и дата ({on}) като фактура {other}",
+      "suggestion": "Проверете дали същата фактура не е въведена два пъти с друг номер"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Плащането е планирано за {scheduled}, преди датата на фактурата {invoice_date}",
+      "suggestion": "Планирайте плащането на датата на фактурата или по-късно"
+    }
   }
 }

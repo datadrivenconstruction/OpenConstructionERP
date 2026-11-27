@@ -2954,5 +2954,31 @@
       "fail": "{line} tiene la categoría \"{category}\", que no es un tipo de coste",
       "suggestion": "Asigne a la línea mano de obra, material, equipo, subcontrato u otros"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "La factura {invoice} supera en {excess} los {remaining} aún pendientes en {commitment}",
+      "suggestion": "Apruebe una orden de cambio que aumente el compromiso o corrija el importe de la factura"
+    },
+    "commitment_currency": {
+      "fail": "La factura {invoice} está en {invoice_currency}, pero {commitment} está en {commitment_currency}",
+      "suggestion": "Registre la factura en la moneda de su pedido o subcontrato"
+    },
+    "commitment_retention": {
+      "fail": "La factura {invoice} retiene {retention}, menos que la retención de {expected} acordada en {commitment} ({percent}%)",
+      "suggestion": "Retenga lo acordado o indique por qué no se aplica"
+    },
+    "duplicate_number": {
+      "fail": "El número de factura {invoice} de este proveedor ya se ha registrado",
+      "suggestion": "Abra la factura anterior; cancele esta si es el mismo documento"
+    },
+    "possible_duplicate": {
+      "fail": "La factura {invoice} tiene el mismo proveedor, importe ({amount}) y fecha ({on}) que la factura {other}",
+      "suggestion": "Compruebe que no sea la misma factura registrada dos veces con otro número"
+    },
+    "payment_date_before_invoice": {
+      "fail": "El pago está programado para el {scheduled}, antes de la fecha de la factura {invoice_date}",
+      "suggestion": "Programe el pago en la fecha de la factura o después"
+    }
   }
 }

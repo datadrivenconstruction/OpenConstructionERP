@@ -2954,5 +2954,31 @@
       "fail": "{line} kategooria on \"{category}\", mis ei ole kuluiik",
       "suggestion": "Määrake reale töö, materjal, masinad, alltöövõtt või muu"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "Arve {invoice} ületab kohustusel {commitment} veel avatud summat {remaining} {excess} võrra",
+      "suggestion": "Kinnitage kohustust suurendav muudatustellimus või parandage arve summat"
+    },
+    "commitment_currency": {
+      "fail": "Arve {invoice} on valuutas {invoice_currency}, kuid {commitment} on valuutas {commitment_currency}",
+      "suggestion": "Sisestage arve selle tellimuse või alltöövõtu valuutas"
+    },
+    "commitment_retention": {
+      "fail": "Arve {invoice} peab kinni {retention}, vähem kui kohustusel {commitment} kokku lepitud kinnipidamine {expected} ({percent}%)",
+      "suggestion": "Pidage kinni kokkulepitud summa või märkige, miks see ei kehti"
+    },
+    "duplicate_number": {
+      "fail": "Selle tarnija arve number {invoice} on juba sisestatud",
+      "suggestion": "Avage varasem arve; tühistage see, kui tegemist on sama dokumendiga"
+    },
+    "possible_duplicate": {
+      "fail": "Arvel {invoice} on sama tarnija, summa ({amount}) ja kuupäev ({on}) kui arvel {other}",
+      "suggestion": "Kontrollige, et sama arvet ei ole teise numbriga kaks korda sisestatud"
+    },
+    "payment_date_before_invoice": {
+      "fail": "Makse on kavandatud kuupäevaks {scheduled}, enne arve kuupäeva {invoice_date}",
+      "suggestion": "Kavandage makse arve kuupäevale või hiljemaks"
+    }
   }
 }

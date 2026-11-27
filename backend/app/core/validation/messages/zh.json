@@ -2954,5 +2954,31 @@
       "fail": "{line} 的类别为“{category}”，不是成本类型",
       "suggestion": "请将此行设为人工、材料、机械、分包或其他"
     }
+  },
+  "invoice_posting": {
+    "within_commitment": {
+      "fail": "发票 {invoice} 比 {commitment} 尚未开票的 {remaining} 多出 {excess}",
+      "suggestion": "请批准一项增加承诺额的变更单，或更正发票金额"
+    },
+    "commitment_currency": {
+      "fail": "发票 {invoice} 的币种为 {invoice_currency}，而 {commitment} 的币种为 {commitment_currency}",
+      "suggestion": "请按其采购订单或分包合同的币种录入发票"
+    },
+    "commitment_retention": {
+      "fail": "发票 {invoice} 扣留 {retention}，少于 {commitment} 约定的保留金 {expected}（{percent}%）",
+      "suggestion": "请扣留约定的保留金，或注明不适用的原因"
+    },
+    "duplicate_number": {
+      "fail": "该供应商的发票号 {invoice} 已录入",
+      "suggestion": "请打开先前的发票；如为同一单据，请作废本张"
+    },
+    "possible_duplicate": {
+      "fail": "发票 {invoice} 与发票 {other} 的供应商、金额（{amount}）和日期（{on}）相同",
+      "suggestion": "请确认同一张发票未以其他编号重复录入"
+    },
+    "payment_date_before_invoice": {
+      "fail": "付款计划日期 {scheduled} 早于发票日期 {invoice_date}",
+      "suggestion": "请将付款安排在发票日期当天或之后"
+    }
   }
 }
