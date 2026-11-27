@@ -597,12 +597,14 @@ describe('deleting', () => {
     expect(confirm).toHaveTextContent(/2 contract payment instalments follow its milestones/);
   });
 
-  it('shows a viewer the plan without the buttons the server would refuse', async () => {
+  it('shows a viewer the plan with regenerate disabled and the reason, and no clear or archive', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     state.activities = THREE;
     renderDetail();
     expect(await screen.findByTestId('svg-gantt')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Regenerate from BOQ' })).toBeNull();
+    const regenerate = screen.getByRole('button', { name: 'Regenerate from BOQ' });
+    expect(regenerate).toBeDisabled();
+    expect(regenerate).toHaveAttribute('title', expect.stringMatching(/^Only an? /));
     expect(screen.queryByRole('button', { name: 'Clear all activities' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Archive Main schedule' })).toBeNull();
   });

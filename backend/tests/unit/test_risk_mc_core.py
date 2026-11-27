@@ -93,4 +93,7 @@ def test_project_simulation_output_is_unchanged_by_the_extraction():
     for mode, expected in golden.items():
         random.seed(11)
         got = asyncio.run(svc.simulate(uuid.uuid4(), iterations=2000, mode=mode))
-        assert json.loads(json.dumps(got, sort_keys=True)) == expected, mode
+        shown = json.loads(json.dumps(got, sort_keys=True))
+        # Every figure the extraction used to return is unchanged; the confidence read-out only adds keys.
+        assert {k: shown[k] for k in expected} == expected, mode
+        assert shown["confidence"] == 80 and shown["target_cost"] == shown["p80_cost"], mode

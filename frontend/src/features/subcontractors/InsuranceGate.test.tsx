@@ -87,12 +87,14 @@ describe('PaymentInsuranceGate', () => {
     await waitFor(() => expect(overrideMock).toHaveBeenCalledWith('pay1', 'Renewal in transit'));
   });
 
-  it('offers no override to a role below manager', async () => {
+  it('shows the override disabled, with the reason, to a role below manager', async () => {
     role = 'editor';
     checkMock.mockResolvedValue(blocked);
     wrap(<PaymentRowActions payment={payment} requiresWaiver={false} />);
     await screen.findByTestId('insurance-gate-banner');
-    expect(screen.queryByTestId('insurance-override-open')).toBeNull();
+    const open = screen.getByTestId('insurance-override-open');
+    expect(open).toBeDisabled();
+    expect(open).toHaveAttribute('title', 'Only a manager or administrator can do this.');
   });
 
   it('releases the button and shows who overrode once an override is on file', async () => {

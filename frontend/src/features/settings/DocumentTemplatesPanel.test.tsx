@@ -309,8 +309,10 @@ describe('DocumentTemplatesPanel', () => {
     renderPanel();
     await openRow('rfi');
 
-    expect(screen.queryByTestId('doc-type-save-rfi')).toBeNull();
-    expect(screen.queryByTestId('doc-type-reset-rfi')).toBeNull();
+    for (const id of ['doc-type-save-rfi', 'doc-type-reset-rfi']) {
+      expect(screen.getByTestId(id)).toBeDisabled();
+      expect(screen.getByTestId(id)).toHaveAttribute('title', 'Only an administrator can do this.');
+    }
     for (const name of RFI.fields) {
       expect(pinBox('rfi', name)).toBeDisabled();
     }

@@ -166,12 +166,12 @@ describe('MarketSettings', () => {
     expect(screen.queryByTestId('market-primary')).toBeNull();
   });
 
-  it('is read-only for a non-admin: no add control, disabled fields and Save', () => {
+  it('is read-only for a non-admin: disabled add control, fields and Save', () => {
     scopeState = { data: scope({ can_edit: false }) };
     wrap(<MarketSettings />);
     expect(screen.getByTestId('market-primary').disabled).toBe(true);
     expect(screen.getByTestId('market-units').disabled).toBe(true);
-    expect(screen.queryByTestId('market-add-select')).toBeNull();
+    expect(screen.getByTestId('market-add-select').closest('fieldset').disabled).toBe(true);
     expect(screen.getByRole('button', { name: /common\.save|Save/ }).disabled).toBe(true);
   });
 

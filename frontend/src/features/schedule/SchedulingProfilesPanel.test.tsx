@@ -157,10 +157,12 @@ describe('SchedulingProfilesPanel', () => {
     await waitFor(() => expect(interopApi.assignScheduleProfile).toHaveBeenCalledWith('s1', 'p1'));
   });
 
-  it('hides editing for a viewer', async () => {
+  it('shows editing disabled, with the reason, for a viewer', async () => {
     renderPanel(false);
     await screen.findAllByText('Working-day lags');
-    expect(screen.queryByText(/Add profile/)).not.toBeInTheDocument();
+    const add = screen.getByRole('button', { name: /Add profile/ });
+    expect(add).toBeDisabled();
+    expect(add).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
     expect(screen.getByTestId('profile-assign')).toBeDisabled();
   });
 });

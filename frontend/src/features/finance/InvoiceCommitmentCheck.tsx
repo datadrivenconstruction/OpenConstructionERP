@@ -86,11 +86,11 @@ export function useSubcontractCommitments(projectId: string, contactId: string) 
   return useQuery({
     queryKey: ['finance-commitments', projectId, contactId],
     queryFn: () =>
-      apiGet<Commitment[]>(
+      apiGet<{ items: Commitment[] }>(
         `/v1/finance/commitments/?project_id=${encodeURIComponent(projectId)}&contact_id=${encodeURIComponent(contactId)}`,
       ),
     enabled: !!projectId && !!contactId,
-    select: (rows) => rows.filter((c) => c.kind === 'subcontract'),
+    select: (page) => page.items.filter((c) => c.kind === 'subcontract'),
   });
 }
 

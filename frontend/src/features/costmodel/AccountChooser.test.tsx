@@ -59,10 +59,12 @@ describe('AccountChooser', () => {
     expect(screen.getByText(/from the contract line/)).toBeInTheDocument();
   });
 
-  it('shows a row on no cost line as such and offers no change without the right', async () => {
+  it('shows a row on no cost line as such and offers a disabled change without the right', async () => {
     renderChooser({ costLineId: null, canEdit: false });
     expect(await screen.findByText('No cost line')).toBeInTheDocument();
-    expect(screen.queryByTestId('account-change-it-1')).not.toBeInTheDocument();
+    const change = screen.getByTestId('account-change-it-1');
+    expect(change).toBeDisabled();
+    expect(change).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
   });
 
   it('sets another line, and the empty choice takes the inherited one back', async () => {

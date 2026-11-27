@@ -204,7 +204,7 @@ interface RegisterFieldsPayload {
 }
 
 export interface CreateSubmittalPayload extends RegisterFieldsPayload {
-  ball_in_court?: string;
+  ball_in_court?: string | null;
   distribution_list?: string[];
   project_id: string;
   title: string;

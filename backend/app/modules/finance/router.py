@@ -102,6 +102,7 @@ from app.modules.finance.schemas import (
     BudgetUpdate,
     CashFlowResponse,
     ClaimInvoiceRequest,
+    CommitmentListResponse,
     CommitmentResponse,
     EVMListResponse,
     EVMSnapshotCreate,
@@ -459,7 +460,7 @@ async def list_invoices(
 
 @router.get(
     "/commitments/",
-    response_model=list[CommitmentResponse],
+    response_model=CommitmentListResponse,
     summary="Purchase orders and subcontract agreements an invoice may bill",
 )
 async def list_invoice_commitments(
@@ -469,14 +470,15 @@ async def list_invoice_commitments(
     contact_id: str | None = Query(default=None, max_length=36),
     _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
-) -> list[CommitmentResponse]:
+) -> CommitmentListResponse:
     """The project's orders and agreements with this supplier, with what is still open on each, net of VAT.
 
     Agreements are listed only where the subcontractors module is installed.
     """
     await _require_project_access(session, project_id, user_id)
     found = await service.commitments_for(project_id, contact_id)
-    return [CommitmentResponse.model_validate(c.as_dict()) for c in found]
+    items = [CommitmentResponse.model_validate(c.as_dict()) for c in found]
+    return CommitmentListResponse(items=items, total=len(items), offset=0, limit=len(items))
 
 
 @router.post(

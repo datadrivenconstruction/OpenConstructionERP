@@ -657,12 +657,17 @@ describe('SheetsIndexPage - bulk edit', () => {
     );
   });
 
-  it('offers no selection to a viewer', async () => {
+  it('shows a viewer the selection boxes disabled, with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     routeApi();
     renderPage();
 
     expect(await screen.findByText('A-101')).toBeInTheDocument();
-    expect(screen.queryByRole('checkbox', { name: /Select (all sheets|sheet)/ })).not.toBeInTheDocument();
+    const boxes = screen.getAllByRole('checkbox', { name: /Select (all sheets|sheet)/ });
+    expect(boxes.length).toBeGreaterThan(0);
+    for (const box of boxes) {
+      expect(box).toBeDisabled();
+      expect(box).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
+    }
   });
 });

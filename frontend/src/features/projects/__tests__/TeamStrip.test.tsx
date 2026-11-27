@@ -135,10 +135,12 @@ describe('TeamStrip', () => {
     expect(screen.getByTestId('team-strip-add-submit')).toBeInTheDocument();
   });
 
-  it('hides the add controls when canManage is false', () => {
+  it('shows the add controls disabled, with the reason, when canManage is false', () => {
     renderStrip([makeMember(0), makeMember(1)], false);
-    expect(screen.queryByTestId('team-strip-add-button')).toBeNull();
-    expect(screen.queryByTestId('team-strip-manage')).toBeNull();
+    for (const id of ['team-strip-add-button', 'team-strip-manage']) {
+      expect(screen.getByTestId(id)).toBeDisabled();
+      expect(screen.getByTestId(id)).toHaveAttribute('title', 'Only a manager or administrator can do this.');
+    }
     // Avatars still render in read-only mode.
     expect(screen.getAllByTestId('team-strip-avatar')).toHaveLength(2);
   });

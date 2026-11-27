@@ -309,13 +309,13 @@ describe('HakedisPanel', () => {
     );
   });
 
-  it('offers no entry to a viewer', async () => {
+  it('offers no entry to a viewer and shows the final toggle disabled', async () => {
     role = 'viewer';
     getMock.mockResolvedValue(certificate());
     renderPanel();
     await screen.findByTestId('hakedis-line-price_adjustment');
     expect(screen.queryByTestId('hakedis-line-edit-price_adjustment')).toBeNull();
-    expect(screen.queryByTestId('hakedis-final-toggle')).toBeNull();
+    expect(screen.getByTestId('hakedis-final-toggle')).toBeDisabled();
   });
 
   it('is read-only and says it is frozen once certified', async () => {
@@ -343,7 +343,7 @@ describe('HakedisPanel', () => {
     expect(screen.queryByTestId('hakedis-certify-refusal')).toBeNull();
     expect(screen.getByTestId('hakedis-frozen-note')).toHaveTextContent('stored snapshot');
     expect(screen.queryByTestId('hakedis-attention')).toBeNull();
-    expect(screen.queryByTestId('hakedis-final-toggle')).toBeNull();
+    expect(screen.getByTestId('hakedis-final-toggle')).toBeDisabled();
     expect(screen.queryByTestId(/^hakedis-line-edit-/)).toBeNull();
     expect(screen.queryByTestId('hakedis-taxes-save')).toBeNull();
     expect(screen.queryByTestId(/^hakedis-tax-option-/)).toBeNull();

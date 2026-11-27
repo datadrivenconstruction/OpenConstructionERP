@@ -344,7 +344,8 @@ describe('manual quantity', () => {
     h.access = { can_accept: false, currency: 'EUR', lock: null };
     await mount();
     const row = await screen.findByTestId('pos-wall_ext');
-    expect(within(row).queryByRole('button', { name: 'Save reason' })).toBeNull();
+    const save = within(row).getByRole('button', { name: 'Save reason' }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
     expect((within(row).getByLabelText('Reason for the manual quantity') as HTMLTextAreaElement).readOnly).toBe(true);
     expect(screen.getByTestId('read-only')).toBeTruthy();
     expect((screen.getByRole('button', { name: 'Compute estimate' }) as HTMLButtonElement).disabled).toBe(true);
@@ -352,7 +353,7 @@ describe('manual quantity', () => {
     h.accessPending = true;
     await mount();
     const row2 = await screen.findByTestId('pos-wall_ext');
-    expect(within(row2).queryByRole('button', { name: 'Save reason' })).toBeNull();
+    expect((within(row2).getByRole('button', { name: 'Save reason' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Compute estimate' }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

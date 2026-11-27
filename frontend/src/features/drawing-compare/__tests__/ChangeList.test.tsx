@@ -158,9 +158,11 @@ describe('ChangeList', () => {
     await waitFor(() => expect(apiDelete).toHaveBeenCalledWith('/v1/drawing-compare/changes/ch-1/remeasure/'));
   });
 
-  it('hides every action from a reader without write access', () => {
+  it('shows every action disabled to a reader without write access', () => {
     renderList([change(1, { comment: 'Checked on site' })], false);
-    expect(screen.queryByRole('button', { name: /RFI/ })).toBeNull();
+    const rfi = screen.getByRole('button', { name: /RFI/ });
+    expect(rfi).toBeDisabled();
+    expect(rfi.closest('fieldset')).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
     expect(screen.getByText('Checked on site')).toBeTruthy();
   });
 });

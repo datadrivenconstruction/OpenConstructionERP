@@ -663,6 +663,8 @@ class RiskService:
         # Bound iterations defensively even though the schema already
         # enforces 1000 ≤ iterations ≤ 100 000.
         iterations = max(1, min(int(iterations), 100_000))
+        # The caller seeds the generator first; awaits below must not let other draws shift the stream.
+        rng_state = random.getstate()
         confidence = max(50, min(int(confidence), 99))
         range_low_pct = max(0.0, min(float(range_low_pct), 90.0))
         range_high_pct = max(0.0, min(float(range_high_pct), 300.0))
@@ -789,6 +791,7 @@ class RiskService:
         per_risk_cost_sum = [0.0] * len(items)
         per_risk_schedule_sum = [0.0] * len(items)
 
+        random.setstate(rng_state)
         if sample_cost and not sample_schedule:
             sim = simulate_cost(
                 [CostItem(lo, mid, hi, w) for (lo, mid, hi), w in zip(cost_triples, cost_weights, strict=True)],

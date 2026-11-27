@@ -106,9 +106,9 @@ describe('StakeCard', () => {
     await waitFor(() => expect(createNcrDraft).toHaveBeenCalledWith('r1', expect.any(String)));
   });
 
-  it('has no NCR button once the draft exists, and no inputs for a viewer', () => {
+  it('has no NCR button once the draft exists, and a disabled save for a viewer', () => {
     wrap(<StakeCard stake={stake('C-03', 389060, { ...failed, ncr_id: 'n1' })} {...props} canWrite={false} />);
     expect(screen.queryByTestId('stake-create-ncr')).toBeNull();
-    expect(screen.queryByTestId('stake-save')).toBeNull();
+    expect(screen.getByTestId('stake-save')).toBeDisabled();
   });
 });

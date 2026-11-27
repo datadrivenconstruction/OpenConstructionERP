@@ -200,7 +200,12 @@ describe('InvoiceApprovalGate', () => {
 
 describe('InvoiceSubcontractField', () => {
   it('offers only this supplier subcontract agreements and hides itself when there are none', async () => {
-    api.apiGet.mockResolvedValue([COMMITMENT, { ...COMMITMENT, kind: 'subcontract', id: 'sa-1', ref: 'Concrete package' }]);
+    api.apiGet.mockResolvedValue({
+      items: [COMMITMENT, { ...COMMITMENT, kind: 'subcontract', id: 'sa-1', ref: 'Concrete package' }],
+      total: 2,
+      offset: 0,
+      limit: 2,
+    });
     wrap(<InvoiceSubcontractField projectId="proj-1" contactId="vendor-1" value="" onChange={vi.fn()} />);
     const select = await screen.findByTestId('invoice-subcontract-select');
     expect(select.textContent).toContain('Concrete package');
@@ -209,7 +214,7 @@ describe('InvoiceSubcontractField', () => {
   });
 
   it('is absent where the market has no subcontract agreements', async () => {
-    api.apiGet.mockResolvedValue([]);
+    api.apiGet.mockResolvedValue({ items: [], total: 0, offset: 0, limit: 0 });
     const { container } = wrap(
       <InvoiceSubcontractField projectId="proj-1" contactId="vendor-1" value="" onChange={vi.fn()} />,
     );

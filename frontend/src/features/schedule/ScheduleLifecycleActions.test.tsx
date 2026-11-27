@@ -127,10 +127,12 @@ describe('Delete on a schedule that is still in use', () => {
     expect(scheduleApi.archiveSchedule).not.toHaveBeenCalled();
   });
 
-  it('is not shown to a viewer, who may not archive either', () => {
+  it('is shown to a viewer disabled, with the reason, as archiving is refused too', () => {
     useAuthStore.setState({ userRole: 'viewer' });
     view();
-    expect(screen.queryByRole('button', { name: 'Delete Contract plan' })).toBeNull();
+    const del = screen.getByRole('button', { name: 'Delete Contract plan' });
+    expect(del).toBeDisabled();
+    expect(del).toHaveAttribute('title', expect.stringMatching(/^Only an? /));
   });
 });
 
@@ -143,7 +145,7 @@ describe('permanent deletion is for an administrator or the project owner', () =
     await new Promise((resolve) => setTimeout(resolve, 0));
     if (role === 'viewer') {
       expect(screen.queryByRole('button', { name: /Permanently delete/ })).toBeNull();
-      expect(screen.queryByRole('button', { name: /Restore/ })).toBeNull();
+      expect(screen.getByRole('button', { name: /Restore/ })).toBeDisabled();
       return;
     }
     // Shown switched off, with who may delete in words next to it.

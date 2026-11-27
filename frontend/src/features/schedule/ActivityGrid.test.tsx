@@ -271,11 +271,13 @@ describe('ActivityGrid delete', () => {
   const C1 = { ...A, id: 'k1', name: 'Dig', parent_id: 'sub' };
   const C2 = { ...B, id: 'k2', name: 'Fill', parent_id: 's1' };
 
-  it('offers a viewer no delete, which the server would refuse', async () => {
+  it('shows a viewer delete disabled, with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     renderGrid({ activities: [S, SUB, C1, C2], allActivities: [S, SUB, C1, C2] });
     expect(await screen.findByTestId('grid-deps-s1')).toBeInTheDocument();
-    expect(screen.queryByTestId('grid-delete-s1')).toBeNull();
+    const del = screen.getByTestId('grid-delete-s1');
+    expect(del).toBeDisabled();
+    expect(del).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
   });
 
   it('asks whether a section goes with its activities, counted at every depth', async () => {

@@ -102,13 +102,15 @@ describe('progress reports reach the client only once published', () => {
     expect(apiMocks.publishProgressReport).toHaveBeenCalledTimes(1);
   });
 
-  it('shows an editor the state but not the action the backend would refuse', async () => {
+  it('shows an editor the state and the action disabled, with the reason', async () => {
     apiMocks.listProgressReports.mockResolvedValue([report('r1', 'Week 40 draft', null)]);
     mount('editor');
     await waitFor(() => expect(screen.getByText('Week 40 draft')).toBeTruthy());
 
     const row = screen.getByText('Week 40 draft').closest('tr')!;
     expect(row.textContent).toContain('Internal only');
-    expect(screen.queryByRole('button', { name: /Show to client/ })).toBeNull();
+    const show = screen.getByRole('button', { name: /Show to client/ });
+    expect(show).toBeDisabled();
+    expect(show).toHaveAttribute('title', 'Only a manager or administrator can do this.');
   });
 });

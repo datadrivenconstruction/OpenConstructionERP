@@ -417,6 +417,15 @@ class CommitmentResponse(BaseModel):
     shared_change_orders: int = 0
 
 
+class CommitmentListResponse(BaseModel):
+    """The orders and agreements an invoice may bill, in the page envelope."""
+
+    items: list[CommitmentResponse]
+    total: int
+    offset: int = 0
+    limit: int
+
+
 class InvoicePostingCheckResponse(BaseModel):
     """What approving the invoice would meet: its commitment and the ``invoice_posting`` report."""
 

@@ -184,14 +184,17 @@ describe('SheetsIndexPage review of machine-read sheets', () => {
     expect(await screen.findByText(/^1 sheets? confirmed.$/)).toBeInTheDocument();
   });
 
-  it('keeps the review controls away from a viewer', async () => {
+  it('shows a viewer the review controls disabled, with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     routeApi();
     renderPage();
 
     expect(await screen.findByText('A-102')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Confirm all above 80%' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Confirm the reading of sheet/ })).not.toBeInTheDocument();
+    const all = screen.getByRole('button', { name: 'Confirm all above 80%' });
+    expect(all).toBeDisabled();
+    expect(all).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
+    const rows = screen.getAllByRole('button', { name: /Confirm the reading of sheet/ });
+    for (const row of rows) expect(row).toBeDisabled();
   });
 
   it('shows the install hint, not a raw error, for a sheet OCR could not read', async () => {

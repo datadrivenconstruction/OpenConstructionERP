@@ -91,7 +91,7 @@ describe('buyer delete affordance', () => {
 
   it('offers delete to an editor, the role owner-scoped delete was lowered for', () => {
     mountAs('editor');
-    expect(deleteButton()).not.toBeNull();
+    expect(deleteButton()).toBeEnabled();
   });
 
   it('offers delete to an alias that resolves to editor', () => {
@@ -100,24 +100,25 @@ describe('buyer delete affordance', () => {
     // served by the backend, so hiding the button from them would be the
     // same defect in a less obvious costume.
     mountAs('estimator');
-    expect(deleteButton()).not.toBeNull();
+    expect(deleteButton()).toBeEnabled();
   });
 
   it('still offers delete to an admin', () => {
     mountAs('admin');
-    expect(deleteButton()).not.toBeNull();
+    expect(deleteButton()).toBeEnabled();
   });
 
-  it('withholds delete from a viewer', () => {
+  it('shows a viewer delete disabled, with the reason', () => {
     // Without this the suite would pass on a component that shows the button
     // unconditionally, which is the cheapest wrong way to make the three
     // assertions above go green.
     mountAs('viewer');
-    expect(deleteButton()).toBeNull();
+    expect(deleteButton()).toBeDisabled();
+    expect(deleteButton()).toHaveAttribute('title', 'Only a manager or administrator can do this.');
   });
 
-  it('withholds delete while the role is still unknown', () => {
+  it('shows delete disabled while the role is still unknown', () => {
     mountAs(null);
-    expect(deleteButton()).toBeNull();
+    expect(deleteButton()).toBeDisabled();
   });
 });

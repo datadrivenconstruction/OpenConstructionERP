@@ -239,13 +239,13 @@ describe('delete asks first', () => {
 });
 
 describe('registers panel', () => {
-  it('shows a reader the registers and no editing, with the confirmer of the tax treatment by name', () => {
+  it('shows a reader the registers with editing disabled, with the confirmer of the tax treatment by name', () => {
     render(<RegistersPanel projectId="p" data={REGISTERS} canEdit={false} currency="EUR" />);
     expect(screen.getAllByTestId('economics-security')).toHaveLength(1);
     expect(screen.getByTestId('economics-tax').textContent).toContain('Maria Lindner');
-    expect(screen.queryByText('Add a security')).toBeNull();
-    expect(screen.queryByLabelText('Delete the security')).toBeNull();
-    expect(screen.queryByText('Save the tax treatment')).toBeNull();
+    expect(screen.getByText('Add a security').closest('button')).toBeDisabled();
+    expect(screen.getByLabelText('Delete the security')).toBeDisabled();
+    expect(screen.getByText('Save the tax treatment').closest('button')).toBeDisabled();
   });
 
   it('offers editing to an editor even though the plan itself is not editable', () => {

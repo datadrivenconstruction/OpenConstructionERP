@@ -231,14 +231,19 @@ describe('ResourceIndexPage', () => {
     await waitFor(() => expect(labour.value).toBe('1.6'));
   });
 
-  it('offers no edit controls to a person without price_index.manage', async () => {
+  it('shows a person without price_index.manage the edit controls disabled, with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     renderPage();
     expect(await screen.findByText('Resource indices')).toBeTruthy();
     await waitFor(() => expect(screen.getAllByText('1.6').length).toBeGreaterThan(0));
     expect(screen.queryAllByRole('textbox', { name: 'Index' })).toHaveLength(0);
-    expect(screen.queryByRole('button', { name: /Add index/ })).toBeNull();
-    expect(screen.queryByRole('button', { name: /Add work type/ })).toBeNull();
-    expect(screen.queryAllByRole('button', { name: 'Delete' })).toHaveLength(0);
+    for (const add of [/Add index/, /Add work type/]) {
+      for (const btn of screen.getAllByRole('button', { name: add })) expect(btn).toBeDisabled();
+    }
+    const deletes = screen.getAllByRole('button', { name: 'Delete' });
+    for (const del of deletes) {
+      expect(del).toBeDisabled();
+      expect(del).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
+    }
   });
 });

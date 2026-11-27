@@ -223,7 +223,9 @@ describe('what a viewer is offered', () => {
     vi.mocked(api.getPaymentPlan).mockResolvedValue(plan([line('a')]));
     renderPanel();
     expect(await screen.findByRole('button', { name: 'Edit' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Delete instalment' })).toBeNull();
+    const del = screen.getByRole('button', { name: 'Delete instalment' }) as HTMLButtonElement;
+    expect(del.disabled).toBe(true);
+    expect(del.title).toBe('Only a manager or administrator can do this.');
   });
 });
 

@@ -411,7 +411,8 @@ describe('CompanyDocumentsSettings', () => {
     const name = (await screen.findByLabelText('Legal company name')) as HTMLInputElement;
     expect(name.value).toBe('Hochbau Nord GmbH');
     expect(name.readOnly).toBe(true);
-    expect(screen.queryByTestId('company-save')).toBeNull();
+    expect(screen.getByTestId('company-save')).toBeDisabled();
+    expect(screen.getByTestId('company-save')).toHaveAttribute('title', 'Only an administrator can do this.');
     expect(screen.queryByText('Drop your logo here, or click to browse')).toBeNull();
     // What documents print is still shown, since that is what the reader came for.
     expect(screen.getByTestId('letterhead-preview-name')).toHaveTextContent('Hochbau Nord GmbH');

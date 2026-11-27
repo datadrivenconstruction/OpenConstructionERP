@@ -33,6 +33,8 @@ const SUBMITTAL: Submittal = {
   status: 'draft',
   ball_in_court: null,
   ball_in_court_name: null,
+  distribution_list: [],
+  distribution_names: [],
   revision: 1,
   date_submitted: null,
   date_required: '2026-09-01',

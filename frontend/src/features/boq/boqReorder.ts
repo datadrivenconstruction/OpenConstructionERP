@@ -63,7 +63,7 @@ export function orderAfterSectionMove(positions: Row[], movedId: string, targetI
   if (from < 0 || to < 0 || from === to) return null;
   const next = [...siblings];
   const [item] = next.splice(from, 1);
-  next.splice(to, 0, item);
+  if (item) next.splice(to, 0, item);
   kids.set(parentOf(moved, ids), next);
 
   const out: string[] = [];
@@ -89,5 +89,5 @@ export function orderAfterLineMove(positions: Row[], visibleOrder: string[]): st
   const moving = new Set(visibleOrder.filter((id) => current.includes(id)));
   const queue = visibleOrder.filter((id) => moving.has(id));
   let i = 0;
-  return current.map((id) => (moving.has(id) ? queue[i++] : id));
+  return current.map((id) => (moving.has(id) ? (queue[i++] ?? id) : id));
 }

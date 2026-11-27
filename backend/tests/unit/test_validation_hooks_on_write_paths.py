@@ -364,6 +364,8 @@ async def test_submitting_a_complete_submittal_adds_no_finding_keys(
         current_revision=0,
         spec_section="05 12 00",
         reviewer_id=reviewer,
+        ball_in_court=str(reviewer),
+        distribution_list=[str(uuid.uuid4())],
         approver_id=uuid.uuid4(),
         date_required="2099-01-01",
         linked_boq_item_ids=[str(uuid.uuid4())],

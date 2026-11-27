@@ -510,6 +510,7 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "escalate_project_risks",
         "risk_similar",
         "simulate_risks",
+        "last_simulation",
         # Contingency position and drawdowns (18.4)
         "get_contingency_position",
         "confirm_contingency_drawdown",
@@ -586,6 +587,7 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         # Route census (test_object_scoped_routes_are_all_pinned)
         "add_submittal_attachment",
         "approve_submittal",
+        "close_submittal",
         "download_submittal_attachment",
         "get_submittal_approval",
         "list_submittal_attachments",
