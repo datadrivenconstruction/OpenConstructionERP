@@ -23,6 +23,7 @@ The figures are net of VAT and in the commitment's own currency:
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -292,6 +293,21 @@ async def _agreement(session: AsyncSession, agreement_id: uuid.UUID) -> Commitme
     )
 
 
+async def _project_payables(session: AsyncSession, project_id: uuid.UUID) -> Sequence[Any]:
+    """Every supplier invoice of the project, in one query."""
+    from app.modules.finance.models import Invoice
+
+    return (
+        (
+            await session.execute(
+                select(Invoice).where(Invoice.project_id == project_id, Invoice.invoice_direction == "payable")
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+
 def _links_to(invoice: Any, commitment: Commitment) -> bool:
     if commitment.kind == KIND_PURCHASE_ORDER:
         return invoice_po_link(invoice.purchase_order_id, invoice.metadata_) == commitment.id
@@ -304,11 +320,15 @@ async def load_commitment(
     purchase_order_id: uuid.UUID | None = None,
     subcontract_agreement_id: uuid.UUID | None = None,
     exclude_invoice_id: uuid.UUID | None = None,
+    project_id: uuid.UUID | None = None,
+    invoices: Sequence[Any] | None = None,
 ) -> Commitment | None:
     """The commitment an invoice names, with what the other invoices on it already billed and were paid.
 
     ``exclude_invoice_id`` leaves the invoice being checked out of the
-    figures, so re-checking a saved invoice does not count it twice.
+    figures, so re-checking a saved invoice does not count it twice. Given
+    ``project_id``, a commitment of another project reads as absent.
+    ``invoices`` are the project's payables when the caller already loaded them.
     """
     if purchase_order_id is not None:
         commitment = await _purchase_order(session, purchase_order_id)
@@ -316,24 +336,12 @@ async def load_commitment(
         commitment = await _agreement(session, subcontract_agreement_id)
     else:
         return None
-    if commitment is None:
+    if commitment is None or (project_id is not None and commitment.project_id != project_id):
         return None
 
     from app.modules.finance.cost_position import INVOICED_STATUSES
-    from app.modules.finance.models import Invoice
 
-    rows = (
-        (
-            await session.execute(
-                select(Invoice).where(
-                    Invoice.project_id == commitment.project_id,
-                    Invoice.invoice_direction == "payable",
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
+    rows = invoices if invoices is not None else await _project_payables(session, commitment.project_id)
     for inv in rows:
         if inv.id == exclude_invoice_id or inv.status not in INVOICED_STATUSES or not _links_to(inv, commitment):
             continue
@@ -453,6 +461,8 @@ async def list_commitments(session: AsyncSession, project_id: uuid.UUID, contact
     alone.
     """
     found: list[Commitment] = []
+    # One read of the project's payables serves every commitment listed.
+    invoices = await _project_payables(session, project_id)
     try:
         from app.modules.procurement.models import PurchaseOrder
     except ImportError:  # pragma: no cover
@@ -465,7 +475,7 @@ async def list_commitments(session: AsyncSession, project_id: uuid.UUID, contact
         if contact_id:
             stmt = stmt.where(PurchaseOrder.vendor_contact_id == contact_id)
         for po_id in (await session.execute(stmt.order_by(PurchaseOrder.po_number))).scalars().all():
-            loaded = await load_commitment(session, purchase_order_id=po_id)
+            loaded = await load_commitment(session, purchase_order_id=po_id, invoices=invoices)
             if loaded is not None:
                 found.append(loaded)
     try:
@@ -483,7 +493,7 @@ async def list_commitments(session: AsyncSession, project_id: uuid.UUID, contact
     if contact_id:
         stmt = stmt.where(Subcontractor.contact_id == _uuid(contact_id))
     for agreement_id in (await session.execute(stmt.order_by(SubcontractAgreement.title))).scalars().all():
-        loaded = await load_commitment(session, subcontract_agreement_id=agreement_id)
+        loaded = await load_commitment(session, subcontract_agreement_id=agreement_id, invoices=invoices)
         if loaded is not None:
             found.append(loaded)
     return found

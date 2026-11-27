@@ -255,6 +255,9 @@ _INVOICE_EDITABLE_STATUSES: frozenset[str] = frozenset({"draft", "pending"})
 #: and an ERROR refuses it (commitment, duplicate number, payment date).
 _INVOICE_POSTING_STATUSES: frozenset[str] = frozenset({"approved", "sent"})
 
+#: Statuses at which an invoice already counts against its commitment as posted.
+_INVOICE_COMMITTED_STATUSES: frozenset[str] = frozenset({"approved", "sent", "paid"})
+
 #: The invoice fields the ``invoice_posting`` rules read.
 _POSTING_FIELDS: tuple[str, ...] = (
     "project_id",
@@ -287,6 +290,16 @@ _INVOICE_KEPT_AMOUNTS: tuple[str, ...] = ("amount_subtotal", "tax_amount", "rete
 
 #: The parties and terms an issued invoice keeps, compared as text.
 _INVOICE_KEPT_TERMS: tuple[str, ...] = ("currency_code", "tax_config_id", "contact_id", "invoice_direction")
+
+
+def _state_uuid(value: Any) -> uuid.UUID | None:
+    """A project or record id from a request state, ``None`` when absent or unreadable."""
+    if isinstance(value, uuid.UUID) or value is None:
+        return value
+    try:
+        return uuid.UUID(str(value))
+    except ValueError:
+        return None
 
 
 def _invoice_amount(value: Any) -> Decimal | None:
@@ -982,6 +995,7 @@ class FinanceService:
         project_id: uuid.UUID,
         direction: str,
         contact_id: str | None,
+        lock: bool = True,
     ) -> None:
         """Refuse a purchase-order link the order cannot back.
 
@@ -1004,13 +1018,10 @@ class FinanceService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Purchase orders are not available: the procurement module is not installed.",
             ) from exc
-        row = (
-            await self.session.execute(
-                select(PurchaseOrder.project_id, PurchaseOrder.vendor_contact_id, PurchaseOrder.status)
-                .where(PurchaseOrder.id == po_id)
-                .with_for_update()
-            )
-        ).first()
+        query = select(PurchaseOrder.project_id, PurchaseOrder.vendor_contact_id, PurchaseOrder.status).where(
+            PurchaseOrder.id == po_id
+        )
+        row = (await self.session.execute(query.with_for_update() if lock else query)).first()
         if row is None or row[0] != project_id:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -1209,11 +1220,38 @@ class FinanceService:
                 )
 
         new_status = fields.get("status")
+        entering_posting = bool(
+            new_status
+            and new_status != invoice.status
+            and new_status in _INVOICE_POSTING_STATUSES
+            and invoice.status not in _INVOICE_POSTING_STATUSES
+        )
+        # A posted invoice relinked to another order or agreement, or with its
+        # figures moved, is weighed against that commitment as approval was.
+        meta_after = fields.get("metadata_", getattr(invoice, "metadata_", None))
+        po_after = invoice_po_link(
+            fields.get("purchase_order_id", getattr(invoice, "purchase_order_id", None)), meta_after
+        )
+        sa_after = invoice_agreement_link(
+            fields.get("subcontract_agreement_id", getattr(invoice, "subcontract_agreement_id", None)), meta_after
+        )
+        link_moved = po_after != invoice_po_link(
+            getattr(invoice, "purchase_order_id", None), getattr(invoice, "metadata_", None)
+        ) or (
+            sa_after
+            != invoice_agreement_link(
+                getattr(invoice, "subcontract_agreement_id", None), getattr(invoice, "metadata_", None)
+            )
+        )
+        stays_posted = resulting_status in _INVOICE_COMMITTED_STATUSES and not entering_posting
+        if entering_posting or (
+            stays_posted and (link_moved or _issued_invoice_changes(invoice, fields, data.line_items))
+        ):
+            await self._enforce_posting_rules(
+                self._posting_state(invoice, fields, lines=data.line_items), exclude_invoice_id=invoice_id
+            )
         if new_status and new_status != invoice.status:
-            if new_status in _INVOICE_POSTING_STATUSES and invoice.status not in _INVOICE_POSTING_STATUSES:
-                await self._enforce_posting_rules(
-                    self._posting_state(invoice, fields, lines=data.line_items), exclude_invoice_id=invoice_id
-                )
+            if entering_posting:
                 fields["approved_by"] = _actor_uuid(actor_id)
                 fields["approved_at"] = _utcnow_iso()
             elif new_status == "pending":
@@ -1406,11 +1444,13 @@ class FinanceService:
         meta = state.get("metadata") if isinstance(state.get("metadata"), dict) else {}
         po_id = invoice_po_link(state.get("purchase_order_id"), meta)
         agreement_id = None if po_id else invoice_agreement_link(state.get("subcontract_agreement_id"), meta)
+        project_id = _state_uuid(state.get("project_id"))
         commitment = await load_commitment(
             self.session,
             purchase_order_id=po_id,
             subcontract_agreement_id=agreement_id,
             exclude_invoice_id=exclude_invoice_id,
+            project_id=project_id,
         )
         payload: dict[str, Any] = {
             key: (str(state.get(key)) if state.get(key) is not None else None) for key in _POSTING_FIELDS
@@ -1512,6 +1552,7 @@ class FinanceService:
         Returns the commitment figures, whether approval would be refused and
         the full report, so the form says why before anyone presses Approve.
         """
+        await self._check_posting_links(state)
         report, commitment, po_lines = await self._posting_report(
             state, exclude_invoice_id=exclude_invoice_id, with_lines=True
         )
@@ -1544,6 +1585,38 @@ class FinanceService:
                 ],
             },
         }
+
+    async def _check_posting_links(self, state: dict[str, Any]) -> None:
+        """Refuse a check that names an order or agreement the invoice could not be linked to.
+
+        A link outside the invoice's project is 404, so the check never shows
+        another project's figures; a draft, cancelled or other supplier's one is
+        the same 422 creating the invoice would give.
+        """
+        project_id = _state_uuid(state.get("project_id"))
+        meta = state.get("metadata") if isinstance(state.get("metadata"), dict) else {}
+        po_id = invoice_po_link(state.get("purchase_order_id"), meta)
+        agreement_id = None if po_id else invoice_agreement_link(state.get("subcontract_agreement_id"), meta)
+        if po_id is None and agreement_id is None:
+            return
+        found = await load_commitment(
+            self.session, purchase_order_id=po_id, subcontract_agreement_id=agreement_id, project_id=project_id
+        )
+        if found is None or project_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="The order or agreement was not found on this project.",
+            )
+        direction = str(state.get("invoice_direction") or "payable")
+        contact_id = state.get("contact_id")
+        if po_id is not None:
+            await self._check_po_link(
+                po_id, project_id=project_id, direction=direction, contact_id=contact_id, lock=False
+            )
+        elif agreement_id is not None:
+            await self._check_agreement_link(
+                agreement_id, project_id=project_id, direction=direction, contact_id=contact_id
+            )
 
     async def _enforce_posting_rules(self, state: dict[str, Any], *, exclude_invoice_id: uuid.UUID | None) -> None:
         """Refuse (422) posting a payable that an ERROR ``invoice_posting`` rule fails.

@@ -236,7 +236,9 @@ def money_quantum(currency_code: str | None) -> Decimal:
 # ── Writing an amount into a sentence ─────────────────────────────────────────
 
 
-def sentence_amount(value: float | Decimal, currency: str, decimals: int | None = None) -> str:
+def sentence_amount(
+    value: float | Decimal, currency: str, decimals: int | None = None, *, locale: str | None = None
+) -> str:
     """Render ``value`` the way a message shown to a person should carry it.
 
     One spelling, used by every rule in the platform that puts an amount into a
@@ -274,7 +276,17 @@ def sentence_amount(value: float | Decimal, currency: str, decimals: int | None 
 
     Returns:
         ``"1,234.50 EUR"``, or ``"1,234.50"`` when ``currency`` is blank. A
-        zero-decimal currency keeps no decimals at all: ``"1,234 JPY"``.
+        zero-decimal currency keeps no decimals at all: ``"1,234 JPY"``. In a
+        language that writes numbers otherwise (``locale``, else the request's)
+        the separators follow it and the symbol trails: ``"1.234,50 €"`` (de).
     """
+    from app.core.i18n import get_locale
+    from app.core.regional_format import ANGLO, format_number, number_style_for_language
+
     places = minor_units(currency) if decimals is None else decimals
-    return f"{value:,.{places}f} {currency}".rstrip()
+    style = number_style_for_language(locale if locale is not None else get_locale())
+    if style == ANGLO:
+        return f"{value:,.{places}f} {currency}".rstrip()
+    info = CURRENCIES.get((currency or "").strip().upper())
+    symbol = (info or {}).get("symbol") or currency
+    return f"{format_number(value, places, style)} {symbol}".rstrip()
