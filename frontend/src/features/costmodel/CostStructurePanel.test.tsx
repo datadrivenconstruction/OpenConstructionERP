@@ -27,6 +27,7 @@ vi.mock('@/stores/useToastStore', () => ({
 }));
 
 import { ApiError } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { CostStructurePanel, worstSeverity } from './CostStructurePanel';
 import type { StructureNode, StructureTree } from './structureApi';
 
@@ -212,5 +213,20 @@ describe('<CostStructurePanel>', () => {
     expect(await screen.findByText('No cost structure yet')).toBeInTheDocument();
     expect(screen.queryByTestId('structure-traffic-light')).not.toBeInTheDocument();
     expect(screen.queryByText('Expand all')).not.toBeInTheDocument();
+  });
+
+  it('keeps the import button for a viewer but disabled, with the reason', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    renderPanel();
+    const btn = await screen.findByRole('button', { name: /import code list/i });
+    expect(btn).toBeDisabled();
+    expect(btn.getAttribute('title') || btn.getAttribute('aria-label') || '').toMatch(/editor|manager|administrator/i);
+    useAuthStore.setState({ userRole: 'editor' });
+  });
+
+  it('enables the import button for an editor', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    renderPanel();
+    expect(await screen.findByRole('button', { name: /import code list/i })).toBeEnabled();
   });
 });

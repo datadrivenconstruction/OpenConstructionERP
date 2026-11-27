@@ -30,6 +30,7 @@ import {
 
 import { Button, Card, ConfirmDialog, EmptyState, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { formatCurrency } from '@/shared/lib/money';
 import { normalizeDecimalSeparators } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
@@ -227,6 +228,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
   const [listKey, setListKey] = useState('');
   const [maxLevel, setMaxLevel] = useState('');
   const [importOpen, setImportOpen] = useState(false);
+  const { reason: writeReason } = useRoleGate('editor');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const chosenKey = listKey || structure?.standards[0] || lists[0]?.key || '';
   const chosenList = lists.find((l) => l.key === chosenKey);
@@ -455,7 +457,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
           standard={chosenKey || undefined}
           currency={resolvedCurrency}
         />
-        <Button size="sm" variant="ghost" icon={<Download size={14} />} onClick={() => setImportOpen(true)}>
+        <Button size="sm" variant="ghost" icon={<Download size={14} />} disabledReason={writeReason} onClick={() => setImportOpen(true)}>
           {t('costmodel.structure.import_cta', { defaultValue: 'Import code list' })}
         </Button>
         {chosenList?.source === 'custom' && (

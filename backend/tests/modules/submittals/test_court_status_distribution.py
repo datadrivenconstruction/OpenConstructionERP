@@ -6,6 +6,7 @@ import uuid
 
 import pytest
 
+from app.modules.submittals.models import Submittal
 from tests.modules.submittals.test_submittal_register_api import (
     _client,
     _create,
@@ -81,11 +82,22 @@ async def test_a_submittal_not_yet_decided_cannot_be_closed(db_session) -> None:
         assert r.status_code == 400, r.text
 
 
+async def _join(session, project: str, user: str) -> None:
+    from app.modules.teams.models import Team, TeamMembership
+
+    team = Team(project_id=uuid.UUID(project), name="site team")
+    session.add(team)
+    await session.flush()
+    session.add(TeamMembership(team_id=team.id, user_id=uuid.UUID(user), role="member"))
+    await session.flush()
+
+
 @pytest.mark.asyncio
 async def test_distribution_list_is_saved_and_listed(db_session) -> None:  # noqa: F811
     owner = await _make_user(db_session)
     other = await _make_user(db_session)
     project = await _make_project(db_session, owner)
+    await _join(db_session, project, other)
     async with _client(db_session, owner) as client:
         created = await _create(client, project, distribution_list=[owner, other, owner])
         assert created["distribution_list"] == [owner, other]
@@ -118,11 +130,42 @@ async def test_validation_reports_people_who_cannot_open_the_project(db_session)
             and rows["submittal.people_have_project_access"]["passed"]
         )
         assert not rows["submittal.distribution_present"]["passed"]
-        await client.patch(
-            f"/v1/submittals/{sub['id']}", json={"ball_in_court": stranger, "distribution_list": [owner, stranger]}
-        )
+        # A row written before the guard existed: set it directly, the API now refuses it.
+        row = await db_session.get(Submittal, uuid.UUID(sub["id"]))
+        row.ball_in_court = stranger
+        row.distribution_list = [owner, stranger]
+        await db_session.flush()
         bad = await SubmittalService(db_session).validate_submittal(uuid.UUID(sub["id"]))
         rows = {r["rule_id"]: r for r in bad["results"]}
         assert not rows["submittal.people_have_project_access"]["passed"]
         assert rows["submittal.ball_in_court_assigned"]["passed"]
         assert rows["submittal.distribution_present"]["passed"]
+
+
+@pytest.mark.asyncio
+async def test_a_user_without_project_access_is_refused_on_the_distribution_list(db_session) -> None:  # noqa: F811
+    owner = await _make_user(db_session)
+    stranger = await _make_user(db_session)
+    project = await _make_project(db_session, owner)
+    async with _client(db_session, owner) as client:
+        refused = await client.post(
+            "/v1/submittals/",
+            json={
+                "project_id": project,
+                "title": "Rebar",
+                "submittal_type": "shop_drawing",
+                "distribution_list": [stranger],
+            },
+        )
+        assert refused.status_code == 422, refused.text
+        assert "project" in refused.json()["detail"].lower()
+        created = await _create(client, project)
+        patched = await client.patch(f"/v1/submittals/{created['id']}", json={"distribution_list": [owner, stranger]})
+        assert patched.status_code == 422, patched.text
+
+        # A legacy draft that already lists the stranger cannot be submitted either.
+        row = await db_session.get(Submittal, uuid.UUID(created["id"]))
+        row.distribution_list = [stranger]
+        await db_session.flush()
+        submit = await client.post(f"/v1/submittals/{created['id']}/submit/")
+        assert submit.status_code == 422, submit.text

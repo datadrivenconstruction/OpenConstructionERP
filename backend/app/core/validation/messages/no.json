@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "Klassifiseringstjenesten er utilgjengelig",
     "boq_budget_no_positions": "Mengdebeskrivelsen har ingen poster: ingenting å budsjettere.",
     "boq_fix_unit_rate_required": "En ikke-negativ parameter 'unit_rate' er påkrevd",
-    "levy_code_taken": "Det finnes allerede en avgift med denne koden i katalogen."
+    "levy_code_taken": "Det finnes allerede en avgift med denne koden i katalogen.",
+    "role_required": "Denne handlingen krever rollen {role} eller høyere"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} har ingen ressurser, så hele budsjettet gikk til Annet",
       "suggestion": "Legg til postens ressurser, eller flytt beløpet til riktig kostnadstype"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} har kategorien \"{category}\", som ikke er en kostnadstype",

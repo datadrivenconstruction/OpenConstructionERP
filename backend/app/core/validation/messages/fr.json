@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "Service de classification indisponible",
     "boq_budget_no_positions": "Le métré ne contient aucun poste : rien à budgétiser.",
     "boq_fix_unit_rate_required": "Un paramètre « unit_rate » non négatif est requis",
-    "levy_code_taken": "Un prélèvement avec ce code existe déjà dans le catalogue."
+    "levy_code_taken": "Un prélèvement avec ce code existe déjà dans le catalogue.",
+    "role_required": "Cette action exige le rôle {role} ou supérieur"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} n'a aucune ressource, tout son budget est donc allé à Autre",
       "suggestion": "Ajoutez les ressources de la position ou déplacez le montant vers le bon type de coût"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} a la catégorie \"{category}\", qui n'est pas un type de coût",

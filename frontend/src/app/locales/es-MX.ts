@@ -51956,6 +51956,7 @@ const resource = {
     "schedule.impact.col_positions": "Partidas y modificaciones",
     "schedule.impact.unlinked": "Sin vínculo con el presupuesto",
     "schedule.impact.position_missing": "La partida ya no está en el presupuesto",
+    "schedule.delete_blocked_title": "Este cronograma no se puede eliminar",
     "delivery_model.allocation_status.confirmed": "Confirmada",
     "delivery_model.allocation_status.link_missing": "Falta el vínculo con el riesgo",
     "delivery_model.allocation_status.unconfirmed": "Sin confirmar",

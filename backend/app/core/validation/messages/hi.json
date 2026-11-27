@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "वर्गीकरण सेवा उपलब्ध नहीं है",
     "boq_budget_no_positions": "मात्रा सूची में कोई मद नहीं है: बजट करने को कुछ नहीं।",
     "boq_fix_unit_rate_required": "एक गैर-ऋणात्मक 'unit_rate' पैरामीटर आवश्यक है",
-    "levy_code_taken": "इस कोड वाला शुल्क कैटलॉग में पहले से है।"
+    "levy_code_taken": "इस कोड वाला शुल्क कैटलॉग में पहले से है।",
+    "role_required": "इस कार्य के लिए {role} या उससे ऊपर की भूमिका आवश्यक है"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} में कोई संसाधन नहीं है, इसलिए पूरा बजट अन्य में गया",
       "suggestion": "मद के संसाधन जोड़ें या राशि को सही लागत प्रकार में ले जाएँ"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} की श्रेणी \"{category}\" है, जो लागत प्रकार नहीं है",

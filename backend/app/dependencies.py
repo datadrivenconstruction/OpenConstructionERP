@@ -849,6 +849,16 @@ class RequireRole:
     def __init__(self, required: str) -> None:
         self.required = required
 
+    def _detail(self) -> str:
+        """The refusal in the caller's language; the English form if the catalogue cannot be read."""
+        try:
+            from app.core.i18n import get_locale
+            from app.core.validation.messages import translate
+
+            return translate("errors.role_required", locale=get_locale(), role=self.required)
+        except Exception:
+            return f"Role '{self.required}' required"
+
     async def __call__(
         self,
         payload: Annotated[dict[str, Any], Depends(get_current_user_payload)],
@@ -858,15 +868,9 @@ class RequireRole:
         user_role = _resolve_role(payload.get("role", ""))
         needed = _resolve_role(self.required)
         if user_role is None or needed is None:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Role '{self.required}' required",
-            )
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=self._detail())
         if ROLE_HIERARCHY.get(user_role, -1) < ROLE_HIERARCHY.get(needed, 999):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Role '{self.required}' required",
-            )
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=self._detail())
         # Attribution only - role comes from DB-rehydrated payload, not from
         # the JWT claim, so this log entry is trustworthy.
         user_id = payload.get("sub", "unknown")

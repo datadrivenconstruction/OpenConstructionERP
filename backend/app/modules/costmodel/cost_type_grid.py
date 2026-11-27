@@ -28,7 +28,7 @@ in the tests run without a database.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 
@@ -65,6 +65,7 @@ class GridLine:
     forecast: Decimal
     committed_from_documents: bool = False
     split_basis: str | None = None
+    unpriced: list[str] = field(default_factory=list)
     editable: bool = True
 
 
@@ -236,6 +237,14 @@ def assemble_grid(
     )
 
 
+def _line_label(cost_code: str, description: str) -> str:
+    """Code and description for a finding; a description that already opens with the code is not prefixed twice."""
+    code, text = (cost_code or "").strip(), (description or "").strip()
+    if code and text.startswith(code):
+        return text
+    return " ".join(part for part in (code, text) if part)
+
+
 def validation_payload(lines: list[GridLine]) -> dict[str, Any]:
     """The ``cost_types`` rule-set payload for a project's budget lines."""
     return {
@@ -243,9 +252,10 @@ def validation_payload(lines: list[GridLine]) -> dict[str, Any]:
             "lines": [
                 {
                     "line_id": line.id,
-                    "label": " ".join(part for part in (line.cost_code, line.description) if part).strip(),
+                    "label": _line_label(line.cost_code, line.description),
                     "category": line.category,
                     "split_basis": line.split_basis,
+                    "unpriced": line.unpriced,
                 }
                 for line in lines
             ]
@@ -307,6 +317,7 @@ async def load_grid_lines(session: AsyncSession, project_id: uuid.UUID) -> tuple
                 forecast=_amount_in_base(line.forecast_amount, ccy, base, fx),
                 committed_from_documents=idx in from_documents,
                 split_basis=split.get("basis") if isinstance(split, dict) else None,
+                unpriced=[str(x) for x in split.get("unpriced_resources") or []] if isinstance(split, dict) else [],
                 editable=not ccy or ccy == base,
             )
         )

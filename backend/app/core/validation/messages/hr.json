@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "Usluga klasifikacije nije dostupna",
     "boq_budget_no_positions": "Troškovnik nema stavki: nema što budžetirati.",
     "boq_fix_unit_rate_required": "Obavezan je nenegativan parametar 'unit_rate'",
-    "levy_code_taken": "Naknada s ovom šifrom već je u katalogu."
+    "levy_code_taken": "Naknada s ovom šifrom već je u katalogu.",
+    "role_required": "Ova radnja zahtijeva ulogu {role} ili višu"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} nema resursa, pa je cijeli proračun otišao u Ostalo",
       "suggestion": "Dodajte resurse stavke ili premjestite iznos na pravu vrstu troška"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} ima kategoriju \"{category}\", koja nije vrsta troška",

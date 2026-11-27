@@ -94,3 +94,28 @@ def test_rows_in_another_currency_weigh_in_the_position_currency() -> None:
     shares = split_by_cost_type(Decimal("180"), resources, fx_factor=rates.get)
     # GBP has no rate, so the crane is left out rather than weighed at a guess.
     assert [(s.cost_type, s.amount) for s in shares] == [("labor", Decimal("90.00")), ("material", Decimal("90.00"))]
+
+
+def test_unpriced_rows_are_reported_not_dropped_silently() -> None:
+    resources = [
+        {"type": "labor", "total": "90", "currency": ""},
+        {"type": "equipment", "total": "50", "currency": "GBP", "name": "Crane"},
+    ]
+    skipped: list[object] = []
+    shares = split_by_cost_type(Decimal("90"), resources, fx_factor={"": Decimal("1")}.get, unpriced=skipped)
+    assert [s.cost_type for s in shares] == ["labor"]
+    assert [r["name"] for r in skipped] == ["Crane"]  # type: ignore[index]
+
+
+def test_language_synonyms_come_from_country_data_not_core_code() -> None:
+    from pathlib import Path
+
+    import app.core.cost_types as module
+
+    assert normalize_cost_type("Lohn") == "labor"
+    assert normalize_cost_type("Nachunternehmer") == "subcontractor"
+    assert normalize_cost_type("Baustoffe") == "material"
+    assert normalize_cost_type("Geraet") == "equipment"
+    source = Path(module.__file__).read_text(encoding="utf-8")
+    assert "nachunternehmer" not in source
+    assert "lohn" not in source

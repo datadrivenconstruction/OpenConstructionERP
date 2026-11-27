@@ -1152,7 +1152,8 @@
     "boq_classification_unavailable": "Servicio de clasificación no disponible",
     "boq_budget_no_positions": "El presupuesto no tiene partidas: nada que presupuestar.",
     "boq_fix_unit_rate_required": "Se requiere un parámetro 'unit_rate' no negativo",
-    "levy_code_taken": "Ya existe en el catálogo un cargo con este código."
+    "levy_code_taken": "Ya existe en el catálogo un cargo con este código.",
+    "role_required": "Esta acción requiere el rol {role} o superior"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} no tiene recursos, así que todo su presupuesto fue a Otros",
       "suggestion": "Añada los recursos de la partida o mueva el importe al tipo de coste correcto"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} tiene la categoría \"{category}\", que no es un tipo de coste",

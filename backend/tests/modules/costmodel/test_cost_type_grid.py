@@ -11,7 +11,7 @@ import pytest
 from app.core.cost_types import split_by_cost_type
 from app.core.validation.engine import ValidationContext
 from app.modules.costmodel.cost_type_grid import GridLine, assemble_grid, eac_of, validation_payload
-from app.modules.costmodel.cost_type_rules import PositionUnsplitRule, UnknownTypeRule
+from app.modules.costmodel.cost_type_rules import PositionUnsplitRule, ResourcesUnpricedRule, UnknownTypeRule
 from app.modules.costmodel.service import COST_TYPE_SPLIT_KEY, _budget_lines_by_cost_type
 
 D = Decimal
@@ -145,3 +145,17 @@ async def test_rules_flag_unsplit_positions_and_unknown_types() -> None:
 async def test_rules_are_silent_on_other_payloads() -> None:
     ctx = ValidationContext(data={"cost_control": {}}, metadata={})
     assert await PositionUnsplitRule().validate(ctx) == []
+
+
+@pytest.mark.asyncio
+async def test_label_does_not_repeat_the_code_and_unpriced_rows_are_flagged() -> None:
+    line = _line("03 11 00.10", "other", "10", split_basis="resources_unpriced", unpriced=["Crane"])
+    line = GridLine(**{**line.__dict__, "description": "03 11 00.10 - Formwork"})
+    ctx = ValidationContext(data=validation_payload([line]), metadata={"locale": "en"})
+
+    unsplit = [r for r in await PositionUnsplitRule().validate(ctx) if not r.passed]
+    assert unsplit == []
+    unpriced = [r for r in await ResourcesUnpricedRule().validate(ctx) if not r.passed]
+    assert len(unpriced) == 1
+    assert "Crane" in unpriced[0].message
+    assert unpriced[0].message.count("03 11 00.10") == 1

@@ -225,6 +225,22 @@ async def test_stranger_cannot_reach_the_bill(session):
 
 @pytest.mark.tenant_isolation
 @pytest.mark.asyncio
+async def test_project_member_who_is_not_owner_may_target_the_bill(session):
+    from app.modules.assemblies.router import _verify_target_boq_owner
+    from app.modules.teams.models import Team, TeamMembership
+
+    pos = await _position(session)
+    team = Team(project_id=PROJECT, name="site team")
+    session.add(team)
+    await session.flush()
+    session.add(TeamMembership(team_id=team.id, user_id=STRANGER, role="member"))
+    await session.commit()
+
+    await _verify_target_boq_owner(session, pos.boq_id, str(STRANGER), payload=None)
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
 async def test_route_refuses_a_user_without_access_to_the_project(session):
     from app.modules.assemblies.router import apply_to_position
     from app.modules.assemblies.service import AssemblyService

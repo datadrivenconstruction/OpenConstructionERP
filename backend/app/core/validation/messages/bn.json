@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "শ্রেণিবিন্যাস সেবা উপলব্ধ নেই",
     "boq_budget_no_positions": "পরিমাণ তালিকায় কোনো আইটেম নেই: বাজেট করার কিছু নেই।",
     "boq_fix_unit_rate_required": "একটি অ-ঋণাত্মক 'unit_rate' প্যারামিটার প্রয়োজন",
-    "levy_code_taken": "এই কোডের একটি চার্জ ক্যাটালগে আগেই আছে।"
+    "levy_code_taken": "এই কোডের একটি চার্জ ক্যাটালগে আগেই আছে।",
+    "role_required": "এই কাজের জন্য {role} বা তার উপরের ভূমিকা প্রয়োজন"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line}-এর কোনো সম্পদ নেই, তাই পুরো বাজেট অন্যান্যতে গেছে",
       "suggestion": "আইটেমের সম্পদ যোগ করুন বা অর্থ সঠিক খরচের ধরনে সরান"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line}-এর শ্রেণি \"{category}\", যা খরচের ধরন নয়",

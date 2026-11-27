@@ -224,7 +224,7 @@ def _convert_ifc_or_rvt(
     # to be loaded before a conversion runs, which the dependency
     # declaration on ``oe_bim_hub`` does not (yet) provide, so the
     # import happens here to keep module load deterministic.
-    from app.modules.bim_hub.ifc_processor import process_ifc_file
+    from app.modules.bim_hub.ifc_processor import process_ifc_file, text_step_fallback_disabled
 
     ext = file.extension.lower().lstrip(".")
 
@@ -236,11 +236,13 @@ def _convert_ifc_or_rvt(
         output_dir.mkdir()
 
         try:
-            result = process_ifc_file(
-                input_path,
-                output_dir,
-                conversion_depth="standard",
-            )
+            # Real uploads must not be answered by the box-geometry text parser.
+            with text_step_fallback_disabled():
+                result = process_ifc_file(
+                    input_path,
+                    output_dir,
+                    conversion_depth="standard",
+                )
         except Exception as exc:
             logger.warning(
                 "dashboards.cad2data.convert_ifc failed for %s: %s",

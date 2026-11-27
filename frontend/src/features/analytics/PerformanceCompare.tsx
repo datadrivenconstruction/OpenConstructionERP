@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Columns3, Download, FileSpreadsheet } from 'lucide-react';
+import { Columns3, FileSpreadsheet, Upload } from 'lucide-react';
 import { Badge, Button, Card, Skeleton } from '@/shared/ui';
 import { compareNames } from '@/shared/lib/collator';
 import { useToastStore } from '@/stores/useToastStore';
@@ -136,7 +136,7 @@ export function PerformanceCompare({
             <Button
               variant="secondary"
               size="sm"
-              icon={<Download size={14} />}
+              icon={<Upload size={14} />}
               disabled={!data || !data.columns.length}
               onClick={() => downloadCsv(matrixToCsv(matrix()), 'performance_comparison.csv')}
             >

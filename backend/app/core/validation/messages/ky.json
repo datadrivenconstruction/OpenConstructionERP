@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "Классификация кызматы жеткиликсиз",
     "boq_budget_no_positions": "Көлөм ведомостунда позиция жок: бюджеттей турган эч нерсе жок.",
     "boq_fix_unit_rate_required": "Терс эмес 'unit_rate' параметри керек",
-    "levy_code_taken": "Бул коддогу алым каталогдо мурунтан эле бар."
+    "levy_code_taken": "Бул коддогу алым каталогдо мурунтан эле бар.",
+    "role_required": "Бул аракет үчүн {role} же андан жогорку роль керек"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} ресурстары жок, ошондуктан бүт бюджет Башкага кетти",
       "suggestion": "Позициянын ресурстарын кошуңуз же сумманы туура чыгым түрүнө которуңуз"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} категориясы \"{category}\", бул чыгым түрү эмес",

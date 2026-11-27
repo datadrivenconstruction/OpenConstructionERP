@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "分类服务不可用",
     "boq_budget_no_positions": "工程量清单没有项目：没有可编制预算的内容。",
     "boq_fix_unit_rate_required": "需要非负的“unit_rate”参数",
-    "levy_code_taken": "目录中已有使用此代码的分摊费。"
+    "levy_code_taken": "目录中已有使用此代码的分摊费。",
+    "role_required": "此操作需要 {role} 或更高角色"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} 没有资源，因此全部预算计入了其他",
       "suggestion": "请补充清单项的资源，或将金额移到正确的成本类型"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} 的类别为“{category}”，不是成本类型",

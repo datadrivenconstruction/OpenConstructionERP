@@ -27,7 +27,7 @@ import {
   ArrowUpRight,
   ClipboardList,
   Cuboid,
-  Download,
+  Upload,
   Edit3,
   FileSpreadsheet,
   Network,
@@ -680,7 +680,7 @@ export function AssetsPage() {
                           defaultValue: 'Download COBie (XLSX) for this model',
                         })}
                       >
-                        <Download size={12} /> COBie
+                        <Upload size={12} /> COBie
                       </button>
                     </div>
                   </td>

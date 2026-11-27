@@ -43,6 +43,7 @@ import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useResolvedProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -1107,6 +1108,7 @@ export function SubmittalsPage() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const { reason: createReason } = useRoleGate('editor');
 
   // Deep-link from the CDE container row: ?create=true&container_id=<id>
   // opens the create flow prefilled so the CDE -> Submittal document-control
@@ -1480,6 +1482,7 @@ export function SubmittalsPage() {
               size="sm"
               onClick={() => setShowCreateModal(true)}
               disabled={!projectId}
+              disabledReason={createReason}
               title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
               className="shrink-0 whitespace-nowrap"
               icon={<Plus size={14} />}
@@ -1682,10 +1685,11 @@ export function SubmittalsPage() {
             }
             action={
               !searchQuery && !filtersActive
-                ? {
-                    label: t('submittals.new_submittal', { defaultValue: 'New Submittal' }),
-                    onClick: () => setShowCreateModal(true),
-                  }
+                ? (
+                    <Button variant="primary" size="sm" icon={<Plus size={14} />} disabledReason={createReason} onClick={() => setShowCreateModal(true)}>
+                      {t('submittals.new_submittal', { defaultValue: 'New Submittal' })}
+                    </Button>
+                  )
                 : undefined
             }
           />

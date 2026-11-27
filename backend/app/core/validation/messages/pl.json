@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "Usługa klasyfikacji niedostępna",
     "boq_budget_no_positions": "Przedmiar nie ma pozycji: nie ma czego budżetować.",
     "boq_fix_unit_rate_required": "Wymagany jest nieujemny parametr 'unit_rate'",
-    "levy_code_taken": "Opłata z tym kodem jest już w katalogu."
+    "levy_code_taken": "Opłata z tym kodem jest już w katalogu.",
+    "role_required": "Ta czynność wymaga roli {role} lub wyższej"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} nie ma zasobów, więc cały budżet trafił do Inne",
       "suggestion": "Dodaj zasoby pozycji lub przenieś kwotę na właściwy rodzaj kosztu"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} ma kategorię \"{category}\", która nie jest rodzajem kosztu",

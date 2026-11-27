@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "分類サービスは利用できません",
     "boq_budget_no_positions": "数量表に項目がありません。予算化するものがありません。",
     "boq_fix_unit_rate_required": "負でない 'unit_rate' パラメータが必要です",
-    "levy_code_taken": "このコードの賦課金はすでにカタログにあります。"
+    "levy_code_taken": "このコードの賦課金はすでにカタログにあります。",
+    "role_required": "この操作には {role} 以上のロールが必要です"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "{line} には資源がないため、予算全額がその他に入りました",
       "suggestion": "項目の資源を追加するか、金額を正しい原価区分に移してください"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} の区分は「{category}」で、原価区分ではありません",

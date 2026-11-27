@@ -1134,7 +1134,8 @@
     "boq_classification_unavailable": "خدمة التصنيف غير متاحة",
     "boq_budget_no_positions": "لا توجد بنود في جدول الكميات: لا شيء للميزنة.",
     "boq_fix_unit_rate_required": "المعامل 'unit_rate' مطلوب ويجب ألا يكون سالبًا",
-    "levy_code_taken": "يوجد في الكتالوج رسم بهذا الرمز بالفعل."
+    "levy_code_taken": "يوجد في الكتالوج رسم بهذا الرمز بالفعل.",
+    "role_required": "يتطلب هذا الإجراء دور {role} أو أعلى"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2957,6 +2958,10 @@
     "position_unsplit": {
       "fail": "لا يحتوي {line} على موارد، لذا ذهبت ميزانيته كلها إلى أخرى",
       "suggestion": "أضف موارد البند أو انقل المبلغ إلى نوع التكلفة الصحيح"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "فئة {line} هي \"{category}\"، وهي ليست نوع تكلفة",
