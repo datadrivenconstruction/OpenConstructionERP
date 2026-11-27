@@ -624,6 +624,9 @@ async def _position_for_cost_item(
     if position is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
     await _verify_boq_owner(session, position.boq_id, user_id, payload)
+    boq = await session.get(BOQ, position.boq_id)
+    if boq is not None:
+        await verify_project_access(boq.project_id, str(user_id), session)
     currency = (
         await session.execute(
             select(Project.currency).join(BOQ, BOQ.project_id == Project.id).where(BOQ.id == position.boq_id)

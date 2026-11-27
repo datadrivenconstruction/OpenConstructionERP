@@ -13,7 +13,7 @@
 All nullable and additive, so the boot heal and ``alembic upgrade`` agree.
 
 Revision ID: vpo02_po_lines_allocations_release
-Revises: vpo01_invoice_commitment_chain
+Revises: vreq01_requisition_value_bands
 Create Date: 2026-11-27
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vpo02_po_lines_allocations_release"
-down_revision: str | Sequence[str] | None = "vpo01_invoice_commitment_chain"
+down_revision: str | Sequence[str] | None = "vreq01_requisition_value_bands"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
