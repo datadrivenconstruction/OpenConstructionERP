@@ -115,7 +115,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           sizeStyles[effSize],
           iconOnly && iconOnlyStyles[effSize],
           // A reason needs the pointer to reach the button, or its tooltip never shows.
-          isDisabled && (reason ? 'pointer-events-none active:scale-100' : 'pointer-events-none'),
+          isDisabled && (reason ? 'cursor-not-allowed active:scale-100' : 'pointer-events-none'),
           isDisabled && !loading && 'opacity-40',
           className,
         )}

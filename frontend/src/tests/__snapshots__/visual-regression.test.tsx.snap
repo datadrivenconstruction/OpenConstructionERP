@@ -190,6 +190,7 @@ exports[`Visual Regression - Button > danger button 1`] = `
 exports[`Visual Regression - Button > disabled state 1`] = `
 <div>
   <button
+    aria-disabled="true"
     class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs border border-transparent h-8 px-3 text-sm gap-1.5 rounded-lg pointer-events-none opacity-40"
     data-oe-button="primary"
     disabled=""
@@ -222,6 +223,7 @@ exports[`Visual Regression - Button > loading state 1`] = `
 <div>
   <button
     aria-busy="true"
+    aria-disabled="true"
     class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs border border-transparent h-8 px-3 text-sm gap-1.5 rounded-lg pointer-events-none"
     data-oe-button="primary"
     disabled=""
@@ -2117,6 +2119,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 class="flex shrink-0 items-center gap-2"
               >
                 <button
+                  aria-disabled="true"
                   class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs border border-transparent h-7 px-2.5 text-xs gap-1.5 rounded-lg pointer-events-none opacity-40"
                   data-oe-button="primary"
                   disabled=""
@@ -2488,6 +2491,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
+                      aria-disabled="true"
                       class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs h-7 px-2.5 text-xs gap-1.5 rounded-lg pointer-events-none opacity-40 w-full"
                       data-oe-button="secondary"
                       disabled=""
@@ -2868,6 +2872,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
+                      aria-disabled="true"
                       class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs h-7 px-2.5 text-xs gap-1.5 rounded-lg pointer-events-none opacity-40 w-full"
                       data-oe-button="secondary"
                       disabled=""
@@ -2971,6 +2976,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
+                      aria-disabled="true"
                       class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-colors duration-normal ease-oe active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs h-7 px-2.5 text-xs gap-1.5 rounded-lg pointer-events-none opacity-40 w-full"
                       data-oe-button="secondary"
                       disabled=""
