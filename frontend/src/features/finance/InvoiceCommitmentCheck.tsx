@@ -44,9 +44,23 @@ export interface PaySummary {
   balance_to_finish: string;
 }
 
+/** One order line as a schedule of values with this invoice laid over it (net of VAT). */
+export interface PoLineStatement {
+  po_line_id: string;
+  description: string;
+  scheduled: string;
+  previously_invoiced: string;
+  previously_paid: string;
+  this_invoice: string;
+  total: string;
+  percent_complete: string | null;
+  balance_to_complete: string;
+}
+
 export interface PostingCheck {
   commitment: Commitment | null;
   summary?: PaySummary | null;
+  po_lines?: PoLineStatement[];
   blocking: boolean;
   report: { results: PostingResult[] };
 }
@@ -65,6 +79,7 @@ export interface PostingCheckInput {
   retention_amount?: string;
   purchase_order_id?: string;
   subcontract_agreement_id?: string;
+  lines?: { po_line_id: string; amount: string }[];
 }
 
 /** The first refusal approval would meet, as one sentence, or null when approval would go through. */
@@ -114,9 +129,12 @@ function Figure({ label, amount, currency, testId }: { label: string; amount: st
 export function InvoiceCommitmentCheck({
   input,
   onBlockingChange,
+  onPoLines,
 }: {
   input: PostingCheckInput;
   onBlockingChange?: (reason: string | null) => void;
+  /** Hands the order's lines to the line editor so each invoice line can name one. */
+  onPoLines?: (lines: PoLineStatement[]) => void;
 }) {
   const { t } = useTranslation();
   // Weigh the figures once typing settles, not on every keystroke.
@@ -132,6 +150,10 @@ export function InvoiceCommitmentCheck({
   useEffect(() => {
     onBlockingChange?.(reason);
   }, [reason, onBlockingChange]);
+  const poLines = data?.po_lines;
+  useEffect(() => {
+    if (poLines) onPoLines?.(poLines);
+  }, [poLines, onPoLines]);
 
   const failed = (data?.report?.results ?? []).filter((r) => !r.passed);
   const commitment = data?.commitment ?? null;
@@ -221,6 +243,63 @@ export function InvoiceCommitmentCheck({
             ))}
           </tbody>
         </table>
+      )}
+
+      {commitment && poLines && poLines.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="oe-table oe-table-compact w-full text-xs" data-testid="invoice-po-lines">
+            <thead>
+              <tr>
+                <th className="text-left">{t('finance.sov_description', { defaultValue: 'Order line' })}</th>
+                <th className="text-right">{t('finance.sov_scheduled', { defaultValue: 'Scheduled value' })}</th>
+                <th className="text-right">{t('finance.sov_previous', { defaultValue: 'Previously invoiced' })}</th>
+                <th className="text-right">{t('finance.sov_paid', { defaultValue: 'Previously paid' })}</th>
+                <th className="text-right">{t('finance.sov_current', { defaultValue: 'This invoice' })}</th>
+                <th className="text-right">{t('finance.sov_total', { defaultValue: 'Total to date' })}</th>
+                <th className="text-right">{t('finance.sov_percent', { defaultValue: '% complete' })}</th>
+                <th className="text-right">{t('finance.sov_balance', { defaultValue: 'Balance to complete' })}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {poLines.map((line) => {
+                const over = (Number(line.balance_to_complete) || 0) < 0;
+                return (
+                  <tr key={line.po_line_id} data-testid={`po-line-${line.po_line_id}`}>
+                    <td>{line.description}</td>
+                    {(['scheduled', 'previously_invoiced', 'previously_paid', 'this_invoice', 'total'] as const).map(
+                      (field) => (
+                        <td key={field} className="text-right tabular-nums">
+                          <MoneyDisplay
+                            amount={isDecimalString(line[field]) ? line[field] : null}
+                            currency={commitment.currency_code}
+                          />
+                        </td>
+                      ),
+                    )}
+                    <td className="text-right tabular-nums">{line.percent_complete ?? '-'}</td>
+                    <td
+                      className={`text-right tabular-nums ${over ? 'font-semibold text-semantic-error' : ''}`}
+                      data-testid={`po-line-balance-${line.po_line_id}`}
+                    >
+                      <MoneyDisplay
+                        amount={isDecimalString(line.balance_to_complete) ? line.balance_to_complete : null}
+                        currency={commitment.currency_code}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {commitment?.kind === 'subcontract' && (
+        <p className="text-2xs text-content-tertiary" data-testid="invoice-subcontract-grid-note">
+          {t('finance.sov_subcontract_note', {
+            defaultValue: 'Line-by-line values for a subcontract are kept on its payment applications.',
+          })}
+        </p>
       )}
 
       {errors.length > 0 && (

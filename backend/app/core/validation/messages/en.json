@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "The payment is scheduled for {scheduled}, before the invoice date {invoice_date}",
       "suggestion": "Schedule the payment on or after the invoice date"
+    },
+    "unallocated_change_order": {
+      "fail": "Change orders not counted on {commitment} until they are allocated: {count}",
+      "suggestion": "Allocate this change order: enter the share of each order or subcontract it touches"
+    },
+    "po_line_within_balance": {
+      "fail": "Line {line} of invoice {invoice} is {excess} over its balance to complete of {balance}",
+      "suggestion": "Approve a change order that covers the overrun, or correct the line amount"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Invoice {invoice} was due for payment on {scheduled} and has not been released to accounting",
+      "suggestion": "Include it in a booking export, or move the scheduled payment date"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "The allocations of change order {code} add up to {allocated}, not its amount of {amount}",
+      "suggestion": "Adjust the allocations so they add up to the change order amount"
+    },
+    "missing": {
+      "fail": "Change order {code} touches {count} commitments and is not allocated",
+      "suggestion": "Allocate this change order: enter the amount for each order or subcontract"
     }
   }
 }

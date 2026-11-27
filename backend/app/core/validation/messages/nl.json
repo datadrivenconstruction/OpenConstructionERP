@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "De betaling is gepland op {scheduled}, vóór de factuurdatum {invoice_date}",
       "suggestion": "Plan de betaling op of na de factuurdatum"
+    },
+    "unallocated_change_order": {
+      "fail": "Wijzigingsopdrachten die op {commitment} pas na verdeling meetellen: {count}",
+      "suggestion": "Verdeel deze wijzigingsopdracht: geef het deel per betrokken bestelling of onderaanneming op"
+    },
+    "po_line_within_balance": {
+      "fail": "Regel {line} van factuur {invoice} ligt {excess} boven het restant van {balance}",
+      "suggestion": "Keur een wijzigingsopdracht goed die de overschrijding dekt, of corrigeer het regelbedrag"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Factuur {invoice} moest op {scheduled} betaald worden en is niet aan de boekhouding doorgegeven",
+      "suggestion": "Neem haar op in een boekingsexport, of verschuif de geplande betaaldatum"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "De verdeling van wijzigingsopdracht {code} komt op {allocated}, niet op het bedrag van {amount}",
+      "suggestion": "Pas de verdeling aan zodat ze het bedrag van de wijzigingsopdracht geeft"
+    },
+    "missing": {
+      "fail": "Wijzigingsopdracht {code} raakt {count} verplichtingen en is niet verdeeld",
+      "suggestion": "Verdeel deze wijzigingsopdracht: geef het bedrag per bestelling of onderaanneming op"
     }
   }
 }

@@ -29,6 +29,8 @@ export interface InvoiceEditorLine {
   /** The contract line this line bills, '' for none. The server then puts the
    *  line on that contract line's cost line. */
   contract_line_id?: string;
+  /** The purchase order line this line bills, '' for none. */
+  po_line_id?: string;
   /** Fields of a stored line the editor does not show, sent back unchanged so
    *  a save does not cut the line's link to its cost line, WBS or category. */
   keep?: Record<string, unknown>;
@@ -47,6 +49,7 @@ export interface StoredInvoiceLine {
   cost_category?: string | null;
   cost_line_id?: string | null;
   contract_line_id?: string | null;
+  po_line_id?: string | null;
   sort_order?: number | null;
 }
 
@@ -185,6 +188,7 @@ export function editorLinesFromInvoice(
       // after it loaded must not rewrite it.
       vat_touched: true,
       ...(item.contract_line_id ? { contract_line_id: item.contract_line_id } : {}),
+      ...(item.po_line_id ? { po_line_id: item.po_line_id } : {}),
       keep: {
         wbs_id: item.wbs_id ?? null,
         cost_category: item.cost_category ?? null,
@@ -229,6 +233,7 @@ export function linesToPayload(lines: InvoiceEditorLine[], fallbackDescription: 
         // server; sending the old one beside a new contract line would be refused.
         // Lines are replaced whole on save, so a line without one simply has none.
         ...(contractLine ? { contract_line_id: contractLine, cost_line_id: null } : {}),
+        ...(line.po_line_id ? { po_line_id: line.po_line_id } : {}),
         description: line.description.trim() || fallbackDescription,
         quantity: qty != null ? String(qty) : '1',
         unit: line.unit.trim() || null,

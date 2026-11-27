@@ -12,7 +12,7 @@ money values.
 
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -139,6 +139,14 @@ class ChangeOrderCreate(BaseModel):
         return _validate_decimal(v, "cost_impact")
 
 
+class CommitmentAllocation(BaseModel):
+    """The part of a change order that raises one purchase order or subcontract agreement."""
+
+    kind: Literal["purchase_order", "subcontract"]
+    id: UUID
+    amount: str = Field(..., pattern=r"^-?\d+(\.\d+)?$", max_length=50)
+
+
 class ChangeOrderUpdate(BaseModel):
     """Partial update for a change order.
 
@@ -168,6 +176,8 @@ class ChangeOrderUpdate(BaseModel):
     # T3: commitment / RFI links are mutable while the CO is in draft.
     linked_po_ids: list[UUID] | None = Field(default=None, max_length=50)
     linked_rfi_ids: list[UUID] | None = Field(default=None, max_length=50)
+    # The share of the amount that raises each commitment; must add up to the amount.
+    commitment_allocations: list[CommitmentAllocation] | None = Field(default=None, max_length=50)
     ball_in_court: str | None = Field(default=None, max_length=36)
     response_due_date: str | None = Field(default=None, max_length=40)
     status: str | None = Field(
@@ -278,6 +288,7 @@ class ChangeOrderResponse(BaseModel):
     # (where the columns are physically NULL) still serialize cleanly.
     linked_po_ids: list[str] = Field(default_factory=list)
     linked_rfi_ids: list[str] = Field(default_factory=list)
+    commitment_allocations: list[dict[str, str]] = Field(default_factory=list)
     current_approval_step: int | None = None
     ball_in_court: str | None = None
     response_due_date: str | None = None

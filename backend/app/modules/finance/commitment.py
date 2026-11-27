@@ -30,6 +30,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.changeorders.allocations import allocated_to, allocations_of
 from app.modules.finance.po_link import invoice_po_link
 
 KIND_PURCHASE_ORDER = "purchase_order"
@@ -103,6 +104,8 @@ class Commitment:
     paid: Decimal = _ZERO
     invoices_in_other_currency: int = 0
     invoice_ids: list[uuid.UUID] = field(default_factory=list)
+    #: Share of each counted invoice already paid, 0..1, for the line statement.
+    paid_share: dict[uuid.UUID, Decimal] = field(default_factory=dict)
 
     @property
     def revised(self) -> Decimal:
@@ -207,18 +210,48 @@ async def _purchase_order(session: AsyncSession, po_id: uuid.UUID) -> Commitment
         .all()
     )
     for order in rows:
+        currency = _currency(order.currency)
+        if currency and commitment.currency_code and currency != commitment.currency_code:
+            continue
+        raw = getattr(order, "commitment_allocations", None)
+        share = allocated_to(raw, KIND_PURCHASE_ORDER, po.id)
+        if share is not None:
+            commitment.approved_changes += share
+            continue
         linked = {_uuid(x) for x in (order.linked_po_ids or [])} - {None}
-        if po.id not in linked:
+        if po.id not in linked or allocations_of(raw):
             continue
         if len(linked) > 1:
             commitment.shared_change_orders += 1
             continue
-        currency = _currency(order.currency)
-        if currency and commitment.currency_code and currency != commitment.currency_code:
-            continue
         amount = order.approved_amount if order.approved_amount is not None else order.cost_impact
         commitment.approved_changes += _dec(amount)
     return commitment
+
+
+async def _allocated_changes(
+    session: AsyncSession, project_id: uuid.UUID, agreement_id: uuid.UUID, currency: str
+) -> Decimal:
+    """What approved change orders allocate to a subcontract agreement."""
+    try:
+        from app.modules.changeorders.models import ChangeOrder
+    except ImportError:  # pragma: no cover - change orders are optional
+        return _ZERO
+    rows = (
+        await session.execute(
+            select(ChangeOrder.currency, ChangeOrder.commitment_allocations).where(
+                ChangeOrder.project_id == project_id,
+                ChangeOrder.status.in_(APPROVED_CHANGE_ORDER_STATUSES),
+                ChangeOrder.commitment_allocations.is_not(None),
+            )
+        )
+    ).all()
+    total = _ZERO
+    for order_currency, raw in rows:
+        if currency and _currency(order_currency) and _currency(order_currency) != currency:
+            continue
+        total += allocated_to(raw, KIND_SUBCONTRACT, agreement_id) or _ZERO
+    return total
 
 
 async def _agreement(session: AsyncSession, agreement_id: uuid.UUID) -> Commitment | None:
@@ -244,6 +277,7 @@ async def _agreement(session: AsyncSession, agreement_id: uuid.UUID) -> Commitme
         .all()
     )
     changes = sum((_dec(a) for a in applied), _ZERO)
+    allocated = await _allocated_changes(session, agreement.project_id, agreement.id, _currency(agreement.currency))
     return Commitment(
         kind=KIND_SUBCONTRACT,
         id=agreement.id,
@@ -253,7 +287,7 @@ async def _agreement(session: AsyncSession, agreement_id: uuid.UUID) -> Commitme
         vendor_contact_id=str(sub.contact_id) if sub is not None and sub.contact_id else None,
         currency_code=_currency(agreement.currency),
         original=_dec(agreement.total_value) - changes,
-        approved_changes=changes,
+        approved_changes=changes + allocated,
         retention_percent=_dec(agreement.retention_percent),
     )
 
@@ -309,10 +343,105 @@ async def load_commitment(
         commitment.invoiced += _dec(inv.amount_subtotal)
         commitment.retained += _dec(inv.retention_amount)
         commitment.invoice_ids.append(inv.id)
+        paid_here = _ZERO
         for pay in inv.payments or []:
             amount = _dec(pay.amount)
-            commitment.paid += -amount if pay.is_refund else amount
+            paid_here += -amount if pay.is_refund else amount
+        commitment.paid += paid_here
+        gross = _dec(inv.amount_total)
+        commitment.paid_share[inv.id] = min(max(paid_here / gross, _ZERO), Decimal(1)) if gross > 0 else _ZERO
     return commitment
+
+
+async def po_line_owners(session: AsyncSession, line_ids: set[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:
+    """The purchase order each of ``line_ids`` belongs to; unknown ids are absent."""
+    if not line_ids:
+        return {}
+    try:
+        from app.modules.procurement.models import PurchaseOrderItem
+    except ImportError:  # pragma: no cover
+        return {}
+    rows = (
+        await session.execute(
+            select(PurchaseOrderItem.id, PurchaseOrderItem.po_id).where(PurchaseOrderItem.id.in_(line_ids))
+        )
+    ).all()
+    return {line_id: po_id for line_id, po_id in rows}
+
+
+async def po_line_statement(
+    session: AsyncSession, commitment: Commitment, current_lines: list[dict[str, Any]]
+) -> list[dict[str, str | None]]:
+    """The order's lines as a schedule of values, with this invoice's lines laid over them.
+
+    Per line: scheduled value, invoiced and paid on earlier counted invoices,
+    this invoice, total, percent complete and balance to complete, all net in
+    the order's currency. ``current_lines`` are ``{"po_line_id", "amount"}``.
+    """
+    if commitment.kind != KIND_PURCHASE_ORDER:
+        return []
+    try:
+        from app.modules.procurement.models import PurchaseOrderItem
+    except ImportError:  # pragma: no cover
+        return []
+    from app.modules.finance.models import InvoiceLineItem
+
+    items = (
+        (
+            await session.execute(
+                select(PurchaseOrderItem)
+                .where(PurchaseOrderItem.po_id == commitment.id)
+                .order_by(PurchaseOrderItem.sort_order)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    if not items:
+        return []
+    previous: dict[uuid.UUID, Decimal] = {}
+    paid: dict[uuid.UUID, Decimal] = {}
+    if commitment.invoice_ids:
+        rows = (
+            await session.execute(
+                select(InvoiceLineItem.po_line_id, InvoiceLineItem.amount, InvoiceLineItem.invoice_id).where(
+                    InvoiceLineItem.invoice_id.in_(commitment.invoice_ids),
+                    InvoiceLineItem.po_line_id.is_not(None),
+                )
+            )
+        ).all()
+        for line_id, amount, invoice_id in rows:
+            value = _dec(amount)
+            previous[line_id] = previous.get(line_id, _ZERO) + value
+            share = commitment.paid_share.get(invoice_id, _ZERO)
+            paid[line_id] = paid.get(line_id, _ZERO) + (value * share).quantize(Decimal("0.01"))
+    current: dict[uuid.UUID, Decimal] = {}
+    for line in current_lines:
+        line_id = _uuid(line.get("po_line_id"))
+        if line_id is not None:
+            current[line_id] = current.get(line_id, _ZERO) + _dec(line.get("amount"))
+    out: list[dict[str, str | None]] = []
+    for item in items:
+        scheduled = _dec(item.amount)
+        before = previous.get(item.id, _ZERO)
+        now = current.get(item.id, _ZERO)
+        total = before + now
+        out.append(
+            {
+                "po_line_id": str(item.id),
+                "description": item.description,
+                "scheduled": str(scheduled),
+                "previously_invoiced": str(before),
+                "previously_paid": str(paid.get(item.id, _ZERO)),
+                "this_invoice": str(now),
+                "total": str(total),
+                "percent_complete": (
+                    str((total * 100 / scheduled).quantize(Decimal("0.1"))) if scheduled > 0 else None
+                ),
+                "balance_to_complete": str(scheduled - total),
+            }
+        )
+    return out
 
 
 async def list_commitments(session: AsyncSession, project_id: uuid.UUID, contact_id: str | None) -> list[Commitment]:

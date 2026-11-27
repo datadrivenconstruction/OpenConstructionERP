@@ -133,6 +133,36 @@ describe('InvoiceCommitmentCheck', () => {
     expect(screen.getByTestId('invoice-pay-summary').textContent).toContain('Current payment due (A - B - C)');
   });
 
+  it('lays this invoice over each order line and marks a line billed past its balance', async () => {
+    // Rebar scheduled at 6,000: 5,000 billed before, 2,000 now leaves -1,000 to complete.
+    const lines = [
+      { po_line_id: 'l1', description: 'Rebar', scheduled: '6000.00', previously_invoiced: '5000.00',
+        previously_paid: '4000.00', this_invoice: '2000.00', total: '7000.00', percent_complete: '116.7',
+        balance_to_complete: '-1000.00' },
+      { po_line_id: 'l2', description: 'Formwork', scheduled: '4000.00', previously_invoiced: '0.00',
+        previously_paid: '0.00', this_invoice: '0.00', total: '0.00', percent_complete: '0.0',
+        balance_to_complete: '4000.00' },
+    ];
+    api.apiPost.mockResolvedValue({ ...WARNED, po_lines: lines });
+    const onPoLines = vi.fn();
+    const input = { ...INPUT, lines: [{ po_line_id: 'l1', amount: '2000.00' }] };
+    wrap(<InvoiceCommitmentCheck input={input} onPoLines={onPoLines} />);
+    const table = await screen.findByTestId('invoice-po-lines');
+    expect(table.textContent).toContain('Rebar');
+    expect(table.textContent).toContain('116.7');
+    expect(screen.getByTestId('po-line-balance-l1').className).toContain('text-semantic-error');
+    expect(screen.getByTestId('po-line-balance-l2').textContent).toContain('4,000.00');
+    expect(api.apiPost).toHaveBeenCalledWith('/v1/finance/invoices/posting-check/', input);
+    await waitFor(() => expect(onPoLines).toHaveBeenCalledWith(lines));
+  });
+
+  it('points a subcontract invoice to the payment applications for line values', async () => {
+    api.apiPost.mockResolvedValue({ ...WARNED, commitment: { ...COMMITMENT, kind: 'subcontract', ref: 'SC-1' } });
+    wrap(<InvoiceCommitmentCheck input={INPUT} />);
+    expect(await screen.findByTestId('invoice-subcontract-grid-note')).toBeInTheDocument();
+    expect(screen.queryByTestId('invoice-po-lines')).toBeNull();
+  });
+
   it('says approval will be refused and hands the reason to the form', async () => {
     api.apiPost.mockResolvedValue(REFUSED);
     const onBlockingChange = vi.fn();

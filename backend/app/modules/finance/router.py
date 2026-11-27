@@ -34,6 +34,7 @@ import io
 import logging
 import uuid
 from collections.abc import Iterable
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -69,6 +70,7 @@ from app.dependencies import (
 )
 from app.modules.contacts.models import Contact
 from app.modules.finance.ageing import BUCKETS as AGEING_BUCKETS
+from app.modules.finance.commitment_rules import check_release_overdue
 from app.modules.finance.connector_schemas import (
     ConnectorConfigCreate,
     ConnectorConfigListResponse,
@@ -220,6 +222,18 @@ def _invoice_to_response(invoice: Invoice, names: dict[str, str]) -> InvoiceResp
         resp.submitted_by_name = names.get(f"user:{invoice.submitted_by}")
     if invoice.approved_by:
         resp.approved_by_name = names.get(f"user:{invoice.approved_by}")
+    resp.release_overdue = bool(
+        check_release_overdue(
+            {
+                "invoice_number": invoice.invoice_number,
+                "invoice_direction": invoice.invoice_direction,
+                "status": invoice.status,
+                "scheduled_payment_date": invoice.scheduled_payment_date,
+                "released_at": invoice.released_at,
+                "today": date.today().isoformat(),
+            }
+        )
+    )
     return resp
 
 
@@ -509,6 +523,9 @@ async def check_invoice_posting(
         exclude = saved.id
         metadata = dict(saved.metadata_ or {})
     state = {**data.model_dump(exclude={"invoice_id"}), "metadata": metadata}
+    if not data.lines and data.invoice_id is not None:
+        # A list row asks without its lines; weigh the saved ones, as approval will.
+        state["line_items"] = [{"po_line_id": li.po_line_id, "amount": li.amount} for li in saved.line_items or []]
     result = await service.posting_check(state, exclude_invoice_id=exclude)
     return InvoicePostingCheckResponse.model_validate(result)
 

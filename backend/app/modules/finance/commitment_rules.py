@@ -214,15 +214,85 @@ def check_payment_date_before_invoice(payload: dict[str, Any]) -> list[Finding]:
     return [Finding(params={"scheduled": scheduled, "invoice_date": invoice_date})]
 
 
+def check_unallocated_change_orders(payload: dict[str, Any]) -> list[Finding]:
+    """Approved change orders touching several commitments raise none of them until allocated."""
+    commitment = _commitment(payload)
+    count = int(_dec((commitment or {}).get("shared_change_orders")))
+    if not _payable(payload) or commitment is None or count <= 0:
+        return []
+    return [Finding(params={"commitment": str(commitment.get("ref") or ""), "count": count}, details={"count": count})]
+
+
+def check_po_lines_within_balance(payload: dict[str, Any]) -> list[Finding]:
+    """No order line is billed past its scheduled value beyond what approved changes cover.
+
+    Overruns are summed over every line, earlier invoices included; when the
+    sum exceeds the commitment's approved changes, each line this invoice
+    bills past its balance is named.
+    """
+    commitment = _commitment(payload)
+    lines = payload.get("po_lines") or []
+    if not _payable(payload) or commitment is None or not lines or not _same_currency(payload, commitment):
+        return []
+    currency = str(commitment.get("currency_code") or "")
+    over = [(line, _dec(line.get("total")) - _dec(line.get("scheduled"))) for line in lines]
+    overrun = sum((excess for _line, excess in over if excess > 0), _ZERO)
+    cover = _dec(commitment.get("approved_changes")) + max(_dec(commitment.get("tolerance")), _CENT)
+    if overrun <= cover:
+        return []
+    return [
+        Finding(
+            params={
+                "line": str(line.get("description") or line.get("po_line_id") or ""),
+                "invoice": _ref(payload),
+                "excess": sentence_amount(excess, currency),
+                "balance": sentence_amount(
+                    max(_dec(line.get("scheduled")) - _dec(line.get("previously_invoiced")), _ZERO), currency
+                ),
+            },
+            details={
+                "po_line_id": str(line.get("po_line_id") or ""),
+                "scheduled_net": str(_dec(line.get("scheduled"))),
+                "total_net": str(_dec(line.get("total"))),
+                "overrun_all_lines_net": str(overrun),
+                "approved_changes_net": str(_dec(commitment.get("approved_changes"))),
+            },
+        )
+        for line, excess in over
+        if excess > 0 and _dec(line.get("this_invoice")) > 0
+    ]
+
+
+RELEASE_RULE_SET = "invoice_release"
+RELEASED_STATUSES = frozenset({"approved", "sent"})
+
+
+def check_release_overdue(payload: dict[str, Any]) -> list[Finding]:
+    """An approved payable past its scheduled payment date has gone to accounting."""
+    scheduled = str(payload.get("scheduled_payment_date") or "")[:10]
+    today = str(payload.get("today") or "")[:10]
+    if (
+        not _payable(payload)
+        or payload.get("status") not in RELEASED_STATUSES
+        or payload.get("released_at")
+        or not scheduled
+        or not today
+        or scheduled >= today
+    ):
+        return []
+    return [Finding(params={"invoice": _ref(payload), "scheduled": scheduled}, details={"scheduled": scheduled})]
+
+
 class _PostingRule(ValidationRule):
     """Run one pure check over the ``invoice_posting`` payload and translate its findings."""
 
     standard = "finance"
     check_name: str = ""
+    payload_key: str = PAYLOAD_KEY
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         data = context.data
-        payload = data.get(PAYLOAD_KEY) if isinstance(data, dict) else None
+        payload = data.get(self.payload_key) if isinstance(data, dict) else None
         if not isinstance(payload, dict):
             return []
         meta = getattr(context, "metadata", None) or {}
@@ -311,6 +381,34 @@ class InvoicePaymentDateAfterInvoice(_PostingRule):
     check_name = "check_payment_date_before_invoice"
 
 
+class InvoiceUnallocatedChangeOrders(_PostingRule):
+    rule_id = "invoice_posting.unallocated_change_order"
+    name = "Change Orders Allocated Across Commitments"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags approved change orders on several commitments that raise none until allocated."
+    check_name = "check_unallocated_change_orders"
+
+
+class InvoicePoLinesWithinBalance(_PostingRule):
+    rule_id = "invoice_posting.po_line_within_balance"
+    name = "Invoice Lines Within Their Order Line Balance"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Refuses billing an order line past its balance unless approved changes cover it."
+    check_name = "check_po_lines_within_balance"
+
+
+class InvoiceReleasedWhenDue(_PostingRule):
+    rule_id = "invoice_release.overdue_unreleased"
+    name = "Approved Invoice Released By Its Payment Date"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags an approved payable past its scheduled payment date that no booking export carried."
+    check_name = "check_release_overdue"
+    payload_key = RELEASE_RULE_SET
+
+
 POSTING_RULES: tuple[ValidationRule, ...] = (
     InvoiceWithinCommitment(),
     InvoiceCommitmentCurrency(),
@@ -318,7 +416,10 @@ POSTING_RULES: tuple[ValidationRule, ...] = (
     InvoiceDuplicateNumber(),
     InvoicePossibleDuplicate(),
     InvoicePaymentDateAfterInvoice(),
+    InvoiceUnallocatedChangeOrders(),
+    InvoicePoLinesWithinBalance(),
 )
+RELEASE_RULES: tuple[ValidationRule, ...] = (InvoiceReleasedWhenDue(),)
 
 
 def register_posting_rules() -> None:
@@ -327,3 +428,5 @@ def register_posting_rules() -> None:
 
     for rule in POSTING_RULES:
         rule_registry.register(rule, [RULE_SET])
+    for rule in RELEASE_RULES:
+        rule_registry.register(rule, [RELEASE_RULE_SET])

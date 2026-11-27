@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Betalingen er planlagt til {scheduled}, før fakturadatoen {invoice_date}",
       "suggestion": "Planlegg betalingen på eller etter fakturadatoen"
+    },
+    "unallocated_change_order": {
+      "fail": "Endringer som ikke telles på {commitment} før de er fordelt: {count}",
+      "suggestion": "Fordel denne endringen: oppgi andelen for hver berørt bestilling eller underentreprise"
+    },
+    "po_line_within_balance": {
+      "fail": "Linje {line} på faktura {invoice} ligger {excess} over gjenstående saldo på {balance}",
+      "suggestion": "Godkjenn en endring som dekker overskridelsen, eller rett linjebeløpet"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Faktura {invoice} skulle betales {scheduled} og er ikke overført til regnskapet",
+      "suggestion": "Ta den med i en bokføringseksport, eller flytt planlagt betalingsdato"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Fordelingen av endring {code} blir {allocated}, ikke beløpet på {amount}",
+      "suggestion": "Juster fordelingen slik at den blir endringens beløp"
+    },
+    "missing": {
+      "fail": "Endring {code} berører {count} forpliktelser og er ikke fordelt",
+      "suggestion": "Fordel denne endringen: oppgi beløpet for hver bestilling eller underentreprise"
     }
   }
 }

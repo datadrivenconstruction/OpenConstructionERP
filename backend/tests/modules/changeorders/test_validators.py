@@ -109,4 +109,5 @@ def test_registered_under_rule_set() -> None:
     register_changeorders_validation_rules()
     ids = {r.rule_id for r in rule_registry.get_rules_for_sets([CHANGEORDERS_RULE_SET])}
     assert "changeorders.status_transition" in ids
-    assert len(ids) == 5
+    assert "changeorders.allocation_matches_amount" in ids
+    assert len(ids) == 7

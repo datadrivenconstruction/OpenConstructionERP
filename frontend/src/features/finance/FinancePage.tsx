@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -74,6 +74,7 @@ import { InvoiceLinesEditor } from './InvoiceLinesEditor';
 import {
   editorLinesFromInvoice,
   invoiceTotals as linesTotals,
+  lineNet,
   linesToPayload,
   newEditorLine,
   vatChoices,
@@ -210,6 +211,9 @@ interface Invoice {
   approved_at?: string | null;
   submitted_by_name?: string | null;
   approved_by_name?: string | null;
+  released_at?: string | null;
+  released_export_id?: string | null;
+  release_overdue?: boolean;
   invoice_date?: string | null;
   currency_code?: string | null;
   notes?: string | null;
@@ -2209,6 +2213,13 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   const invoiceModalOpen = showCreate || isEditingInvoice;
   // A supplier invoice line can name the contract line it bills.
   const contractLineChoices = useContractLineOptions(projectId, invoiceModalOpen);
+  // The linked order's lines, from the posting check, for each invoice line to name one.
+  const [poLineChoices, setPoLineChoices] = useState<{ value: string; label: string }[]>([]);
+  const handlePoLines = useCallback(
+    (rows: { po_line_id: string; description: string }[]) =>
+      setPoLineChoices(rows.map((r) => ({ value: r.po_line_id, label: r.description }))),
+    [],
+  );
 
   // The invoice currently being issued as an EN 16931 e-invoice, if any.
   const [einvoiceFor, setEinvoiceFor] = useState<Invoice | null>(null);
@@ -2804,6 +2815,16 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                             defaultValue: inv.status,
                           })}
                         </Badge>
+                        {inv.released_at && (
+                          <div className="mt-0.5 text-2xs text-content-tertiary" data-testid={`invoice-released-${inv.id}`}>
+                            {t('finance.released_badge', { defaultValue: 'Released to accounting' })}
+                          </div>
+                        )}
+                        {inv.release_overdue && (
+                          <div className="mt-0.5 text-2xs text-semantic-warning" data-testid={`invoice-release-overdue-${inv.id}`}>
+                            {t('finance.release_overdue', { defaultValue: 'Payment date passed, not released' })}
+                          </div>
+                        )}
                       </td>
                       <td className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -3390,7 +3411,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                       retention_amount: editingInvoice?.retention_amount || '0',
                       purchase_order_id: invoiceForm.purchase_order_id || undefined,
                       subcontract_agreement_id: invoiceForm.subcontract_agreement_id || undefined,
+                      lines: invoiceForm.lines
+                        .filter((l) => l.po_line_id)
+                        .map((l) => ({ po_line_id: l.po_line_id as string, amount: fmtNumberForInput(lineNet(l)) })),
                     }}
+                    onPoLines={handlePoLines}
                   />
                 </div>
               </WideModalField>
@@ -3451,6 +3476,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                         date: fmtDate(editingInvoice.submitted_at),
                       })}
                     {editingInvoice.submitted_at && editingInvoice.approved_at ? ' · ' : ''}
+                    {editingInvoice.released_at &&
+                      ` · ${t('finance.released_on', {
+                        defaultValue: 'Released to accounting on {{date}}',
+                        date: fmtDate(editingInvoice.released_at),
+                      })}`}
                     {editingInvoice.approved_at &&
                       t('finance.approved_by_on', {
                         defaultValue: 'Approved by {{name}} on {{date}}',
@@ -3502,6 +3532,9 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                 error={invoiceErrors.lines}
                 contractLineOptions={
                   invoiceForm.direction === 'payable' ? contractLineChoices.data : undefined
+                }
+                poLineOptions={
+                  invoiceForm.direction === 'payable' && invoiceForm.purchase_order_id ? poLineChoices : undefined
                 }
               />
             </div>

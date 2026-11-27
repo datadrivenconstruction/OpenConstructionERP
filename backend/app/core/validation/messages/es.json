@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "El pago está programado para el {scheduled}, antes de la fecha de la factura {invoice_date}",
       "suggestion": "Programe el pago en la fecha de la factura o después"
+    },
+    "unallocated_change_order": {
+      "fail": "Órdenes de cambio no contadas en {commitment} hasta asignarlas: {count}",
+      "suggestion": "Asigne esta orden de cambio: indique la parte de cada pedido o subcontrato afectado"
+    },
+    "po_line_within_balance": {
+      "fail": "La línea {line} de la factura {invoice} supera en {excess} su saldo por ejecutar de {balance}",
+      "suggestion": "Apruebe una orden de cambio que cubra el exceso, o corrija el importe de la línea"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "La factura {invoice} debía pagarse el {scheduled} y no se ha pasado a contabilidad",
+      "suggestion": "Inclúyala en una exportación contable, o mueva la fecha de pago programada"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "La asignación de la orden de cambio {code} suma {allocated}, no su importe de {amount}",
+      "suggestion": "Ajuste la asignación para que sume el importe de la orden de cambio"
+    },
+    "missing": {
+      "fail": "La orden de cambio {code} afecta a {count} compromisos y no está asignada",
+      "suggestion": "Asigne esta orden de cambio: indique el importe de cada pedido o subcontrato"
     }
   }
 }

@@ -107,6 +107,12 @@ class ChangeOrder(Base):
         default=list,
         server_default="[]",
     )
+    # How the amount splits across the orders and subcontracts it touches:
+    # [{"kind": "purchase_order" | "subcontract", "id", "amount"}]. See allocations.py.
+    commitment_allocations: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+    )
     # Cursor into ``approvals`` - points at the active ``step_order`` of
     # the in-flight chain. ``None`` means no chain has been started (a
     # legacy CO using the single-step ``approve`` endpoint). Indexed so

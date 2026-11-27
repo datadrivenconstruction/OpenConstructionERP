@@ -54,6 +54,17 @@ describe('editorLinesFromInvoice', () => {
     expect(sent).toMatchObject({ cost_line_id: 'cl-1', wbs_id: 'w', cost_category: 'labor', sort_order: 4, amount: '12.50' });
   });
 
+  it('keeps the order line a stored line bills when it is saved again', () => {
+    const [loaded] = editorLinesFromInvoice(
+      [{ description: 'Rebar', quantity: '1', unit_rate: '2000', amount: '2000.00', vat_rate: '0', po_line_id: 'pl-1' }],
+      {},
+      '0',
+    );
+    expect(loaded?.po_line_id).toBe('pl-1');
+    expect(linesToPayload([loaded!], 'x')[0]).toMatchObject({ po_line_id: 'pl-1', amount: '2000.00' });
+    expect(linesToPayload([line('5', '0')], 'x')[0]).not.toHaveProperty('po_line_id');
+  });
+
   it('opens a lump-sum invoice as one line reproducing its stored tax', () => {
     const lines = editorLinesFromInvoice([], { subtotal: '1000.00', tax: '190.00' }, '25');
     expect(lines).toHaveLength(1);

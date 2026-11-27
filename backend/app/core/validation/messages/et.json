@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Makse on kavandatud kuupäevaks {scheduled}, enne arve kuupäeva {invoice_date}",
       "suggestion": "Kavandage makse arve kuupäevale või hiljemaks"
+    },
+    "unallocated_change_order": {
+      "fail": "Muudatused, mida {commitment} juures ei arvestata enne jaotamist: {count}",
+      "suggestion": "Jaota see muudatus: sisestage iga puudutatud tellimuse või alltöövõtu osa"
+    },
+    "po_line_within_balance": {
+      "fail": "Arve {invoice} rida {line} ületab järelejäänud saldot {balance} summa {excess} võrra",
+      "suggestion": "Kinnitage ületust kattev muudatus või parandage rea summat"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Arve {invoice} tuli tasuda {scheduled} ja seda pole raamatupidamisse edastatud",
+      "suggestion": "Lisage see kannete eksporti või muutke kavandatud maksekuupäeva"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Muudatuse {code} jaotus annab {allocated}, mitte selle summa {amount}",
+      "suggestion": "Parandage jaotust, et see annaks muudatuse summa"
+    },
+    "missing": {
+      "fail": "Muudatus {code} puudutab kohustusi: {count} ja pole jaotatud",
+      "suggestion": "Jaota see muudatus: sisestage summa iga tellimuse või alltöövõtu kohta"
     }
   }
 }

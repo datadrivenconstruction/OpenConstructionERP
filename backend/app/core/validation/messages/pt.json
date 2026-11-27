@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "O pagamento está agendado para {scheduled}, antes da data da fatura {invoice_date}",
       "suggestion": "Agende o pagamento na data da fatura ou depois"
+    },
+    "unallocated_change_order": {
+      "fail": "Ordens de alteração não contadas em {commitment} até serem repartidas: {count}",
+      "suggestion": "Reparta esta ordem de alteração: indique a parte de cada encomenda ou subempreitada afetada"
+    },
+    "po_line_within_balance": {
+      "fail": "A linha {line} da fatura {invoice} excede em {excess} o seu saldo por executar de {balance}",
+      "suggestion": "Aprove uma ordem de alteração que cubra o excesso, ou corrija o valor da linha"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "A fatura {invoice} devia ser paga em {scheduled} e não foi passada à contabilidade",
+      "suggestion": "Inclua-a numa exportação contabilística, ou mude a data de pagamento prevista"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "A repartição da ordem de alteração {code} soma {allocated}, não o seu valor de {amount}",
+      "suggestion": "Ajuste a repartição para que some o valor da ordem de alteração"
+    },
+    "missing": {
+      "fail": "A ordem de alteração {code} afeta {count} compromissos e não está repartida",
+      "suggestion": "Reparta esta ordem de alteração: indique o valor de cada encomenda ou subempreitada"
     }
   }
 }

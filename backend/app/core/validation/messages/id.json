@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Pembayaran dijadwalkan pada {scheduled}, sebelum tanggal faktur {invoice_date}",
       "suggestion": "Jadwalkan pembayaran pada atau setelah tanggal faktur"
+    },
+    "unallocated_change_order": {
+      "fail": "Perintah perubahan yang belum dihitung pada {commitment} sampai dialokasikan: {count}",
+      "suggestion": "Alokasikan perintah perubahan ini: masukkan bagian tiap pesanan atau subkontrak yang terkait"
+    },
+    "po_line_within_balance": {
+      "fail": "Baris {line} faktur {invoice} melebihi sisa saldo {balance} sebesar {excess}",
+      "suggestion": "Setujui perintah perubahan yang menutup kelebihan, atau perbaiki jumlah baris"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Faktur {invoice} jatuh tempo dibayar pada {scheduled} dan belum diserahkan ke akuntansi",
+      "suggestion": "Masukkan ke ekspor jurnal, atau geser tanggal pembayaran terjadwal"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Alokasi perintah perubahan {code} berjumlah {allocated}, bukan nilainya {amount}",
+      "suggestion": "Sesuaikan alokasi agar berjumlah nilai perintah perubahan"
+    },
+    "missing": {
+      "fail": "Perintah perubahan {code} menyentuh komitmen sebanyak: {count} dan belum dialokasikan",
+      "suggestion": "Alokasikan perintah perubahan ini: masukkan jumlah untuk tiap pesanan atau subkontrak"
     }
   }
 }

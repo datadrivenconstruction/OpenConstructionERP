@@ -33,6 +33,7 @@ export function InvoiceLinesEditor({
   defaultVat,
   error,
   contractLineOptions,
+  poLineOptions,
 }: {
   lines: InvoiceEditorLine[];
   onChange: (lines: InvoiceEditorLine[]) => void;
@@ -42,6 +43,8 @@ export function InvoiceLinesEditor({
   error?: string;
   /** Given for a supplier invoice: each line can name the contract line it bills. */
   contractLineOptions?: SearchableSelectOption[];
+  /** Given when the invoice bills a purchase order: each line can name the order line it bills. */
+  poLineOptions?: SearchableSelectOption[];
 }) {
   const { t } = useTranslation();
   const listId = useId();
@@ -60,6 +63,16 @@ export function InvoiceLinesEditor({
     contractLine: t('finance.line_contract_line', { defaultValue: 'Contract line' }),
     noContractLine: t('finance.line_no_contract_line', { defaultValue: 'No contract line' }),
   };
+  const setPoLine = (key: string, value: string) =>
+    onChange(
+      lines.map((line) => {
+        if (line.key !== key) return line;
+        const picked = poLineOptions?.find((o) => o.value === value);
+        // An empty description takes the order line's, so the line reads as the order does.
+        const description = line.description.trim() || !picked ? line.description : String(picked.label);
+        return { ...line, po_line_id: value, description };
+      }),
+    );
   const setContractLine = (key: string, value: string) =>
     onChange(lines.map((line) => (line.key === key ? { ...line, contract_line_id: value } : line)));
 
@@ -103,6 +116,19 @@ export function InvoiceLinesEditor({
                         emptyLabel={labels.noContractLine}
                         placeholder={labels.contractLine}
                         data-testid="invoice-line-contract-line"
+                      />
+                    </div>
+                  )}
+                  {poLineOptions && poLineOptions.length > 0 && (
+                    <div className="mt-1">
+                      <SearchableSelect
+                        value={line.po_line_id ?? ''}
+                        onChange={(v) => setPoLine(line.key, v)}
+                        options={poLineOptions}
+                        allowEmpty
+                        emptyLabel={t('finance.line_no_po_line', { defaultValue: 'No order line' })}
+                        placeholder={t('finance.line_po_line', { defaultValue: 'Order line' })}
+                        data-testid="invoice-line-po-line"
                       />
                     </div>
                   )}

@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Maksu on ajoitettu päivälle {scheduled}, ennen laskun päivää {invoice_date}",
       "suggestion": "Ajoita maksu laskun päivälle tai myöhemmäksi"
+    },
+    "unallocated_change_order": {
+      "fail": "Muutokset, joita ei lasketa sitoumukseen {commitment} ennen jakoa: {count}",
+      "suggestion": "Jaa tämä muutos: anna kunkin koskemansa tilauksen tai aliurakan osuus"
+    },
+    "po_line_within_balance": {
+      "fail": "Laskun {invoice} rivi {line} ylittää jäljellä olevan saldon {balance} määrällä {excess}",
+      "suggestion": "Hyväksy ylityksen kattava muutos tai korjaa rivin summa"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Lasku {invoice} piti maksaa {scheduled} eikä sitä ole siirretty kirjanpitoon",
+      "suggestion": "Ota se mukaan kirjausvientiin tai siirrä suunniteltua maksupäivää"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Muutoksen {code} jako on yhteensä {allocated}, ei sen summa {amount}",
+      "suggestion": "Korjaa jako niin, että se vastaa muutoksen summaa"
+    },
+    "missing": {
+      "fail": "Muutos {code} koskee sitoumuksia: {count} eikä sitä ole jaettu",
+      "suggestion": "Jaa tämä muutos: anna summa kullekin tilaukselle tai aliurakalle"
     }
   }
 }

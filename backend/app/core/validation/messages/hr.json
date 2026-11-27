@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Plaćanje je zakazano za {scheduled}, prije datuma računa {invoice_date}",
       "suggestion": "Zakažite plaćanje na datum računa ili kasnije"
+    },
+    "unallocated_change_order": {
+      "fail": "Izmjene koje se ne broje na {commitment} dok se ne raspodijele: {count}",
+      "suggestion": "Raspodijelite ovu izmjenu: unesite udio svake zahvaćene narudžbe ili podizvođenja"
+    },
+    "po_line_within_balance": {
+      "fail": "Stavka {line} računa {invoice} premašuje preostali saldo {balance} za {excess}",
+      "suggestion": "Odobrite izmjenu koja pokriva prekoračenje ili ispravite iznos stavke"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Račun {invoice} trebao je biti plaćen {scheduled} i nije predan računovodstvu",
+      "suggestion": "Uključite ga u izvoz knjiženja ili pomaknite planirani datum plaćanja"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Raspodjela izmjene {code} daje {allocated}, a ne njezin iznos {amount}",
+      "suggestion": "Prilagodite raspodjelu tako da daje iznos izmjene"
+    },
+    "missing": {
+      "fail": "Izmjena {code} zahvaća obveza: {count} i nije raspodijeljena",
+      "suggestion": "Raspodijelite ovu izmjenu: unesite iznos za svaku narudžbu ili podizvođenje"
     }
   }
 }

@@ -29,6 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.party_names import resolve_party_names
 from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.changeorders.allocations import to_json
 from app.modules.changeorders.schemas import (
     AIDraftRequest,
     AIDraftResponse,
@@ -119,6 +120,7 @@ def _order_to_response(order: object, names: Mapping[str, str] | None = None) ->
         updated_at=order.updated_at,  # type: ignore[attr-defined]
         item_count=len(items),
         linked_po_ids=[str(x) for x in (getattr(order, "linked_po_ids", None) or [])],
+        commitment_allocations=to_json(getattr(order, "commitment_allocations", None) or []) or [],
         linked_rfi_ids=[str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])],
         current_approval_step=getattr(order, "current_approval_step", None),
     )
@@ -158,6 +160,7 @@ def _order_to_with_items(order: object, names: Mapping[str, str] | None = None) 
         updated_at=order.updated_at,  # type: ignore[attr-defined]
         item_count=len(items),
         linked_po_ids=[str(x) for x in (getattr(order, "linked_po_ids", None) or [])],
+        commitment_allocations=to_json(getattr(order, "commitment_allocations", None) or []) or [],
         linked_rfi_ids=[str(x) for x in (getattr(order, "linked_rfi_ids", None) or [])],
         current_approval_step=getattr(order, "current_approval_step", None),
         items=[

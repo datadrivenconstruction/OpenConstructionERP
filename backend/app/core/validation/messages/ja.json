@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "支払予定日 {scheduled} が請求日 {invoice_date} より前になっています",
       "suggestion": "支払予定日は請求日以降に設定してください"
+    },
+    "unallocated_change_order": {
+      "fail": "配分されるまで {commitment} に計上されない変更指示: {count}",
+      "suggestion": "この変更指示を配分してください：関係する各発注または下請の配分額を入力します"
+    },
+    "po_line_within_balance": {
+      "fail": "請求書 {invoice} の明細 {line} は残額 {balance} を {excess} 超えています",
+      "suggestion": "超過分をカバーする変更指示を承認するか、明細金額を修正してください"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "請求書 {invoice} は {scheduled} に支払予定でしたが、経理に引き渡されていません",
+      "suggestion": "仕訳エクスポートに含めるか、支払予定日を変更してください"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "変更指示 {code} の配分合計は {allocated} で、金額 {amount} と一致しません",
+      "suggestion": "配分を変更指示の金額と一致するよう調整してください"
+    },
+    "missing": {
+      "fail": "変更指示 {code} は複数のコミットメントに関係し（{count}）、配分されていません",
+      "suggestion": "この変更指示を配分してください：各発注または下請の金額を入力します"
     }
   }
 }

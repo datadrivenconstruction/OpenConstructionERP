@@ -2987,6 +2987,30 @@
     "payment_date_before_invoice": {
       "fail": "Nakatakda ang bayad sa {scheduled}, bago ang petsa ng invoice na {invoice_date}",
       "suggestion": "Itakda ang bayad sa petsa ng invoice o pagkatapos"
+    },
+    "unallocated_change_order": {
+      "fail": "Mga change order na hindi binibilang sa {commitment} hangga't hindi nahahati: {count}",
+      "suggestion": "Hatiin ang change order na ito: ilagay ang bahagi ng bawat order o subkontratang apektado"
+    },
+    "po_line_within_balance": {
+      "fail": "Ang linya {line} ng invoice {invoice} ay lampas ng {excess} sa natitirang balanse na {balance}",
+      "suggestion": "Aprubahan ang change order na sasagot sa sobra, o itama ang halaga ng linya"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Dapat nabayaran ang invoice {invoice} noong {scheduled} at hindi pa naipapasa sa accounting",
+      "suggestion": "Isama ito sa isang booking export, o ilipat ang nakatakdang petsa ng bayad"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Ang hati ng change order {code} ay umaabot sa {allocated}, hindi sa halaga nitong {amount}",
+      "suggestion": "Ayusin ang hati para umabot sa halaga ng change order"
+    },
+    "missing": {
+      "fail": "Ang change order {code} ay sumasaklaw sa ganitong dami ng komitment: {count} at hindi pa nahahati",
+      "suggestion": "Hatiin ang change order na ito: ilagay ang halaga para sa bawat order o subkontrata"
     }
   }
 }

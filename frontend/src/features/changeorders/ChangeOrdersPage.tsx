@@ -63,6 +63,7 @@ import { boqDeepLink, changeOrderWriteback, FINANCE_BUDGETS_LINK } from '@/share
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { ApprovalTimeline } from './ApprovalTimeline';
+import { ChangeOrderAllocations, type CommitmentAllocation } from './ChangeOrderAllocations';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
 import { changeOrderSource } from './changeOrderSource';
 import { AIDraftModal } from './AIDraftModal';
@@ -158,6 +159,7 @@ interface ChangeOrder {
   // T3: construction-management-platform-style approval chain + commitment / RFI links.
   linked_po_ids?: string[];
   linked_rfi_ids?: string[];
+  commitment_allocations?: CommitmentAllocation[];
   current_approval_step?: number | null;
 }
 
@@ -2152,6 +2154,15 @@ function DetailView({
           )}
         </div>
       )}
+
+      <ChangeOrderAllocations
+        orderId={order.id}
+        poIds={order.linked_po_ids ?? []}
+        allocations={order.commitment_allocations ?? []}
+        amount={order.cost_impact}
+        currency={order.currency}
+        canEdit={order.status !== 'rejected'}
+      />
 
       {/* Related records — the commitment (PO) and RFI links the CO ties to,
           plus the source variation when this CO was mirrored from a variation
