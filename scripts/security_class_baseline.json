@@ -586,7 +586,6 @@
     "backend/app/modules/assemblies/router.py::PATCH /{assembly_id}/components/{component_id}",
     "backend/app/modules/assemblies/router.py::PATCH /{assembly_id}/tags/",
     "backend/app/modules/assemblies/router.py::POST /templates/{template_id}/apply",
-    "backend/app/modules/assemblies/router.py::POST /{assembly_id}/apply-to-boq/",
     "backend/app/modules/assemblies/router.py::POST /{assembly_id}/clone/",
     "backend/app/modules/assemblies/router.py::POST /{assembly_id}/components/",
     "backend/app/modules/assemblies/router.py::POST /{assembly_id}/expand-preview/",

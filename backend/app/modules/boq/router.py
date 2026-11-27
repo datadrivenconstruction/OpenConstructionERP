@@ -2411,6 +2411,9 @@ async def inspect_position_composition(
             status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
         )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+    owning_boq = await service.boq_repo.get_by_id(existing.boq_id)
+    if owning_boq is not None:
+        await verify_project_access(owning_boq.project_id, str(user_id), session)
     base, fx_map = await service._resolve_project_fx(existing.boq_id)
     return PositionComposition(
         **inspect_composition(
