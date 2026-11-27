@@ -124,6 +124,7 @@ from app.modules.boq.exchange_fidelity_router import exchange_fidelity_router
 from app.modules.boq.exchange_fidelity_service import with_exchange_fidelity
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.gaeb_exchange_router import gaeb_exchange_router
+from app.modules.boq.importers._encoding import is_price_placeholder
 from app.modules.boq.importers.excel import (
     _parse_csv,
     _parse_rows_from_csv,
@@ -7899,6 +7900,28 @@ def _prepare_rows(
             # Text in the quantity or rate column ("PM", "Inclus", "-") keeps
             # the line at 0 with a warning that quotes the cell.
             text_cells: dict[str, str] = {}
+            bad_cell = next(
+                (
+                    (field, err)
+                    for field, err, raw in (
+                        ("quantity", q_err, quantity_raw),
+                        ("unit_rate", r_err, unit_rate_raw),
+                    )
+                    if err is not None and not is_price_placeholder(raw)
+                ),
+                None,
+            )
+            if bad_cell is not None:
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "column": bad_cell[0],
+                        "error": f"Invalid {bad_cell[0]} at row {row_idx}: {bad_cell[1]}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
             for field, err, raw in (("quantity", q_err, quantity_raw), ("unit_rate", r_err, unit_rate_raw)):
                 if err is None:
                     continue

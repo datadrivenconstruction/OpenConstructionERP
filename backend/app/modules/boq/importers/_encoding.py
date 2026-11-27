@@ -272,6 +272,25 @@ def comma_groups_thousands(value: Any) -> bool:
     return match is not None and "." not in text[: match.end() + 1]
 
 
+_PRICE_PLACEHOLDERS: frozenset[str] = frozenset(
+    {
+        "pm", "pro memoria", "inclus", "incl", "included", "inclusive", "n/a", "na", "tbd",
+        "enthalten", "inbegrepen", "incluido", "incluso", "compris", "nach aufwand", "пм", "включено",
+    }
+)  # fmt: skip
+
+
+def is_price_placeholder(value: Any) -> bool:
+    """True for a quantity or rate cell that holds a bill placeholder, not a typo.
+
+    Bills carry "PM", "Inclus", "-" in the price column; the line stays at 0
+    with a warning. Any other text ("abc", "12x") is a malformed number and the
+    row is reported as an error instead.
+    """
+    text = str(value).strip().casefold().replace(".", "")
+    return not any(ch.isalnum() for ch in text) or text in _PRICE_PLACEHOLDERS
+
+
 def parse_numeric_cell(
     value: Any, *, dot_thousands: bool = False, comma_thousands: bool = False
 ) -> tuple[float | None, str | None]:
