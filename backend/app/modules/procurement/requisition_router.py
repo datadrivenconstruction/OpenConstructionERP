@@ -80,9 +80,12 @@ async def _load_guarded(
     return req
 
 
-async def _respond(service: RequisitionWorkflowService, req: MaterialRequisition) -> RequisitionResponse:
-    """One requisition with its vendor name, order number and converted order lines."""
-    return requisition_to_response(req, await build_response_context(service.session, [req]))
+async def _respond(
+    service: RequisitionWorkflowService, req: MaterialRequisition, user_id: str | None = None
+) -> RequisitionResponse:
+    """One requisition with its vendor name, order number and converted order lines, as ``user_id`` sees it."""
+    viewer = str(user_id) if user_id else None
+    return requisition_to_response(req, await build_response_context(service.session, [req], viewer))
 
 
 @router.get(
@@ -102,7 +105,7 @@ async def list_requisitions(
     """List a project's requisitions, newest first."""
     await verify_project_access(project_id, str(user_id), session)
     rows, total = await service.list_requisitions(project_id, req_status=status, offset=offset, limit=limit)
-    context = await build_response_context(session, rows)
+    context = await build_response_context(session, rows, str(user_id))
     return RequisitionListResponse(
         items=[requisition_to_response(r, context) for r in rows],
         total=total,
@@ -130,7 +133,7 @@ async def create_requisition(
     """
     await verify_project_access(data.project_id, str(user_id), session)
     req = await service.create(data, user_id=str(user_id))
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.get(
@@ -297,7 +300,7 @@ async def get_requisition(
 ) -> RequisitionResponse:
     """Get one requisition with its lines, sources and progress."""
     req = await _load_guarded(service, requisition_id, user_id)
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.patch(
@@ -314,7 +317,7 @@ async def update_requisition(
     """Edit a draft requisition (409 once it has been submitted)."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.update(requisition_id, data, user_id=str(user_id))
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -330,7 +333,7 @@ async def submit_requisition(
     """Submit a draft. It stays ``submitted``; nothing here approves it."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.submit(requisition_id, user_id=str(user_id))
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -346,7 +349,7 @@ async def withdraw_requisition(
     """Take a submitted requisition back to draft."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.withdraw(requisition_id, user_id=str(user_id))
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -363,7 +366,7 @@ async def cancel_requisition(
     """Cancel a requisition. The row and its history are kept."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.cancel(requisition_id, user_id=str(user_id), reason=data.reason if data else None)
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -380,7 +383,7 @@ async def approve_requisition(
     """Approve a submitted requisition. The person who submitted it may not."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.approve(requisition_id, user_id=str(user_id), comment=data.comment if data else None)
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -397,7 +400,7 @@ async def reject_requisition(
     """Reject a submitted requisition with the reason the requester needs."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.reject(requisition_id, user_id=str(user_id), comment=data.comment)
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.post(
@@ -418,7 +421,7 @@ async def report_external_order(
     """
     await _load_guarded(service, requisition_id, user_id)
     req = await service.report_external_order(requisition_id, data, user_id=str(user_id))
-    return await _respond(service, req)
+    return await _respond(service, req, user_id)
 
 
 @router.get(

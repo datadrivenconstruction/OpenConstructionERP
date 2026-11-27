@@ -43,6 +43,8 @@ import { useRoleReason } from '@/shared/lib/permissionReason';
 import {
   REQUISITION_STATUSES,
   approveRequisition,
+  nextStepBlock,
+  type DecideBlock,
   canConvertTogether,
   convertRequisitionsToPurchaseOrder,
   rejectRequisition,
@@ -184,6 +186,34 @@ export const APPROVE_REQUISITION_PERMISSION = 'procurement.approve_requisition';
  * permission list from `/v1/users/me/` is known it is the answer, otherwise
  * the role rank stands in until it loads.
  */
+/** The sentence on Approve and Reject when the server says the current role step is not this user's. */
+export function decideBlockLabel(t: ReturnType<typeof useTranslation>['t'], block: DecideBlock, role: string | null): string {
+  const roleName = role ? t(`users.roles.${role}`, { defaultValue: role }) : '';
+  switch (block) {
+    case 'role':
+      return t('procurement.requisitions.decide_blocked_role', {
+        defaultValue: 'This step is for the role {{role}}, which your role does not meet.',
+        role: roleName,
+      });
+    case 'requester':
+      return t('procurement.requisitions.decide_blocked_requester', {
+        defaultValue: 'You requested this requisition, so another holder of the role decides this step.',
+      });
+    case 'decided':
+      return t('procurement.requisitions.decide_blocked_decided', {
+        defaultValue: 'You already approved an earlier step; another holder of the role decides this one.',
+      });
+    case 'not_designated':
+      return t('procurement.requisitions.decide_blocked_not_designated', {
+        defaultValue: 'Another approver decides this step.',
+      });
+    case 'own_submission':
+      return t('procurement.requisitions.decide_blocked_own_submission', {
+        defaultValue: 'You submitted this requisition, so someone else decides it.',
+      });
+  }
+}
+
 export function canOfferDecision(
   req: Pick<Requisition, 'status' | 'submitted_by'> & Pick<Partial<Requisition>, 'next_approver_id'>,
   userId: string | null,
@@ -849,6 +879,10 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
     me?.permissions,
   );
   const decisionReason = useRoleReason(decisionRoleOk, 'manager');
+  const stepBlock = nextStepBlock(req?.approval_chain);
+  // A role step the user cannot take is shown disabled with the server's reason, not left to a 403.
+  const roleStepBlocked = req?.status === 'submitted' && !!req?.next_approver_role && stepBlock !== null;
+  const stepReason = roleStepBlocked && stepBlock ? decideBlockLabel(t, stepBlock.block, stepBlock.role) : undefined;
 
   return (
     <WideModal
@@ -882,12 +916,12 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 {t('procurement.requisitions.external_record', { defaultValue: 'Record external order' })}
               </Button>
             )}
-            {(canOfferDecision(req, userId, userRole, me?.permissions) || (req.status === 'submitted' && !decisionRoleOk)) && (
+            {(canOfferDecision(req, userId, userRole, me?.permissions) || (req.status === 'submitted' && !decisionRoleOk) || (roleStepBlocked && stepBlock?.block !== 'own_submission')) && (
               <>
-                <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy} disabledReason={decisionReason}>
+                <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy} disabledReason={decisionReason ?? stepReason}>
                   {t('procurement.requisitions.reject', { defaultValue: 'Reject' })}
                 </Button>
-                <Button icon={<Check size={14} />} onClick={() => setDecision('approve')} disabled={busy} disabledReason={decisionReason}>
+                <Button icon={<Check size={14} />} onClick={() => setDecision('approve')} disabled={busy} disabledReason={decisionReason ?? stepReason}>
                   {t('procurement.requisitions.approve', { defaultValue: 'Approve' })}
                 </Button>
               </>

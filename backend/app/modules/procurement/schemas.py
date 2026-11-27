@@ -1358,6 +1358,10 @@ class RequisitionApprovalStep(BaseModel):
     band_currency: str | None = None
     #: Set on a role step: any project member whose role meets it decides; ``user_id`` is then ``role:<name>``.
     role: str | None = None
+    #: On the step that decides now, whether the signed-in user may approve or reject it.
+    can_decide: bool | None = None
+    #: Why not, when ``can_decide`` is false: own_submission, not_designated, requester, decided or role.
+    decide_reason: str | None = None
 
 
 class RequisitionResponse(BaseModel):

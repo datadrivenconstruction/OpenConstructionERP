@@ -17,8 +17,11 @@ vi.mock('@/shared/lib/api', () => ({
   getErrorMessage: (e: unknown) => String(e),
 }));
 
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/shared/ui';
 import { ApprovalChainView } from './RequisitionOrdering';
-import { bandDraftProblem, type RequisitionApprovalStep } from './requisitionsApi';
+import { decideBlockLabel } from './RequisitionsTab';
+import { bandDraftProblem, nextStepBlock, type RequisitionApprovalStep } from './requisitionsApi';
 
 const PM = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
 const DIRECTOR = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2';
@@ -108,5 +111,34 @@ describe('ApprovalChainView with a role step', () => {
     render(<ApprovalChainView steps={steps} />);
     expect(screen.getByText('Project manager')).toBeTruthy();
     expect(screen.getByText(/Anyone with the role/)).toBeTruthy();
+  });
+});
+
+describe('a role step the signed-in user cannot take', () => {
+  const chain = (can_decide: boolean | null, decide_reason: RequisitionApprovalStep['decide_reason']) =>
+    [
+      { user_id: DIRECTOR, name: 'Site buyer', state: 'approved', decided_at: null, comment: null },
+      { user_id: 'role:admin', name: null, state: 'next', decided_at: null, comment: null, role: 'admin', can_decide, decide_reason },
+    ] as RequisitionApprovalStep[];
+
+  it('takes the reason from the server and nothing when the user may decide', () => {
+    expect(nextStepBlock(chain(false, 'role'))).toEqual({ block: 'role', role: 'admin' });
+    expect(nextStepBlock(chain(true, null))).toBeNull();
+    expect(nextStepBlock(chain(null, null))).toBeNull();
+    expect(nextStepBlock(undefined)).toBeNull();
+  });
+
+  it('disables Approve with a sentence that names the role', () => {
+    function Harness() {
+      const { t } = useTranslation();
+      const blocked = nextStepBlock(chain(false, 'role'));
+      return (
+        <Button disabledReason={blocked ? decideBlockLabel(t, blocked.block, blocked.role) : undefined}>Approve</Button>
+      );
+    }
+    render(<Harness />);
+    const button = screen.getByRole('button', { name: /approve/i });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('title', expect.stringMatching(/^This step is for the role \S.*, which your role does not meet\.$/));
   });
 });

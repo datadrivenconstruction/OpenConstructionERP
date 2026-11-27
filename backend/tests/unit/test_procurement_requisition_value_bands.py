@@ -262,3 +262,49 @@ class TestRoleApprovers:
             ("manager", "Project manager", "approved", "5000"),
             ("admin", None, "next", "50000"),
         ]
+
+
+class TestWhoMayDecideNow:
+    """The deciding step tells the signed-in user whether they may decide it, and why not."""
+
+    @staticmethod
+    def _role_req() -> MaterialRequisition:
+        req = MaterialRequisition(
+            status="submitted",
+            approval_chain=[BUYER, "role:manager"],
+            approval_step=1,
+            requester_id=REQUESTER,
+            submitted_by=REQUESTER,
+        )
+        req.metadata_ = {"approval_round": [{"user_id": BUYER, "step": 1}]}
+        return req
+
+    @pytest.mark.parametrize(
+        ("viewer", "role", "reason"),
+        [
+            (PM, "manager", None),
+            (PM, "admin", None),
+            (PM, "editor", "role"),
+            (PM, "viewer", "role"),
+            (REQUESTER, "manager", "own_submission"),
+            (BUYER, "manager", "decided"),
+        ],
+    )
+    def test_a_role_step_answers_for_each_viewer(self, viewer: str, role: str, reason: str | None) -> None:
+        assert RequisitionWorkflowService.decision_block(self._role_req(), viewer, role) == reason
+
+    def test_a_person_step_answers_not_designated_for_anyone_else(self) -> None:
+        req = MaterialRequisition(status="submitted", approval_chain=[BUYER], approval_step=0, requester_id=REQUESTER)
+        assert RequisitionWorkflowService.decision_block(req, PM, "admin") == "not_designated"
+        assert RequisitionWorkflowService.decision_block(req, BUYER, "manager") is None
+
+    def test_the_next_step_carries_can_decide_and_the_reason(self) -> None:
+        editor_view = _approval_view(self._role_req(), ResponseContext(viewer_id=PM, viewer_role="editor"))
+        assert [(s.state, s.can_decide, s.decide_reason) for s in editor_view] == [
+            ("approved", None, None),
+            ("next", False, "role"),
+        ]
+        manager_view = _approval_view(self._role_req(), ResponseContext(viewer_id=PM, viewer_role="manager"))
+        assert manager_view[1].can_decide is True and manager_view[1].decide_reason is None
+        anonymous = _approval_view(self._role_req(), ResponseContext())
+        assert anonymous[1].can_decide is None
