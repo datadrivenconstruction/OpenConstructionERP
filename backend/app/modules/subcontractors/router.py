@@ -650,6 +650,55 @@ async def delete_certificate(
     await svc.delete_certificate(certificate_id)
 
 
+@router.post("/certificates/{certificate_id}/verify", response_model=CertificateResponse)
+async def verify_certificate(
+    certificate_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.approve_prequalification")),
+) -> CertificateResponse:
+    """Mark a certificate as checked. Needs the same permission as approving a qualification."""
+    svc = SubcontractorService(session)
+    entity = await svc.verify_certificate(certificate_id, str(user_id))
+    await session.commit()
+    await session.refresh(entity)
+    return CertificateResponse.model_validate(entity)
+
+
+@router.delete("/certificates/{certificate_id}/verify", response_model=CertificateResponse)
+async def unverify_certificate(
+    certificate_id: uuid.UUID,
+    session: SessionDep,
+    _user: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.approve_prequalification")),
+) -> CertificateResponse:
+    """Withdraw a verification; the certificate goes back to awaiting review."""
+    svc = SubcontractorService(session)
+    entity = await svc.unverify_certificate(certificate_id)
+    await session.commit()
+    await session.refresh(entity)
+    return CertificateResponse.model_validate(entity)
+
+
+@router.get("/certificates/{certificate_id}/download")
+async def download_certificate(
+    certificate_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> StreamingResponse:
+    """Open the file behind a certificate that was attached through an agreement."""
+    svc = SubcontractorService(session)
+    entity = await svc.certs.get_by_id(certificate_id)
+    meta = (entity.metadata_ or {}) if entity is not None else {}
+    try:
+        agreement_id = uuid.UUID(str(meta.get("agreement_id")))
+        document_id = uuid.UUID(str(meta.get("source_document_id")))
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No file attached") from None
+    return await download_agreement_document(agreement_id, document_id, session, user_id)
+
+
 # ── Agreements ─────────────────────────────────────────────────────────
 
 
@@ -2343,6 +2392,9 @@ async def upload_agreement_document(
         notes=notes,
         uploaded_by=user_id,
     )
+    if role == "insurance":
+        agreement = await svc.agreements.get_by_id(agreement_id)
+        await svc.record_certificate_from_document(agreement, entity)
     await session.commit()
     await session.refresh(entity)
     return AgreementDocumentResponse.model_validate(entity)

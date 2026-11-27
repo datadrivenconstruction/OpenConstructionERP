@@ -134,6 +134,10 @@ export interface Certificate {
   coverage_amount?: string | null;
   coverage_currency?: string | null;
   metadata: Record<string, unknown>;
+  /** 'awaiting_review' | 'verified' | 'expired' | 'revoked' */
+  review_status?: string;
+  verified_at?: string | null;
+  verified_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -553,6 +557,18 @@ export interface CreateCertificatePayload {
 
 export function createCertificate(data: CreateCertificatePayload): Promise<Certificate> {
   return apiPost<Certificate>('/v1/subcontractors/certificates/', data);
+}
+
+export function verifyCertificate(id: string): Promise<Certificate> {
+  return apiPost<Certificate>(`/v1/subcontractors/certificates/${id}/verify`, {});
+}
+
+export function unverifyCertificate(id: string): Promise<Certificate> {
+  return apiDelete<Certificate>(`/v1/subcontractors/certificates/${id}/verify`);
+}
+
+export function downloadCertificate(cert: Certificate): Promise<void> {
+  return downloadWithAuth(`${API_BASE}/v1/subcontractors/certificates/${cert.id}/download`, 'certificate');
 }
 
 export function listCertificates(subcontractorId: string): Promise<Certificate[]> {

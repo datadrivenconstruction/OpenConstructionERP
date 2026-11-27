@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from app.core.decimal_types import Decimal5_2, Decimal8_4, Decimal18_2, Decimal18_4, FiniteDecimal
 
@@ -493,6 +493,24 @@ class CertificateResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def review_status(self) -> str:
+        """``revoked`` / ``expired`` / ``verified`` / ``awaiting_review``; an upload alone is awaiting review."""
+        if self.status in ("revoked", "expired"):
+            return self.status
+        return "verified" if (self.metadata.get("review") or {}).get("verified_at") else "awaiting_review"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def verified_at(self) -> str | None:
+        return (self.metadata.get("review") or {}).get("verified_at")
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def verified_by(self) -> str | None:
+        return (self.metadata.get("review") or {}).get("verified_by")
 
 
 # ── SubcontractAgreement ─────────────────────────────────────────────────

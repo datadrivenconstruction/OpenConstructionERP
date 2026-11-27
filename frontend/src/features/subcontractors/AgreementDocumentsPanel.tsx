@@ -4,7 +4,7 @@
  * Documents attached to a subcontract agreement, and where the agreement
  * stands against the required list.
  *
- * Uploads go to POST /agreements/{id}/documents, which checks the file's magic
+ * Uploads go to POST /agreements/{id}/documents/upload, which checks the file's magic
  * bytes against the document allow-list. The required list and its enforcement
  * (warn or block) are the installation's, read from the server; a missing or
  * expired required document shows here before anyone hits a refusal.
@@ -64,7 +64,7 @@ export function AgreementDocumentsPanel({ agreement }: { agreement: Agreement })
       if (until) form.append('valid_until', until);
       form.append('file', file);
       const token = getAuthToken();
-      const resp = await fetch(`${API_BASE}/v1/subcontractors/agreements/${agreement.id}/documents`, {
+      const resp = await fetch(`${API_BASE}/v1/subcontractors/agreements/${agreement.id}/documents/upload`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
@@ -87,6 +87,7 @@ export function AgreementDocumentsPanel({ agreement }: { agreement: Agreement })
       setSigned('');
       setUntil('');
       refresh();
+      if (role === 'insurance') qc.invalidateQueries({ queryKey: ['subcontractors', 'certificates'] });
       addToast({ type: 'success', title: t('subcontractors.docs.uploaded', { defaultValue: 'Document attached' }) });
     } catch (err) {
       addToast({ type: 'error', title: getErrorMessage(err) });
