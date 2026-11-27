@@ -83,7 +83,7 @@ def test_fields_from_position_carry_provenance() -> None:
     assert len(f["components"]) == 1
 
 
-@pytest.mark.parametrize(("desc", "unit"), [("Section", ""), ("", "m2"), (None, None)])
+@pytest.mark.parametrize(("desc", "unit"), [("Section", ""), ("Hall", "section"), ("", "m2"), (None, None)])
 def test_sections_and_blank_positions_are_refused(desc, unit) -> None:
     with pytest.raises(PositionNotSavableError):
         cost_item_fields_from_position(
@@ -97,3 +97,46 @@ def test_code_is_stable_per_position_and_region_falls_back() -> None:
     assert resolve_region("DE-BY", {"cost_item_region": "X"}) == "DE-BY"
     assert resolve_region(None, {"cost_item_region": "X"}) == "X"
     assert resolve_region(None, {}) == DEFAULT_REGION
+
+
+# ── Replace a resource row by a matched cost item ──────────────────────────
+
+
+class _Item:
+    def __init__(self, rate="50", active=True):
+        self.id = uuid.uuid4()
+        self.code = "R1"
+        self.description = "Mason skilled"
+        self.unit = "h"
+        self.rate = rate
+        self.is_active = active
+
+
+def test_replacement_keeps_quantity_and_type_and_records_the_swap() -> None:
+    from app.modules.boq.resource_replace import REPLACED_KEY, replacement_row
+
+    old = _row(qty="2", rate="40", type="labor", code="L1")
+    new = replacement_row(old, item=_Item(), currency="EUR", score=0.8249)
+    assert new["quantity"] == 2.0
+    assert new["type"] == "labor"
+    assert new["unit_rate"] == 50.0
+    assert new["total"] == 100.0
+    assert new["currency"] == "EUR"
+    assert new[REPLACED_KEY]["score"] == 0.8249
+    assert new[REPLACED_KEY]["code"] == "L1"
+
+
+def test_an_explicit_quantity_wins_over_the_old_one() -> None:
+    from app.modules.boq.resource_replace import replacement_row
+
+    new = replacement_row(_row(qty="2"), item=_Item(), currency="", score=None, quantity=Decimal("3"))
+    assert new["quantity"] == 3.0
+    assert "currency" not in new
+
+
+@pytest.mark.parametrize("item", [_Item(active=False), _Item(rate="-1")])
+def test_unusable_candidates_are_refused(item) -> None:
+    from app.modules.boq.resource_replace import CandidateNotUsableError, replacement_row
+
+    with pytest.raises(CandidateNotUsableError):
+        replacement_row(_row(), item=item, currency="", score=0.5)

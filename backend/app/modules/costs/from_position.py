@@ -21,6 +21,8 @@ from pydantic import BaseModel, Field
 # Region of the user's own database when neither the request nor the position names one.
 DEFAULT_REGION = "CUSTOM"
 SAVED_FROM_KEY = "saved_from_boq_position"
+# Unit the BOQ stores on a section row; a section is a heading, not a priced line.
+SECTION_UNIT = "section"
 
 _CENT = Decimal("0.01")
 
@@ -100,7 +102,7 @@ def cost_item_fields_from_position(
     """
     unit_s = (unit or "").strip()
     desc_s = (description or "").strip()
-    if not unit_s or not desc_s:
+    if not unit_s or unit_s.lower() == SECTION_UNIT or not desc_s:
         raise PositionNotSavableError("position has no unit or description")
     meta = metadata or {}
     rate = _dec(unit_rate)

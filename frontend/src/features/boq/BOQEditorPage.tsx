@@ -168,6 +168,8 @@ import { RenumberDialog, type RenumberScheme, type RenumberCustom } from './Renu
 import { LinkedPositionsModal } from './LinkedPositionsModal';
 import { repointedMetadata } from './repointedMetadata';
 import { PriceAlignmentDialog } from './PriceAlignmentDialog';
+import { PositionCompositionDialog } from './PositionCompositionDialog';
+import { positionCostItemApi, refusalText } from './positionCostItemApi';
 import { fmtList } from '@/shared/lib/formatters';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
@@ -3621,6 +3623,7 @@ export function BOQEditorPage() {
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [showRecalcConfirm, setShowRecalcConfirm] = useState(false);
   const [showPriceAlignment, setShowPriceAlignment] = useState(false);
+  const [compositionFor, setCompositionFor] = useState<string | null>(null);
 
   const doRecalculate = useCallback(async () => {
     if (!boqId) return;
@@ -5055,6 +5058,46 @@ export function BOQEditorPage() {
     [boq?.positions, t, addToast],
   );
 
+  const handleSaveAsCostItem = useCallback(
+    async (positionId: string) => {
+      try {
+        const item = await positionCostItemApi.save(positionId);
+        addToast({
+          type: 'success',
+          title: t('boq.position_cost.saved', { defaultValue: 'Saved as cost item {{code}}', code: item.code }),
+        });
+      } catch (err) {
+        const r = refusalText(err, 'save');
+        addToast({ type: 'error', title: t(r.key, { defaultValue: r.fallback }) });
+      }
+    },
+    [t, addToast],
+  );
+
+  const handleRefreshCostItem = useCallback(
+    async (positionId: string) => {
+      const pos = boq?.positions.find((p) => p.id === positionId);
+      const costItemId = pos?.metadata?.cost_item_id;
+      if (typeof costItemId !== 'string' || !costItemId) {
+        addToast({
+          type: 'error',
+          title: t('boq.position_cost.no_source', {
+            defaultValue: 'This line is not linked to a cost item. Save it as a cost item first.',
+          }),
+        });
+        return;
+      }
+      try {
+        await positionCostItemApi.refresh(costItemId, positionId);
+        addToast({ type: 'success', title: t('boq.position_cost.refreshed', { defaultValue: 'Cost item refreshed' }) });
+      } catch (err) {
+        const r = refusalText(err, 'refresh');
+        addToast({ type: 'error', title: t(r.key, { defaultValue: r.fallback }) });
+      }
+    },
+    [boq?.positions, t, addToast],
+  );
+
   /** Handle "Save as Assembly" from the BOQ position context menu */
   const handleSaveAsAssembly = useCallback(
     async (positionId: string) => {
@@ -5928,6 +5971,9 @@ export function BOQEditorPage() {
           anomalyMap={anomalyMap}
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
+          onSaveAsCostItem={handleSaveAsCostItem}
+          onRefreshCostItem={handleRefreshCostItem}
+          onCheckComposition={setCompositionFor}
           onInsertAssembly={setInsertAssemblyFor}
           onSaveQuantityAsVariable={handleSaveQuantityAsVariable}
           customColumns={boqCustomColumns}
@@ -6261,6 +6307,14 @@ export function BOQEditorPage() {
             doExport(fmt);
           }}
           t={t}
+        />
+      )}
+
+      {compositionFor && (
+        <PositionCompositionDialog
+          positionId={compositionFor}
+          onClose={() => setCompositionFor(null)}
+          onChanged={invalidateAll}
         />
       )}
 
