@@ -62,6 +62,13 @@ class _FakeBudgetRepo:
     async def existing_position_ids(self, project_id: uuid.UUID) -> set[uuid.UUID]:
         return set(self.existing)
 
+    async def _project_fx_context(self, project_id: uuid.UUID) -> tuple[str, dict[str, str]]:
+        return "", {}
+
+    async def list_by_position(self, project_id: uuid.UUID, boq_position_id: uuid.UUID) -> list[object]:
+        line = self.line_by_position.get(boq_position_id)
+        return [line] if line is not None else []
+
     async def bulk_create(self, lines: list[object]) -> list[object]:
         self.lines.extend(lines)
         for line in lines:

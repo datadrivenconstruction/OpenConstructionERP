@@ -68,6 +68,8 @@ import { subcontractorsGuide } from './subcontractorsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildSubcontractorsInsights } from './subcontractorsInsights';
 import { useToastStore } from '@/stores/useToastStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { BudgetLinePicker } from '@/features/costmodel/BudgetLinePicker';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
   listSubcontractors,

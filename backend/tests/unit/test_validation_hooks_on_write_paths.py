@@ -426,8 +426,8 @@ def test_every_rule_id_resolves_in_all_four_locales() -> None:
             if type(rule).__module__ == _CORE_RULES_MODULE
         }
     rule_ids = {rid for rid in rule_ids if rid.split(".")[0] in _MESSAGE_SECTIONS}
-    # 27 since subcontract.contact_linked joined the subcontract set.
-    assert len(rule_ids) == 28, f"expected 28 core rules across {_RULE_SETS}, found {len(rule_ids)}"
+    # 27 since subcontract.contact_linked joined the subcontract set, 29 with subcontract.agreement_budget_line.
+    assert len(rule_ids) == 29, f"expected 29 core rules across {_RULE_SETS}, found {len(rule_ids)}"
 
     base = pathlib.Path(__file__).resolve().parents[2] / "app" / "core" / "validation" / "messages"
     docs = {loc: json.loads((base / f"{loc}.json").read_text(encoding="utf-8")) for loc in ("en", "de", "es", "ru")}
