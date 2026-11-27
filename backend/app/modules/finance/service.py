@@ -1472,6 +1472,11 @@ class FinanceService:
         summary = report.summary()
         return {
             "commitment": commitment.as_dict() if commitment is not None else None,
+            "summary": (
+                commitment.pay_summary(state.get("amount_subtotal"), state.get("retention_amount"))
+                if commitment is not None
+                else None
+            ),
             "blocking": bool(report.has_errors),
             "report": {
                 "status": summary["status"],

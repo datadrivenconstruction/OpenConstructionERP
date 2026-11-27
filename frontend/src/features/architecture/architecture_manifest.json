@@ -146009,6 +146009,16 @@
               "default": "None"
             },
             {
+              "name": "submitted_by_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approved_by_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "currency_code",
               "type": "str",
               "default": "''"
@@ -146221,6 +146231,11 @@
             {
               "name": "commitment",
               "type": "CommitmentResponse | None",
+              "default": "None"
+            },
+            {
+              "name": "summary",
+              "type": "dict[str, str] | None",
               "default": "None"
             },
             {
