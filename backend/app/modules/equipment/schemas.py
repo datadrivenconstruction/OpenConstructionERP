@@ -388,6 +388,15 @@ class MaintenanceDueItem(BaseModel):
     description: str | None = None
 
 
+class MaintenanceDueListResponse(BaseModel):
+    """Schedules due within the lookahead. The whole due set is read, so ``total`` equals ``len(items)``."""
+
+    items: list[MaintenanceDueItem]
+    total: int
+    offset: int = 0
+    limit: int
+
+
 class MaintenanceWorkOrderResponse(BaseModel):
     """Maintenance work order returned from the API."""
 

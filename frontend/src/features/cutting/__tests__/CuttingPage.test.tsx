@@ -256,8 +256,8 @@ describe('CuttingPage', () => {
     const optimise = screen.getByRole('button', { name: 'Optimise' });
     expect(optimise).toBeDisabled();
     expect(optimise).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
-    // Creating a job is an inline form, still offered only to editors.
-    expect(screen.queryByRole('button', { name: 'New job' })).toBeNull();
+    // Creating a job is an inline form, shown disabled to a viewer too.
+    expect(screen.getByRole('button', { name: 'New job' })).toBeDisabled();
   });
 
   it('runs the optimiser and shows the validation outcome', async () => {

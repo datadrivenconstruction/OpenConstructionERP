@@ -334,6 +334,24 @@ def _duplicate_problems() -> list[str]:
     return problems
 
 
+def _import_permissions_module(package: str):
+    """Import ``app.modules.<package>.permissions`` without running the package's ``__init__``.
+
+    Some packages import their manifest there, which pulls in the application
+    framework; this step runs without it, and the role table needs none of it.
+    """
+    import importlib
+    import sys
+    import types
+
+    pkg_name = f"app.modules.{package}"
+    if pkg_name not in sys.modules:
+        stub = types.ModuleType(pkg_name)
+        stub.__path__ = [str(BACKEND / "app" / "modules" / package)]
+        sys.modules[pkg_name] = stub
+    return importlib.import_module(f"{pkg_name}.permissions")
+
+
 def _register_for(permission: str) -> None:
     """Register the permissions of the module that owns ``permission``.
 
@@ -341,8 +359,6 @@ def _register_for(permission: str) -> None:
     starts the application, so each module's own registration function is
     called instead. ``audit.*`` and ``system.*`` belong to the core.
     """
-    import importlib
-
     core_permissions = _backend_permissions()
     prefix = permission.split(".", 1)[0]
     if prefix in {"audit", "system"}:
@@ -354,7 +370,7 @@ def _register_for(permission: str) -> None:
         if own.is_file() and quoted not in own.read_text(encoding="utf-8"):
             # Two packages can share a prefix: `design.manage` belongs to `design_management`.
             raise ImportError(f"{own.parent.name} does not declare {permission!r}")
-        module = importlib.import_module(f"app.modules.{prefix}.permissions")
+        module = _import_permissions_module(prefix)
     except ImportError as exc:
         # The prefix is not always the package: `bim.*` is registered by
         # `bim_hub`. Fall back to the one module that declares the name.
@@ -367,7 +383,7 @@ def _register_for(permission: str) -> None:
             raise LookupError(
                 f"no permissions module for {permission!r} ({exc}; declared in {owners or 'none'})"
             ) from exc
-        module = importlib.import_module(f"app.modules.{owners[0]}.permissions")
+        module = _import_permissions_module(owners[0])
     for name in dir(module):
         func = getattr(module, name)
         if name.startswith("register_") and callable(func) and getattr(func, "__module__", "") == module.__name__:

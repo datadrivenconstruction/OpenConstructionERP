@@ -685,6 +685,11 @@ async def apply_to_position(
             detail=translate("errors.position_not_found", locale=get_locale()),
         )
     await _verify_target_boq_owner(session, position.boq_id, user_id, payload)
+    from app.modules.boq.repository import BOQRepository
+
+    target_boq = await BOQRepository(session).get_by_id(position.boq_id)
+    if target_boq is not None:
+        await verify_project_access(target_boq.project_id, user_id, session)
     try:
         actor = uuid.UUID(str(user_id))
     except (TypeError, ValueError):

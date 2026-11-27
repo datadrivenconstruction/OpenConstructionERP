@@ -127516,7 +127516,7 @@
           "method": "GET",
           "path": "/maintenance-schedules/due-within",
           "handler": "list_due_schedules",
-          "response_model": "list[MaintenanceDueItem]",
+          "response_model": "MaintenanceDueListResponse",
           "request_schema": "None"
         },
         {
@@ -128664,6 +128664,32 @@
               "name": "description",
               "type": "str | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MaintenanceDueListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Schedules due within the lookahead. The whole due set is read, so ``total`` equals ``len(items)``.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[MaintenanceDueItem]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int"
             }
           ]
         },
@@ -348977,7 +349003,7 @@
     "total_columns": 11600,
     "total_relationships": 264,
     "total_routes": 5617,
-    "total_schemas": 5249,
+    "total_schemas": 5250,
     "total_python_files": 4055,
     "frontend_features": 254,
     "frontend_ts_files": 4596,

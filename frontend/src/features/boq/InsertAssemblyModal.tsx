@@ -353,7 +353,7 @@ export function InsertAssemblyModal({
                       ))}
                     </tbody>
                   </table>
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl border border-border-light bg-surface-secondary/40 p-3" data-testid="insert-assembly-result">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-xl border border-border-light bg-surface-secondary/40 p-3" data-testid="insert-assembly-result">
                     <div>
                       <p className="text-2xs uppercase tracking-wide text-content-tertiary">{t('boq.insert_assembly.now', { defaultValue: 'Now' })}</p>
                       <p className="text-sm tabular-nums">{money(p.before.unit_rate)} / {p.position_unit}</p>

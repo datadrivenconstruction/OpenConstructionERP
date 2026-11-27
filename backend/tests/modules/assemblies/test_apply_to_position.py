@@ -223,6 +223,21 @@ async def test_stranger_cannot_reach_the_bill(session):
     assert exc.value.status_code == 404
 
 
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_route_refuses_a_user_without_access_to_the_project(session):
+    from app.modules.assemblies.router import apply_to_position
+    from app.modules.assemblies.service import AssemblyService
+
+    asm = await _assembly(session)
+    pos = await _position(session)
+    with pytest.raises(HTTPException) as exc:
+        await apply_to_position(
+            asm.id, _req(pos.id), str(STRANGER), {"role": "editor"}, session, AssemblyService(session)
+        )
+    assert exc.value.status_code == 404
+
+
 @pytest.mark.parametrize(
     "kw",
     [{"factor": 0}, {"factor": -1}, {"factor": 10001}, {"factor": float("nan")}, {"mode": "merge"}],

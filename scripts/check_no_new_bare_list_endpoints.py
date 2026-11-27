@@ -406,7 +406,6 @@ ALLOWED: frozenset[str] = frozenset(
         "einvoice_clearance/router.py::list_clearance_events",
         "einvoice_clearance/router.py::list_registrations",
         "equipment/router.py::expiring_inspections",
-        "equipment/router.py::generate_due_work_orders",
         "equipment/router.py::list_damage_reports",
         "equipment/router.py::list_inspections",
         "equipment/router.py::list_parts_logs",

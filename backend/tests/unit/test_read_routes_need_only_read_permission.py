@@ -87,7 +87,7 @@ def test_the_write_behind_the_preview_still_refuses_a_viewer(router, method: str
 
 def test_listing_due_maintenance_creates_nothing() -> None:
     """The GET answers with due schedules, not work orders: creating them is the POST."""
-    from app.modules.equipment.schemas import MaintenanceDueItem
+    from app.modules.equipment.schemas import MaintenanceDueListResponse
 
     route = _route(equipment_router, "GET", "/maintenance-schedules/due-within")
-    assert route.response_model == list[MaintenanceDueItem]
+    assert route.response_model is MaintenanceDueListResponse

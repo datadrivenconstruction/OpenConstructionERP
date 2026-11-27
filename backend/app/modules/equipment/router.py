@@ -105,6 +105,7 @@ from app.modules.equipment.schemas import (
     InspectionResponse,
     InspectionUpdate,
     MaintenanceDueItem,
+    MaintenanceDueListResponse,
     MaintenanceScheduleCreate,
     MaintenanceScheduleResponse,
     MaintenanceScheduleUpdate,
@@ -434,17 +435,17 @@ async def delete_schedule(
 
 @router.get(
     "/maintenance-schedules/due-within",
-    response_model=list[MaintenanceDueItem],
+    response_model=MaintenanceDueListResponse,
 )
 async def list_due_schedules(
     hours: float = Query(default=50.0, ge=0),
     equipment_id: uuid.UUID | None = Query(default=None),
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: EquipmentService = Depends(_get_service),
-) -> list[MaintenanceDueItem]:
+) -> MaintenanceDueListResponse:
     """Schedules within `hours` of due that have no open work order. Writes nothing."""
     due = await service.due_schedules(equipment_id=equipment_id, lookahead_hours=hours)
-    return [
+    items = [
         MaintenanceDueItem(
             schedule_id=s.id,
             equipment_id=s.equipment_id,
@@ -454,6 +455,7 @@ async def list_due_schedules(
         )
         for s, scheduled_for in due
     ]
+    return MaintenanceDueListResponse(items=items, total=len(items), offset=0, limit=len(items))
 
 
 @router.post(
