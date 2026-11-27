@@ -2742,6 +2742,9 @@ async def replace_position_resource(
             status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.position_not_found", locale=get_locale())
         )
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+    owning_boq = await service.boq_repo.get_by_id(existing.boq_id)
+    if owning_boq is not None:
+        await verify_project_access(owning_boq.project_id, str(user_id), session)
     await service._ensure_boq_writable(existing.boq_id)
     meta = dict(existing.metadata_) if isinstance(existing.metadata_, dict) else {}
     rows = [dict(r) if isinstance(r, dict) else {} for r in (meta.get("resources") or [])]

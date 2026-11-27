@@ -129,15 +129,23 @@ class TestTheCurrencyRegistryIsStandardLibraryOnly:
         assert foreign == [], f"the registry dragged in non-stdlib modules: {foreign}"
 
     def test_the_two_validator_modules_import_only_the_registry_from_core(self) -> None:
-        """Neither may reach ``app.core.money``: that is the module with the ORM in it."""
+        """Neither may reach ``app.core.money``: that is the module with the ORM in it.
+
+        ``app.core.cost_types`` is the second neutral registry: the cost type vocabulary,
+        asserted standard-library only just below.
+        """
+        registries = {"app.core.currency_registry", "app.core.cost_types"}
         for module in ("procurement", "subcontractors"):
             imported = _imported_modules(BACKEND / "app" / "modules" / module / "validators.py")
             foreign = {
-                name
-                for name in imported
-                if name.split(".")[0] not in sys.stdlib_module_names and name != "app.core.currency_registry"
+                name for name in imported if name.split(".")[0] not in sys.stdlib_module_names and name not in registries
             }
             assert foreign == set(), f"{module} imports outside the standard library: {sorted(foreign)}"
+
+    def test_the_cost_type_registry_is_standard_library_only(self) -> None:
+        imported = _imported_modules(BACKEND / "app" / "core" / "cost_types.py")
+        foreign = {name for name in imported if name.split(".")[0] not in sys.stdlib_module_names}
+        assert foreign == set(), f"cost_types imports outside the standard library: {sorted(foreign)}"
 
 
 # ── procurement: the purchase order states its own currency ─────────────────

@@ -29332,6 +29332,7 @@
         "change_review_models.py",
         "change_review_router.py",
         "change_review_schemas.py",
+        "composition_check.py",
         "copilot_models.py",
         "copilot_schemas.py",
         "copilot_service.py",
@@ -29383,6 +29384,7 @@
         "repository.py",
         "resource_basis.py",
         "resource_norms.py",
+        "resource_replace.py",
         "resource_review.py",
         "resource_review_router.py",
         "resource_scaling.py",
@@ -30604,6 +30606,13 @@
         },
         {
           "method": "GET",
+          "path": "/positions/{position_id}/composition/",
+          "handler": "inspect_position_composition",
+          "response_model": "PositionComposition",
+          "request_schema": "BOQService"
+        },
+        {
+          "method": "GET",
           "path": "/positions/{position_id}",
           "handler": "get_position",
           "response_model": "PositionResponse",
@@ -30643,6 +30652,13 @@
           "handler": "restore_position_field",
           "response_model": "RestoreFieldResponse",
           "request_schema": "RestoreFieldRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/positions/{position_id}/resources/{resource_idx}/replace/",
+          "handler": "replace_position_resource",
+          "response_model": "PositionResponse",
+          "request_schema": "ResourceReplaceBody"
         },
         {
           "method": "PATCH",
@@ -35970,6 +35986,68 @@
             {
               "name": "position_ids",
               "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "CompositionComponent",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One resource row of a position and what is wrong with it.",
+          "fields": [
+            {
+              "name": "index",
+              "type": "int"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "str"
+            },
+            {
+              "name": "unit_rate",
+              "type": "str"
+            },
+            {
+              "name": "issues",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PositionComposition",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Stored unit rate of a position against the rate its resource rows derive.",
+          "fields": [
+            {
+              "name": "stored_unit_rate",
+              "type": "str"
+            },
+            {
+              "name": "derived_unit_rate",
+              "type": "str"
+            },
+            {
+              "name": "delta",
+              "type": "str"
+            },
+            {
+              "name": "coherent",
+              "type": "bool"
+            },
+            {
+              "name": "fx_missing",
+              "type": "list[str]"
+            },
+            {
+              "name": "components",
+              "type": "list[CompositionComponent]"
             }
           ]
         },
@@ -49613,6 +49691,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "allocations.py",
         "budget_delta_repair.py",
         "data_paths.py",
         "events.py",
@@ -49817,6 +49896,12 @@
             },
             {
               "name": "linked_rfi_ids",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "commitment_allocations",
               "annotation": "Mapped[list | None]",
               "sql_type": "JSON",
               "nullable": true
@@ -50252,6 +50337,27 @@
           ]
         },
         {
+          "class_name": "CommitmentAllocation",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The part of a change order that raises one purchase order or subcontract agreement.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "Literal['purchase_order', 'subcontract']"
+            },
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "amount",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "ChangeOrderUpdate",
           "bases": [
             "BaseModel"
@@ -50298,6 +50404,10 @@
             {
               "name": "linked_rfi_ids",
               "type": "list[UUID] | None"
+            },
+            {
+              "name": "commitment_allocations",
+              "type": "list[CommitmentAllocation] | None"
             },
             {
               "name": "ball_in_court",
@@ -50525,6 +50635,10 @@
             {
               "name": "linked_rfi_ids",
               "type": "list[str]"
+            },
+            {
+              "name": "commitment_allocations",
+              "type": "list[dict[str, str]]"
             },
             {
               "name": "current_approval_step",
@@ -84682,6 +84796,7 @@
         "cwicr_v3_catalogue.py",
         "data_paths.py",
         "events.py",
+        "from_position.py",
         "hazards.py",
         "intelligence.py",
         "list_projection.py",
@@ -85108,6 +85223,20 @@
           "handler": "create_cost_item",
           "response_model": "CostItemResponse",
           "request_schema": "CostItemCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/from-boq-position/{position_id}/",
+          "handler": "create_cost_item_from_boq_position",
+          "response_model": "CostItemResponse",
+          "request_schema": "CostItemFromPositionRequest | None"
+        },
+        {
+          "method": "PUT",
+          "path": "/from-boq-position/{cost_item_id}/",
+          "handler": "update_cost_item_from_boq_position",
+          "response_model": "CostItemResponse",
+          "request_schema": "CostItemRefreshRequest"
         },
         {
           "method": "GET",
@@ -144821,6 +144950,24 @@
               "nullable": true
             },
             {
+              "name": "released_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "released_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "released_export_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "currency_code",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -144977,6 +145124,12 @@
             },
             {
               "name": "contract_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "po_line_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
@@ -145435,7 +145588,7 @@
           "method": "GET",
           "path": "/commitments/",
           "handler": "list_invoice_commitments",
-          "response_model": "list[CommitmentResponse]",
+          "response_model": "CommitmentListResponse",
           "request_schema": "None"
         },
         {
@@ -145868,6 +146021,10 @@
               "type": "UUID | None"
             },
             {
+              "name": "po_line_id",
+              "type": "UUID | None"
+            },
+            {
               "name": "sort_order",
               "type": "int"
             },
@@ -146117,6 +146274,11 @@
               "default": "None"
             },
             {
+              "name": "po_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "sort_order",
               "type": "int",
               "default": "0"
@@ -146234,6 +146396,26 @@
               "default": "None"
             },
             {
+              "name": "released_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "released_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "released_export_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "release_overdue",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "currency_code",
               "type": "str",
               "default": "''"
@@ -146302,6 +146484,24 @@
           ]
         },
         {
+          "class_name": "InvoicePostingLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One invoice line as the posting check reads it.",
+          "fields": [
+            {
+              "name": "po_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "amount",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "InvoicePostingCheckRequest",
           "bases": [
             "BaseModel"
@@ -146366,6 +146566,10 @@
               "name": "subcontract_agreement_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "lines",
+              "type": "list[InvoicePostingLine]"
             }
           ]
         },
@@ -146437,6 +146641,32 @@
           ]
         },
         {
+          "class_name": "CommitmentListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The orders and agreements an invoice may bill, in the page envelope.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[CommitmentResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
           "class_name": "InvoicePostingCheckResponse",
           "bases": [
             "BaseModel"
@@ -146452,6 +146682,10 @@
               "name": "summary",
               "type": "dict[str, str] | None",
               "default": "None"
+            },
+            {
+              "name": "po_lines",
+              "type": "list[dict[str, str | None]]"
             },
             {
               "name": "blocking",
@@ -345745,10 +345979,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 299,
+      "ts_files": 302,
       "css_files": 0,
-      "test_files": 147,
-      "total_files": 299
+      "test_files": 148,
+      "total_files": 302
     },
     {
       "name": "buyer-portal",
@@ -345822,10 +346056,10 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 17,
+      "ts_files": 19,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 17
+      "test_files": 10,
+      "total_files": 19
     },
     {
       "name": "china-tax",
@@ -349442,13 +349676,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11608,
+    "total_columns": 11613,
     "total_relationships": 264,
-    "total_routes": 5623,
-    "total_schemas": 5257,
-    "total_python_files": 4058,
+    "total_routes": 5627,
+    "total_schemas": 5262,
+    "total_python_files": 4062,
     "frontend_features": 254,
-    "frontend_ts_files": 4605,
+    "frontend_ts_files": 4610,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
