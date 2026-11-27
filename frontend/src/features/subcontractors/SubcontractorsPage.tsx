@@ -59,6 +59,7 @@ import { RatingStars } from './RatingStars';
 import { ScorecardTile } from './ScorecardTile';
 import { LienWaiverPanel } from './LienWaiverPanel';
 import { AgreementDocumentsPanel } from './AgreementDocumentsPanel';
+import { CertificateReview } from './CertificateReview';
 import { DocumentPolicyPanel } from './DocumentPolicyPanel';
 import { AwardEligibilityBanner } from './AwardEligibilityBanner';
 import { InsuranceStatusPanel } from './InsuranceStatusPanel';
@@ -1197,33 +1198,10 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                     defaultValue: 'Certificates',
                   })}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {(certsQ.data ?? []).map((c) => {
-                    const today = new Date().toISOString().slice(0, 10);
-                    const isExpired = !!c.valid_until && c.valid_until < today;
-                    const expiresSoon =
-                      !!c.valid_until &&
-                      !isExpired &&
-                      c.valid_until <=
-                        new Date(Date.now() + 60 * 86_400_000)
-                          .toISOString()
-                          .slice(0, 10);
-                    return (
-                      <Badge
-                        key={c.id}
-                        variant={
-                          c.revoked || isExpired
-                            ? 'error'
-                            : expiresSoon
-                              ? 'warning'
-                              : 'success'
-                        }
-                      >
-                        {certTypeLabel(c.cert_type, t)}
-                        {c.valid_until ? ` · ${c.valid_until}` : ''}
-                      </Badge>
-                    );
-                  })}
+                <div className="flex flex-col gap-2">
+                  {(certsQ.data ?? []).map((c) => (
+                    <CertificateReview key={c.id} cert={c} label={certTypeLabel(c.cert_type, t)} />
+                  ))}
                 </div>
               </div>
             )}

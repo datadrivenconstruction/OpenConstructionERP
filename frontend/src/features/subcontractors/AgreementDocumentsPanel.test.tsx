@@ -67,7 +67,7 @@ describe('AgreementDocumentsPanel', () => {
     fireEvent.change(screen.getByTestId('doc-file'), { target: { files: [file] } });
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const [url, init] = fetchMock.mock.calls[0] ?? [];
-    expect(String(url)).toContain('/agreements/ag-1/documents');
+    expect(String(url)).toContain('/agreements/ag-1/documents/upload');
     const body = (init as RequestInit).body as FormData;
     expect(body.get('doc_role')).toBe('insurance');
     expect((body.get('file') as File).name).toBe('cert.pdf');

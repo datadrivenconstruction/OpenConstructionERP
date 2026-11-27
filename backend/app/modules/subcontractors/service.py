@@ -40,6 +40,7 @@ from app.modules.subcontractors.models import (
     PrequalificationApplication,
     RetentionLedger,
     SubcontractAgreement,
+    SubcontractDocument,
     Subcontractor,
     SubcontractorContact,
     SubcontractorRating,
@@ -1241,8 +1242,55 @@ class SubcontractorService(ProgressBillingMixin):
             new_valid = fields.get("valid_until", entity.valid_until)
             new_revoked = fields.get("revoked", entity.revoked)
             fields["status"] = derive_cert_status(new_valid, new_revoked, today=today)
+            # A verification vouches for one document and one expiry; changing either needs a new review.
+            changed = any(
+                k in fields and fields[k] != getattr(entity, k) for k in ("document_url", "valid_until", "cert_type")
+            )
+            if changed and (entity.metadata_ or {}).get("review"):
+                fields["metadata_"] = {k: v for k, v in entity.metadata_.items() if k != "review"}
             await self.certs.update_fields(certificate_id, **fields)
             await self.session.refresh(entity)
+        return entity
+
+    async def verify_certificate(
+        self, certificate_id: uuid.UUID, user_id: str, *, today: date | None = None
+    ) -> Certificate:
+        """Mark a certificate as checked by a person; refuses a lapsed or revoked one."""
+        entity = await self.certs.get_by_id(certificate_id)
+        if entity is None:
+            raise HTTPException(status_code=404, detail="Certificate not found")
+        if derive_cert_status(entity.valid_until, entity.revoked, today=today) != "valid":
+            raise HTTPException(status_code=409, detail="An expired or revoked certificate cannot be verified")
+        meta = dict(entity.metadata_ or {})
+        meta["review"] = {"verified_at": datetime.now(UTC).isoformat(), "verified_by": user_id}
+        entity.metadata_ = meta
+        await self.session.flush()
+        return entity
+
+    async def unverify_certificate(self, certificate_id: uuid.UUID) -> Certificate:
+        entity = await self.certs.get_by_id(certificate_id)
+        if entity is None:
+            raise HTTPException(status_code=404, detail="Certificate not found")
+        entity.metadata_ = {k: v for k, v in (entity.metadata_ or {}).items() if k != "review"}
+        await self.session.flush()
+        return entity
+
+    async def record_certificate_from_document(
+        self, agreement: SubcontractAgreement, document: SubcontractDocument
+    ) -> Certificate:
+        """Register an uploaded insurance document on the subcontractor, awaiting review."""
+        entity = Certificate(
+            subcontractor_id=agreement.subcontractor_id,
+            cert_type="insurance",
+            issue_date=document.signed_date,
+            valid_until=document.valid_until,
+            document_url=document.document_url,
+            status=derive_cert_status(document.valid_until, revoked=False),
+            revoked=False,
+            notes=document.notes,
+            metadata_={"agreement_id": str(agreement.id), "source_document_id": str(document.id)},
+        )
+        await self.certs.create(entity)
         return entity
 
     async def delete_certificate(self, certificate_id: uuid.UUID) -> None:
