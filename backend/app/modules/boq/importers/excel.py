@@ -44,6 +44,7 @@ from app.modules.boq.importers._encoding import (
     decode_text_bytes,
     dot_groups_thousands,
     fold_width,
+    is_price_placeholder,
     parse_numeric_cell,
     safe_float,
     wide_bom_codec,
@@ -2587,6 +2588,27 @@ def _rows_to_positions(
                         "row": row_idx,
                         "ordinal": ordinal,
                         "error": f"Invalid unit_rate at row {row_idx}: {r_err}",
+                    }
+                )
+                continue
+            bad_cell = next(
+                (
+                    (field, err)
+                    for field, err, raw in (
+                        ("quantity", q_err, quantity_raw),
+                        ("unit_rate", r_err, unit_rate_raw),
+                    )
+                    if err is not None and not is_price_placeholder(raw)
+                ),
+                None,
+            )
+            if bad_cell is not None:
+                result.errors.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "column": bad_cell[0],
+                        "error": f"Invalid {bad_cell[0]} at row {row_idx}: {bad_cell[1]}",
                     }
                 )
                 continue
