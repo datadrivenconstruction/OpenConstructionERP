@@ -7,7 +7,7 @@ Additive only: the column carries a server default, so the boot heal and
 ``alembic upgrade`` agree.
 
 Revision ID: vsub01_submittal_distribution
-Revises: vdoc01_ncr_linked_documents
+Revises: vct01_cost_type_budget_lines
 Create Date: 2026-11-27
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vsub01_submittal_distribution"
-down_revision: str | Sequence[str] | None = "vdoc01_ncr_linked_documents"
+down_revision: str | Sequence[str] | None = "vct01_cost_type_budget_lines"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
