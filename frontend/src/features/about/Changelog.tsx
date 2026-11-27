@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.5.0',
+    date: '2026-11-27',
+    tag: 'NEW',
+    summary:
+      'Budgets split by cost type, orders book to a budget line, and invoices are checked against their commitment line by line. BOQ positions save as cost items, requisitions route by value, and actions a role cannot use stay visible with the reason.',
+  },
+  {
     version: '20.4.1',
     date: '2026-11-26',
     tag: 'NEW',

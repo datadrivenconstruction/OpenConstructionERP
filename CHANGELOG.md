@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.5.0] - 2026-11-27
+
+Budgets split by cost type, orders and invoices tied to the budget line and the commitment they spend, and every role sees what it cannot do and why.
+
+### Added
+
+- Budget, committed, actual and forecast per cost code and per cost type (labour, material, equipment, subcontract, other), with a By cost type grid, and a budget line picker on purchase order lines and subcontract agreements; validation rules flag unsplit positions and unknown types.
+- Supplier invoices are weighed against the order or subcontract they bill: approval is refused above the open commitment, in another currency, for a duplicate number or a payment dated before the invoice; invoices can link a subcontract agreement and carry a scheduled payment date.
+- Invoice lines bill named order lines, with scheduled value, previously invoiced, this invoice, percent complete and balance to complete per line; change orders split their amount across several orders or subcontracts, and only each share raises its commitment.
+- Approved invoices are marked once as released to accounting by the booking export, with who and when, and a rule flags approved invoices past their payment date that were never released.
+- Save a BOQ position with its resources as a cost item, refresh it later, check its composition against the stored rate, and replace a single resource by a ranked database match after confirming it.
+- Requisitions route by value: from each amount you set, named people or anyone holding a role sign after the requisition's own approvers, and the requester can never approve their own.
+- Unavailable actions stay visible and disabled with the role that is needed, across finance, procurement, contracts, assemblies, site logistics, survey, clash detection and more; read-only previews need only the read permission.
+- Data paths open as a module view, a field trace and a platform map by project phase, with the paths of the remaining modules declared and every text translated.
+- Insert an assembly into an existing BOQ position with a preview, a quantity factor, replace or add, and undo.
+- Monte Carlo takes a confidence level from P50 to P99 and a low and high range for single-figure risks, and the last run is restored.
+- Submittals: reassign ball in court, keep a distribution list, close decided items, and three validation rules for ball in court, distribution and project access.
+- Subcontractor insurance certificates show their review state and can be verified, withdrawn and opened.
+- Validation rules for BIM elements without a category and models without quantities.
+- User guide pages in English, German and Russian for cost types, commitments, submittals, data paths and roles.
+
+### Changed
+
+- CAD conversions queue behind a single converter and show a Waiting for the converter stage; failures explain themselves, and a real IFC file without the DDC converter ends as Needs Converter instead of a text-parser result.
+- Import buttons use the arrow into the tray and export buttons the arrow out, on 140 screens.
+- The browser design editor opens as soon as its install finishes, with the download progress in the header.
+
+### Fixed
+
+- Moving a BOQ section or line keeps the new order instead of falling back.
+- The photo drawer keeps the chosen category and album, and viewers see disabled controls with the reason.
+- Insurance document upload on a subcontract agreement saves.
+- Project members, not only the owner, can insert assemblies into positions and read the WBS.
+- Amounts inside validation messages follow the reader's language.
+- Budgets generated before this release are re-split by cost type on the next generation.
+
 ## [20.4.1] - 2026-11-26
 
 Cost control reads deeper: a CVR report rolls up the WBS tree, claims and pay applications get a stage grid, and every commitment opens to the orders and subcontract lines behind it.
