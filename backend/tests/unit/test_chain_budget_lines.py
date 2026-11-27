@@ -220,7 +220,7 @@ async def test_generate_budget_stamps_position_native_currency(monkeypatch: pyte
 
 
 def _budget_line() -> SimpleNamespace:
-    return SimpleNamespace(id=uuid.uuid4(), earned_amount=None)
+    return SimpleNamespace(id=uuid.uuid4(), earned_amount=None, metadata_={})
 
 
 @pytest.mark.asyncio
