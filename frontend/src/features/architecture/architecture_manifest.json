@@ -11,6 +11,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -1254,6 +1255,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "demo.py",
         "events.py",
         "exports/__init__.py",
@@ -2456,6 +2458,7 @@
       "files": [
         "__init__.py",
         "ai_client.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -3432,6 +3435,7 @@
         "catalogue_logic.py",
         "catalogue_router.py",
         "catalogue_service.py",
+        "data_paths.py",
         "events.py",
         "feedback_summary.py",
         "llm.py",
@@ -4899,6 +4903,7 @@
       "files": [
         "__init__.py",
         "benchmarks.py",
+        "data_paths.py",
         "events.py",
         "extractors.py",
         "intake.py",
@@ -7572,6 +7577,7 @@
       "files": [
         "__init__.py",
         "allowance_math.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -8057,6 +8063,7 @@
       "files": [
         "__init__.py",
         "analytics.py",
+        "data_paths.py",
         "delegation_engine.py",
         "escalation.py",
         "escalation_service.py",
@@ -9534,6 +9541,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -9566,6 +9574,7 @@
       "files": [
         "__init__.py",
         "component_tax.py",
+        "data_paths.py",
         "events.py",
         "formula_engine.py",
         "fx_bridge.py",
@@ -9982,6 +9991,12 @@
           "path": "/{assembly_id}/apply-to-boq/",
           "handler": "apply_to_boq",
           "request_schema": "ApplyToBOQRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{assembly_id}/apply-to-position/",
+          "handler": "apply_to_position",
+          "request_schema": "ApplyToPositionRequest"
         },
         {
           "method": "GET",
@@ -10748,6 +10763,45 @@
           ]
         },
         {
+          "class_name": "ApplyToPositionRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Request body for pricing an existing BOQ position from an assembly.\n\n``factor`` is how many assembly units one unit of the position takes (1 when\nboth share a unit; 0.0929 to price a square-foot line from a square-metre\nassembly). ``replace`` swaps the position's resources for the assembly's,\n``append`` adds them. ``dry_run`` returns the result without saving it.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "factor",
+              "type": "float"
+            },
+            {
+              "name": "mode",
+              "type": "Literal['replace', 'append']",
+              "default": "'replace'"
+            },
+            {
+              "name": "region",
+              "type": "str | None"
+            },
+            {
+              "name": "parameter_values",
+              "type": "dict[str, float]"
+            },
+            {
+              "name": "dry_run",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "version",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
           "class_name": "ParameterValidationResponse",
           "bases": [
             "BaseModel"
@@ -11303,6 +11357,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "discovery.py",
         "intl.py",
         "lifecycle.py",
@@ -12330,6 +12385,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "graph_scope.py",
         "manifest.py",
         "permissions.py",
@@ -12475,6 +12531,7 @@
       "files": [
         "__init__.py",
         "bcf_xml.py",
+        "data_paths.py",
         "import_service.py",
         "manifest.py",
         "messages/__init__.py",
@@ -13524,6 +13581,7 @@
       "files": [
         "__init__.py",
         "alert_dsl.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "kpi_spec.py",
@@ -17828,6 +17886,7 @@
       "module_category": "integration",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "feeds.py",
         "formats.py",
         "manifest.py",
@@ -17965,6 +18024,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "exports.py",
         "logic.py",
         "manifest.py",
@@ -19280,6 +19340,7 @@
         "award_contract.py",
         "award_route.py",
         "award_selection.py",
+        "data_paths.py",
         "events.py",
         "legacy_adapter.py",
         "legacy_copy.py",
@@ -23887,6 +23948,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "logic.py",
         "manifest.py",
         "models.py",
@@ -24411,6 +24473,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "dataframe_store.py",
         "ddc_extras.py",
         "events.py",
@@ -29121,6 +29184,7 @@
       "files": [
         "__init__.py",
         "container.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py",
@@ -36031,6 +36095,7 @@
         "__init__.py",
         "classification_mapper.py",
         "crs_detector.py",
+        "data_paths.py",
         "manifest.py"
       ],
       "manifest": {
@@ -36057,6 +36122,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "logic.py",
         "manifest.py",
         "models.py",
@@ -37285,6 +37351,7 @@
       "files": [
         "__init__.py",
         "csrd.py",
+        "data_paths.py",
         "lcc.py",
         "lifecycle.py",
         "lifecycle_router.py",
@@ -42203,6 +42270,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "fx_view.py",
         "manifest.py",
         "models.py",
@@ -42806,6 +42874,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -45848,6 +45917,7 @@
       "files": [
         "__init__.py",
         "certpay_math.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -47642,6 +47712,7 @@
         "clarifier.py",
         "coordination.py",
         "cycle_time.py",
+        "data_paths.py",
         "decision_impact.py",
         "delay_risk.py",
         "dispute_risk.py",
@@ -51139,6 +51210,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "fapiao.py",
         "fees.py",
         "manifest.py",
@@ -51392,6 +51464,7 @@
       "module_category": "controls",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "evidence_pack.py",
         "export_routes.py",
         "manifest.py",
@@ -51669,6 +51742,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "geometry.py",
         "manifest.py",
@@ -54526,6 +54600,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -54893,6 +54968,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "permissions.py",
         "router.py",
@@ -55107,6 +55183,7 @@
       "module_category": "infra",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py"
@@ -55183,6 +55260,7 @@
         "checklist_templates.py",
         "completeness.py",
         "cover_pdf.py",
+        "data_paths.py",
         "dossier.py",
         "dossier_pdf.py",
         "dossier_service.py",
@@ -56762,6 +56840,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -57340,6 +57419,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -57599,6 +57679,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -58718,6 +58799,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "drawdown.py",
         "errors.py",
         "evaluator.py",
@@ -61305,6 +61387,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "messages/__init__.py",
@@ -61432,6 +61515,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -61847,6 +61931,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -63200,6 +63285,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "router.py",
@@ -67661,6 +67747,7 @@
       "files": [
         "__init__.py",
         "bridge.py",
+        "data_paths.py",
         "lookup.py",
         "manifest.py",
         "models.py",
@@ -76673,6 +76760,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "intl.py",
@@ -77185,6 +77273,7 @@
       "files": [
         "__init__.py",
         "bench_math.py",
+        "data_paths.py",
         "demo.py",
         "manifest.py",
         "models.py",
@@ -77749,6 +77838,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -78650,6 +78740,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "matcher.py",
@@ -79762,6 +79853,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "engine.py",
         "export.py",
         "manifest.py",
@@ -80132,6 +80224,7 @@
         "__init__.py",
         "apportionment.py",
         "back_charge.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -87084,6 +87177,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -88181,6 +88275,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -92598,6 +92693,7 @@
       "files": [
         "__init__.py",
         "compute.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -94224,6 +94320,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "datev.py",
         "hooks.py",
         "manifest.py",
@@ -98880,6 +98977,7 @@
         "__init__.py",
         "cad2data_bridge.py",
         "cascade.py",
+        "data_paths.py",
         "duckdb_pool.py",
         "events.py",
         "federation.py",
@@ -100541,6 +100639,7 @@
         "manifest.py",
         "parties.py",
         "permissions.py",
+        "phases.py",
         "registry.py",
         "router.py",
         "schemas.py",
@@ -100822,6 +100921,11 @@
               "type": "str"
             },
             {
+              "name": "edge",
+              "type": "str",
+              "description": "i18n key of the short label drawn on the link"
+            },
+            {
               "name": "live",
               "type": "Live"
             }
@@ -100962,6 +101066,11 @@
               "type": "list[str]"
             },
             {
+              "name": "phase",
+              "type": "str",
+              "default": "'platform'"
+            },
+            {
               "name": "project_id",
               "type": "uuid.UUID | None",
               "default": "None"
@@ -101019,6 +101128,11 @@
             {
               "name": "category",
               "type": "str"
+            },
+            {
+              "name": "phase",
+              "type": "str",
+              "default": "'platform'"
             },
             {
               "name": "declared",
@@ -101124,6 +101238,11 @@
             {
               "name": "health",
               "type": "list[HealthItem]"
+            },
+            {
+              "name": "phases",
+              "type": "list[str]",
+              "description": "Phase ids in project order, the map's columns"
             },
             {
               "name": "generated_at",
@@ -101520,6 +101639,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "logic.py",
         "manifest.py",
         "permissions.py",
@@ -101729,6 +101849,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "limitation.py",
         "manifest.py",
         "models.py",
@@ -102943,6 +103064,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -106097,6 +106219,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -108634,6 +108757,7 @@
       "files": [
         "__init__.py",
         "comparison.py",
+        "data_paths.py",
         "exporters.py",
         "manifest.py",
         "models.py",
@@ -109840,6 +109964,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "logic.py",
         "manifest.py",
         "models.py",
@@ -111292,6 +111417,7 @@
       "files": [
         "__init__.py",
         "core.py",
+        "data_paths.py",
         "evaluation.py",
         "manifest.py",
         "models.py",
@@ -111754,6 +111880,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "documents.py",
         "kinds.py",
         "layout_router.py",
@@ -112861,6 +112988,7 @@
         "__init__.py",
         "activity_models.py",
         "activity_service.py",
+        "data_paths.py",
         "documents_seed.py",
         "events.py",
         "folder_permissions_models.py",
@@ -115441,6 +115569,7 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "entity_diff.py",
         "geometry.py",
         "manifest.py",
@@ -116574,6 +116703,7 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "ddc_dwg_parser.py",
         "dxf_processor.py",
         "events.py",
@@ -118043,6 +118173,7 @@
         "aliases/router.py",
         "aliases/schemas.py",
         "aliases/service.py",
+        "data_paths.py",
         "engine/__init__.py",
         "engine/api.py",
         "engine/executor.py",
@@ -120227,6 +120358,7 @@
         "__init__.py",
         "calc.py",
         "classification.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -121702,6 +121834,7 @@
         "__init__.py",
         "bank.py",
         "cii.py",
+        "data_paths.py",
         "inbound.py",
         "manifest.py",
         "pdf_embed.py",
@@ -122111,6 +122244,7 @@
         "adapters.py",
         "chain.py",
         "consolidation.py",
+        "data_paths.py",
         "irp.py",
         "lifecycle.py",
         "manifest.py",
@@ -123749,6 +123883,7 @@
         "checks.py",
         "client.py",
         "codes.py",
+        "data_paths.py",
         "der.py",
         "manifest.py",
         "serialization.py",
@@ -123786,6 +123921,7 @@
         "builder.py",
         "client.py",
         "crypto.py",
+        "data_paths.py",
         "fa3.py",
         "facts.py",
         "jpk.py",
@@ -123832,6 +123968,7 @@
         "codes.py",
         "csr.py",
         "data.py",
+        "data_paths.py",
         "hashing.py",
         "manifest.py",
         "models.py",
@@ -124398,6 +124535,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -126275,6 +126413,7 @@
         "__init__.py",
         "cost_board.py",
         "cost_board_service.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -127376,6 +127515,13 @@
         {
           "method": "GET",
           "path": "/maintenance-schedules/due-within",
+          "handler": "list_due_schedules",
+          "response_model": "list[MaintenanceDueItem]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/maintenance-schedules/due-within/work-orders",
           "handler": "generate_due_work_orders",
           "response_model": "list[MaintenanceWorkOrderResponse]",
           "request_schema": "None"
@@ -128488,6 +128634,36 @@
             {
               "name": "currency",
               "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "MaintenanceDueItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A schedule that is due within the lookahead and has no open work order yet.",
+          "fields": [
+            {
+              "name": "schedule_id",
+              "type": "UUID"
+            },
+            {
+              "name": "equipment_id",
+              "type": "UUID"
+            },
+            {
+              "name": "trigger_type",
+              "type": "str"
+            },
+            {
+              "name": "scheduled_for",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -129691,6 +129867,7 @@
         "actions/schedule_shift.py",
         "actions/service.py",
         "actions/task_create.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -131406,6 +131583,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "engine.py",
         "fixtures.py",
         "manifest.py",
@@ -133369,6 +133547,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "derivation.py",
         "manifest.py",
         "models.py",
@@ -134326,6 +134505,7 @@
       "module_category": "estimation",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "kpis.py",
         "manifest.py",
         "models.py",
@@ -134827,6 +135007,7 @@
       "files": [
         "__init__.py",
         "composition.py",
+        "data_paths.py",
         "manifest.py",
         "permissions.py",
         "router.py",
@@ -135005,6 +135186,7 @@
       "files": [
         "__init__.py",
         "capture_age.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "migrations/__init__.py",
@@ -136603,6 +136785,7 @@
         "clock_seed.py",
         "clock_service.py",
         "counted.py",
+        "data_paths.py",
         "events.py",
         "field_time_math.py",
         "geofence_math.py",
@@ -138305,6 +138488,7 @@
       "files": [
         "__init__.py",
         "builtin_templates.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -140381,6 +140565,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -140881,6 +141066,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -142508,6 +142694,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "extractors.py",
         "manifest.py",
@@ -142815,6 +143002,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -144149,6 +144337,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "helpers.py",
         "manifest.py",
         "models.py",
@@ -149142,6 +149331,7 @@
       "module_category": "estimation",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "debrand.py",
         "demo.py",
         "manifest.py",
@@ -150752,6 +150942,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "packs.py",
@@ -156330,6 +156521,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -157536,6 +157728,7 @@
         "consent.py",
         "coord_reconcile.py",
         "coord_transforms.py",
+        "data_paths.py",
         "events.py",
         "geocoder.py",
         "geojson_io.py",
@@ -161246,6 +161439,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "hub.py",
         "manifest.py",
         "router.py"
@@ -161276,6 +161470,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "defaults.py",
         "demo.py",
         "events.py",
@@ -162903,6 +163098,7 @@
       "module_category": "field",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "importer.py",
         "logic.py",
         "manifest.py",
@@ -169008,6 +169204,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "evidence.py",
         "export.py",
@@ -171883,6 +172080,7 @@
       "module_category": "integration",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "normalize.py",
         "permissions.py",
@@ -172093,6 +172291,7 @@
       "module_category": "controls",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "delay_detection.py",
         "eml_parser.py",
         "manifest.py",
@@ -172247,6 +172446,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -172278,6 +172478,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -175027,6 +175228,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -177475,6 +177677,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -177507,6 +177710,7 @@
       "files": [
         "__init__.py",
         "country_rules.py",
+        "data_paths.py",
         "export_profiles.py",
         "manifest.py",
         "models.py",
@@ -178929,6 +179133,7 @@
       "files": [
         "__init__.py",
         "access.py",
+        "data_paths.py",
         "lookup.py",
         "manifest.py",
         "models.py",
@@ -180072,6 +180277,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "logic.py",
         "manifest.py",
         "models.py",
@@ -180479,6 +180685,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -181104,6 +181311,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -182240,6 +182448,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py",
@@ -182448,6 +182657,7 @@
       "files": [
         "__init__.py",
         "analytics.py",
+        "data_paths.py",
         "events.py",
         "excel_import.py",
         "ifc_labels.py",
@@ -185071,6 +185281,7 @@
       "files": [
         "__init__.py",
         "auth.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -185527,6 +185738,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "formula.py",
         "manifest.py",
         "model.py",
@@ -185555,6 +185767,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -186182,6 +186395,7 @@
         "audio_router.py",
         "audio_schemas.py",
         "audio_service.py",
+        "data_paths.py",
         "ics.py",
         "intl.py",
         "logic.py",
@@ -188035,6 +188249,7 @@
         "__init__.py",
         "bases.py",
         "cascade.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "pdf_export.py",
@@ -189316,6 +189531,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "service.py"
@@ -189397,6 +189613,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -191831,6 +192048,7 @@
       "module_category": "project_controls",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -195251,6 +195469,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "expand_math.py",
         "manifest.py",
         "material_match.py",
@@ -196033,6 +196252,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "export.py",
         "manifest.py",
         "permissions.py",
@@ -196646,6 +196866,7 @@
         "_wave23_subscribers.py",
         "_wave4_subscribers.py",
         "_wave5_cross_module_subscribers.py",
+        "data_paths.py",
         "dispatcher.py",
         "email_render.py",
         "events.py",
@@ -197346,6 +197567,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "pack.py",
@@ -198817,6 +199039,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "handlers.py",
         "manifest.py",
         "router.py",
@@ -199025,6 +199248,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py",
@@ -199638,6 +199862,7 @@
       "module_category": "estimation",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "engine.py",
         "manifest.py",
         "models.py",
@@ -201845,6 +202070,7 @@
       "files": [
         "__init__.py",
         "billing.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -203059,6 +203285,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -204231,6 +204458,7 @@
         "catalogue.py",
         "clock.py",
         "conditions.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -206644,6 +206872,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "normalize.py",
@@ -206999,6 +207228,7 @@
       "module_category": "field",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "jobs.py",
         "logic.py",
@@ -207366,6 +207596,13 @@
           "request_schema": "PhotoPatch"
         },
         {
+          "method": "PUT",
+          "path": "/{photo_id}/albums/",
+          "handler": "set_photo_albums",
+          "response_model": "PhotoOut",
+          "request_schema": "PhotoAlbumsIn"
+        },
+        {
           "method": "DELETE",
           "path": "/{photo_id}/",
           "handler": "delete_photo",
@@ -207596,6 +207833,10 @@
             {
               "name": "links",
               "type": "list[PhotoLinkOut]"
+            },
+            {
+              "name": "album_ids",
+              "type": "list[uuid.UUID]"
             }
           ]
         },
@@ -207884,6 +208125,19 @@
               "name": "limit",
               "type": "int",
               "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "PhotoAlbumsIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The albums one photo belongs to, replacing its current set; empty takes it out of all.",
+          "fields": [
+            {
+              "name": "album_ids",
+              "type": "list[uuid.UUID]"
             }
           ]
         },
@@ -208293,6 +208547,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "pipeline_nodes.py",
@@ -209021,6 +209276,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -209613,6 +209869,7 @@
         "__init__.py",
         "calc.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -213057,6 +213314,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "deliveries.py",
         "dependencies.py",
         "login_email.py",
@@ -215499,6 +215757,7 @@
       "files": [
         "__init__.py",
         "cpm_logic.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -216101,6 +216360,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "model.py",
         "norm_outturn.py",
@@ -216835,6 +217095,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -217215,6 +217476,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "mapping.py",
         "model.py",
@@ -217243,6 +217505,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "index_math.py",
         "manifest.py",
         "models.py",
@@ -222724,6 +222987,7 @@
         "__init__.py",
         "catalogue.py",
         "commitments.py",
+        "data_paths.py",
         "errors.py",
         "evaluator.py",
         "events.py",
@@ -224842,6 +225106,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "installed.py",
         "manifest.py",
         "models.py",
@@ -225530,6 +225795,7 @@
       "files": [
         "__init__.py",
         "catalogue_math.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -226331,6 +226597,7 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "permissions.py",
         "router.py",
@@ -226551,6 +226818,7 @@
         "catalogue_kinds.py",
         "catalogue_packs.py",
         "catalogue_store.py",
+        "data_paths.py",
         "errors.py",
         "escalation.py",
         "evaluator.py",
@@ -228818,6 +229086,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "data_room.py",
         "errors.py",
         "evidence.py",
@@ -230951,6 +231220,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -231326,6 +231596,7 @@
         "bundle_import.py",
         "country_backfill.py",
         "country_configuration.py",
+        "data_paths.py",
         "facets.py",
         "file_manager_schemas.py",
         "file_manager_service.py",
@@ -234795,6 +235066,7 @@
         "access.py",
         "analytics_service.py",
         "bulk_operations.py",
+        "data_paths.py",
         "document_templates.py",
         "events.py",
         "intl.py",
@@ -247862,6 +248134,7 @@
       "files": [
         "__init__.py",
         "bcf_bridge.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -248817,6 +249090,7 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -252750,6 +253024,7 @@
         "__init__.py",
         "capabilities.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "evaluator.py",
         "events.py",
@@ -255431,6 +255706,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "demo.py",
         "documents.py",
         "extraction.py",
@@ -256050,6 +256326,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -257786,6 +258063,7 @@
       "files": [
         "__init__.py",
         "correlate.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -258143,6 +258421,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "permissions.py",
         "router.py",
@@ -258365,6 +258644,7 @@
         "__init__.py",
         "cron.py",
         "currency_resolver.py",
+        "data_paths.py",
         "exporters.py",
         "intl.py",
         "manifest.py",
@@ -259226,6 +259506,7 @@
       "files": [
         "__init__.py",
         "bim_validator.py",
+        "data_paths.py",
         "evaluator.py",
         "events.py",
         "excel_io.py",
@@ -261061,6 +261342,7 @@
       "files": [
         "__init__.py",
         "aggregate.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -261483,6 +261765,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -264400,6 +264683,7 @@
         "__init__.py",
         "chunk_store.py",
         "chunking.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -264729,6 +265013,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "facet_query.py",
         "manifest.py",
         "models.py",
@@ -265146,6 +265431,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -265857,6 +266143,7 @@
       "files": [
         "__init__.py",
         "approval_subscribers.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "intl.py",
@@ -267253,6 +267540,7 @@
         "boq_resources.py",
         "comparison.py",
         "constants.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -269339,6 +269627,7 @@
       "files": [
         "__init__.py",
         "contingency.py",
+        "data_paths.py",
         "escalation.py",
         "events.py",
         "evidence.py",
@@ -269620,6 +269909,13 @@
           "handler": "simulate_risks",
           "response_model": "RiskSimulationResult",
           "request_schema": "RiskSimulateRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/simulate/last",
+          "handler": "last_simulation",
+          "response_model": "RiskSimulationResult | None",
+          "request_schema": "RiskService"
         },
         {
           "method": "GET",
@@ -270197,6 +270493,18 @@
               "name": "mode",
               "type": "Literal['cost', 'schedule', 'both']",
               "default": "'both'"
+            },
+            {
+              "name": "confidence",
+              "type": "int"
+            },
+            {
+              "name": "range_low_pct",
+              "type": "float"
+            },
+            {
+              "name": "range_high_pct",
+              "type": "float"
             }
           ]
         },
@@ -270272,7 +270580,17 @@
               "default": "None"
             },
             {
+              "name": "p90_cost",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
               "name": "p95_cost",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "target_cost",
               "type": "Decimal | None",
               "default": "None"
             },
@@ -270287,9 +270605,39 @@
               "default": "None"
             },
             {
+              "name": "p90_schedule_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
               "name": "p95_schedule_days",
               "type": "int | None",
               "default": "None"
+            },
+            {
+              "name": "target_schedule_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "confidence",
+              "type": "int",
+              "default": "80"
+            },
+            {
+              "name": "range_low_pct",
+              "type": "float",
+              "default": "0.0"
+            },
+            {
+              "name": "range_high_pct",
+              "type": "float",
+              "default": "0.0"
+            },
+            {
+              "name": "point_estimate_risks",
+              "type": "int",
+              "default": "0"
             },
             {
               "name": "histogram_bins",
@@ -270577,6 +270925,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -271314,6 +271663,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -271346,6 +271696,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "service.py"
@@ -277695,6 +278046,7 @@
         "__init__.py",
         "cpm.py",
         "cpm_report.py",
+        "data_paths.py",
         "delay_engine.py",
         "delay_report.py",
         "delay_service.py",
@@ -283985,6 +284337,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "repository.py",
@@ -284278,6 +284631,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py",
@@ -284490,6 +284844,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -287598,6 +287953,7 @@
       "files": [
         "__init__.py",
         "apportion.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -290524,6 +290880,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -291151,6 +291508,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "ledger.py",
         "manifest.py",
         "models.py",
@@ -292013,6 +292371,7 @@
         "__init__.py",
         "catalogue.py",
         "coverage.py",
+        "data_paths.py",
         "demo.py",
         "demo_plan.py",
         "errors.py",
@@ -295840,6 +296199,7 @@
       "files": [
         "__init__.py",
         "analysis.py",
+        "data_paths.py",
         "events.py",
         "evidence.py",
         "evidence_routes.py",
@@ -298429,6 +298789,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "evaluator.py",
         "events.py",
         "manifest.py",
@@ -299675,6 +300036,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -301212,6 +301574,7 @@
         "analysis.py",
         "authority.py",
         "catalogue.py",
+        "data_paths.py",
         "errors.py",
         "events.py",
         "evidence.py",
@@ -304126,6 +304489,7 @@
         "award_bridge.py",
         "change_chain.py",
         "claim_rules.py",
+        "data_paths.py",
         "demo_insurance.py",
         "events.py",
         "finance_bridge.py",
@@ -309956,6 +310320,7 @@
       "files": [
         "__init__.py",
         "approval_subscribers.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "intl.py",
@@ -310934,6 +311299,7 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "legacy_migration.py",
         "manifest.py",
@@ -326466,6 +326832,7 @@
       "files": [
         "__init__.py",
         "access.py",
+        "data_paths.py",
         "entity_types.py",
         "manifest.py",
         "models.py",
@@ -333424,6 +333791,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "mapping.py",
@@ -333571,6 +333939,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "export_routes.py",
         "intl.py",
         "logic.py",
@@ -334314,6 +334683,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -334345,6 +334715,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py"
@@ -334402,6 +334773,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -334448,6 +334820,7 @@
         "aia_pdf.py",
         "billing_forms.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -334482,6 +334855,7 @@
       "files": [
         "__init__.py",
         "config.py",
+        "data_paths.py",
         "manifest.py",
         "router.py"
       ],
@@ -334526,6 +334900,7 @@
       "files": [
         "__init__.py",
         "avatar.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "oidc.py",
@@ -336757,6 +337132,7 @@
         "adoption_benchmark.py",
         "adoption_checklist.py",
         "adoption_service.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -337291,6 +337667,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "export_routes.py",
         "manifest.py",
         "models.py",
@@ -342312,6 +342689,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "router.py",
         "schemas.py",
@@ -342824,6 +343202,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -343462,6 +343841,7 @@
       "files": [
         "__init__.py",
         "analytics.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -344062,6 +344442,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "demo.py",
         "events.py",
         "exports.py",
@@ -344771,10 +345152,10 @@
     },
     {
       "name": "allowances",
-      "ts_files": 5,
+      "ts_files": 6,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 6
     },
     {
       "name": "analytics",
@@ -344876,10 +345257,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 144,
+      "ts_files": 146,
       "css_files": 0,
-      "test_files": 54,
-      "total_files": 145
+      "test_files": 56,
+      "total_files": 147
     },
     {
       "name": "bim_requirements",
@@ -344897,10 +345278,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 295,
+      "ts_files": 297,
       "css_files": 0,
-      "test_files": 145,
-      "total_files": 295
+      "test_files": 146,
+      "total_files": 297
     },
     {
       "name": "buyer-portal",
@@ -344974,10 +345355,10 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 16,
+      "ts_files": 17,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 16
+      "test_files": 9,
+      "total_files": 17
     },
     {
       "name": "china-tax",
@@ -345198,10 +345579,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 25,
+      "ts_files": 18,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 25
+      "test_files": 5,
+      "total_files": 18
     },
     {
       "name": "data-security",
@@ -345583,10 +345964,10 @@
     },
     {
       "name": "hse_frame",
-      "ts_files": 11,
+      "ts_files": 12,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 11
+      "test_files": 2,
+      "total_files": 12
     },
     {
       "name": "inbound",
@@ -346143,10 +346524,10 @@
     },
     {
       "name": "risk",
-      "ts_files": 13,
+      "ts_files": 14,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 13
+      "test_files": 6,
+      "total_files": 14
     },
     {
       "name": "rom-estimate",
@@ -348595,11 +348976,11 @@
     "total_models": 992,
     "total_columns": 11600,
     "total_relationships": 264,
-    "total_routes": 5613,
-    "total_schemas": 5246,
-    "total_python_files": 3859,
+    "total_routes": 5617,
+    "total_schemas": 5249,
+    "total_python_files": 4055,
     "frontend_features": 254,
-    "frontend_ts_files": 4595,
+    "frontend_ts_files": 4596,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
