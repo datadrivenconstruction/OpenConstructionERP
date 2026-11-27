@@ -49542,6 +49542,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "allocations.py",
         "budget_delta_repair.py",
         "data_paths.py",
         "events.py",
@@ -49746,6 +49747,12 @@
             },
             {
               "name": "linked_rfi_ids",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "commitment_allocations",
               "annotation": "Mapped[list | None]",
               "sql_type": "JSON",
               "nullable": true
@@ -50181,6 +50188,27 @@
           ]
         },
         {
+          "class_name": "CommitmentAllocation",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The part of a change order that raises one purchase order or subcontract agreement.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "Literal['purchase_order', 'subcontract']"
+            },
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "amount",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "ChangeOrderUpdate",
           "bases": [
             "BaseModel"
@@ -50227,6 +50255,10 @@
             {
               "name": "linked_rfi_ids",
               "type": "list[UUID] | None"
+            },
+            {
+              "name": "commitment_allocations",
+              "type": "list[CommitmentAllocation] | None"
             },
             {
               "name": "ball_in_court",
@@ -50454,6 +50486,10 @@
             {
               "name": "linked_rfi_ids",
               "type": "list[str]"
+            },
+            {
+              "name": "commitment_allocations",
+              "type": "list[dict[str, str]]"
             },
             {
               "name": "current_approval_step",
@@ -144606,6 +144642,24 @@
               "nullable": true
             },
             {
+              "name": "released_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "released_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "released_export_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "currency_code",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -144762,6 +144816,12 @@
             },
             {
               "name": "contract_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "po_line_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
@@ -145653,6 +145713,10 @@
               "type": "UUID | None"
             },
             {
+              "name": "po_line_id",
+              "type": "UUID | None"
+            },
+            {
               "name": "sort_order",
               "type": "int"
             },
@@ -145902,6 +145966,11 @@
               "default": "None"
             },
             {
+              "name": "po_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "sort_order",
               "type": "int",
               "default": "0"
@@ -146019,6 +146088,26 @@
               "default": "None"
             },
             {
+              "name": "released_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "released_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "released_export_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "release_overdue",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "currency_code",
               "type": "str",
               "default": "''"
@@ -146087,6 +146176,24 @@
           ]
         },
         {
+          "class_name": "InvoicePostingLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One invoice line as the posting check reads it.",
+          "fields": [
+            {
+              "name": "po_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "amount",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "InvoicePostingCheckRequest",
           "bases": [
             "BaseModel"
@@ -146151,6 +146258,10 @@
               "name": "subcontract_agreement_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "lines",
+              "type": "list[InvoicePostingLine]"
             }
           ]
         },
@@ -146237,6 +146348,10 @@
               "name": "summary",
               "type": "dict[str, str] | None",
               "default": "None"
+            },
+            {
+              "name": "po_lines",
+              "type": "list[dict[str, str | None]]"
             },
             {
               "name": "blocking",
@@ -345247,10 +345362,10 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 16,
+      "ts_files": 18,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 16
+      "test_files": 9,
+      "total_files": 18
     },
     {
       "name": "china-tax",
@@ -348867,13 +348982,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11606,
+    "total_columns": 11611,
     "total_relationships": 264,
     "total_routes": 5615,
-    "total_schemas": 5249,
-    "total_python_files": 3861,
+    "total_schemas": 5251,
+    "total_python_files": 3862,
     "frontend_features": 254,
-    "frontend_ts_files": 4597,
+    "frontend_ts_files": 4599,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

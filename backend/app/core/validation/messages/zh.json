@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "付款计划日期 {scheduled} 早于发票日期 {invoice_date}",
       "suggestion": "请将付款安排在发票日期当天或之后"
+    },
+    "unallocated_change_order": {
+      "fail": "在分配之前不计入 {commitment} 的变更单：{count}",
+      "suggestion": "请分配此变更单：输入所涉及每个订单或分包的份额"
+    },
+    "po_line_within_balance": {
+      "fail": "发票 {invoice} 的行 {line} 超出其剩余余额 {balance} 共 {excess}",
+      "suggestion": "批准一张覆盖超出部分的变更单，或更正该行金额"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "发票 {invoice} 应于 {scheduled} 付款，但尚未交给会计",
+      "suggestion": "将其纳入一次记账导出，或调整计划付款日期"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "变更单 {code} 的分配合计为 {allocated}，而不是其金额 {amount}",
+      "suggestion": "调整分配，使其合计等于变更单金额"
+    },
+    "missing": {
+      "fail": "变更单 {code} 涉及多个承诺（{count}），尚未分配",
+      "suggestion": "请分配此变更单：输入每个订单或分包的金额"
     }
   }
 }

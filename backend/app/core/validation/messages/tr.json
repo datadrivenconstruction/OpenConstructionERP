@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Ödeme {scheduled} tarihine, {invoice_date} fatura tarihinden önceye planlanmış",
       "suggestion": "Ödemeyi fatura tarihinde veya sonrasında planlayın"
+    },
+    "unallocated_change_order": {
+      "fail": "{commitment} üzerinde dağıtılana kadar sayılmayan değişiklik emirleri: {count}",
+      "suggestion": "Bu değişiklik emrini dağıtın: etkilediği her sipariş veya taşeron sözleşmesinin payını girin"
+    },
+    "po_line_within_balance": {
+      "fail": "{invoice} faturasının {line} kalemi kalan {balance} bakiyesini {excess} aşıyor",
+      "suggestion": "Aşımı karşılayan bir değişiklik emrini onaylayın veya kalem tutarını düzeltin"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "{invoice} faturası {scheduled} tarihinde ödenecekti ve muhasebeye aktarılmadı",
+      "suggestion": "Bir muhasebe aktarımına ekleyin veya planlanan ödeme tarihini değiştirin"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "{code} değişiklik emrinin dağılımı {allocated} ediyor, {amount} tutarını değil",
+      "suggestion": "Dağılımı değişiklik emri tutarını verecek şekilde düzeltin"
+    },
+    "missing": {
+      "fail": "{code} değişiklik emri şu kadar taahhüdü etkiliyor: {count} ve dağıtılmadı",
+      "suggestion": "Bu değişiklik emrini dağıtın: her sipariş veya taşeron için tutarı girin"
     }
   }
 }

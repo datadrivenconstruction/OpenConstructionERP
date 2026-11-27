@@ -114,6 +114,8 @@ class InvoiceLineItemCreate(BaseModel):
     # lands where the contract was costed; naming a cost line the schedule line
     # is not on is refused.
     contract_line_id: UUID | None = Field(default=None)
+    # The purchase order line this line bills; must belong to the invoice's order.
+    po_line_id: UUID | None = Field(default=None)
     sort_order: int = Field(default=0, ge=0)
     # EN 16931 per-line VAT. Left unset the exporter falls back to the
     # invoice-level rate, which is only right when every line shares one rate.
@@ -283,6 +285,7 @@ class InvoiceLineItemResponse(BaseModel):
     cost_category: str | None = None
     cost_line_id: UUID | None = None
     contract_line_id: UUID | None = None
+    po_line_id: UUID | None = None
     sort_order: int = 0
     vat_rate: str | None = None
     vat_category: str | None = None
@@ -327,6 +330,12 @@ class InvoiceResponse(BaseModel):
     # Display names of the two people above, filled by the router.
     submitted_by_name: str | None = None
     approved_by_name: str | None = None
+    # When, by whom and in which booking export the invoice went to accounting.
+    released_at: str | None = None
+    released_by: UUID | None = None
+    released_export_id: UUID | None = None
+    # Approved, past its scheduled payment date and not released yet (rule invoice_release.overdue_unreleased).
+    release_overdue: bool = False
     currency_code: str = ""
     amount_subtotal: str = "0"
     tax_amount: str = "0"
@@ -363,6 +372,13 @@ class InvoiceResponse(BaseModel):
         return self
 
 
+class InvoicePostingLine(BaseModel):
+    """One invoice line as the posting check reads it."""
+
+    po_line_id: UUID | None = None
+    amount: str = Field(default="0", max_length=50)
+
+
 class InvoicePostingCheckRequest(BaseModel):
     """An invoice as it is being entered, weighed against its commitment (read-only).
 
@@ -386,6 +402,8 @@ class InvoicePostingCheckRequest(BaseModel):
     amount_total: str | None = Field(default=None, max_length=50)
     purchase_order_id: UUID | None = None
     subcontract_agreement_id: UUID | None = None
+    # The lines as typed; only the order line and amount are read.
+    lines: list[InvoicePostingLine] = Field(default_factory=list, max_length=500)
 
     @field_validator("amount_subtotal", "retention_amount")
     @classmethod
@@ -423,6 +441,8 @@ class InvoicePostingCheckResponse(BaseModel):
     commitment: CommitmentResponse | None = None
     # A completed to date, B retention, A - B, C previously certified, A - B - C, balance to finish.
     summary: dict[str, str] | None = None
+    # The order's schedule of values with this invoice laid over it (purchase orders only).
+    po_lines: list[dict[str, str | None]] = Field(default_factory=list)
     blocking: bool
     report: dict[str, Any]
 

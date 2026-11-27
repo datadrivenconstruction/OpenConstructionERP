@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Le paiement est prévu le {scheduled}, avant la date de facture {invoice_date}",
       "suggestion": "Prévoyez le paiement à la date de facture ou après"
+    },
+    "unallocated_change_order": {
+      "fail": "Avenants non comptés sur {commitment} tant qu'ils ne sont pas répartis : {count}",
+      "suggestion": "Répartissez cet avenant : saisissez la part de chaque commande ou sous-traitance concernée"
+    },
+    "po_line_within_balance": {
+      "fail": "La ligne {line} de la facture {invoice} dépasse de {excess} son reste à réaliser de {balance}",
+      "suggestion": "Approuvez un avenant qui couvre le dépassement, ou corrigez le montant de la ligne"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "La facture {invoice} devait être payée le {scheduled} et n'a pas été transmise à la comptabilité",
+      "suggestion": "Incluez-la dans un export comptable, ou déplacez la date de paiement prévue"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "La répartition de l'avenant {code} totalise {allocated}, et non son montant de {amount}",
+      "suggestion": "Ajustez la répartition pour qu'elle égale le montant de l'avenant"
+    },
+    "missing": {
+      "fail": "L'avenant {code} concerne {count} engagements et n'est pas réparti",
+      "suggestion": "Répartissez cet avenant : saisissez le montant de chaque commande ou sous-traitance"
     }
   }
 }

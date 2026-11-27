@@ -79,6 +79,10 @@ class Invoice(Base):
     submitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     approved_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # Set once, when a booking export first carries the approved invoice to accounting.
+    released_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    released_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    released_export_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     # Phase 2e: money columns back to NUMERIC on PG while staying VARCHAR
     # on SQLite for dev-DB compatibility. Python always sees ``Decimal``.
@@ -119,6 +123,7 @@ class InvoiceLineItem(Base):
     """A single line item within an invoice."""
 
     __tablename__ = "oe_finance_invoice_item"
+    __table_args__ = (Index("ix_finance_invoice_item_po_line", "po_line_id"),)
 
     invoice_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -151,6 +156,8 @@ class InvoiceLineItem(Base):
     # its split when it has one, so a supplier's bill lands where the contract
     # was costed without anyone re-coding it.
     contract_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The purchase order line this supplier invoice line bills.
+    po_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Relationship

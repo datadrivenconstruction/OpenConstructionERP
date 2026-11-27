@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "ادائیگی {scheduled} کے لیے طے ہے، انوائس کی تاریخ {invoice_date} سے پہلے",
       "suggestion": "ادائیگی انوائس کی تاریخ یا اس کے بعد طے کریں"
+    },
+    "unallocated_change_order": {
+      "fail": "{commitment} پر تقسیم تک شمار نہ ہونے والے چینج آرڈرز: {count}",
+      "suggestion": "یہ چینج آرڈر تقسیم کریں: ہر متاثرہ آرڈر یا ذیلی ٹھیکے کا حصہ درج کریں"
+    },
+    "po_line_within_balance": {
+      "fail": "انوائس {invoice} کی لائن {line} باقی بیلنس {balance} سے {excess} زیادہ ہے",
+      "suggestion": "زیادتی پوری کرنے والا چینج آرڈر منظور کریں، یا لائن کی رقم درست کریں"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "انوائس {invoice} کی ادائیگی {scheduled} کو ہونی تھی اور یہ اکاؤنٹنگ کو جاری نہیں ہوا",
+      "suggestion": "اسے بکنگ ایکسپورٹ میں شامل کریں، یا طے شدہ ادائیگی کی تاریخ بدلیں"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "چینج آرڈر {code} کی تقسیم {allocated} بنتی ہے، اس کی رقم {amount} نہیں",
+      "suggestion": "تقسیم کو درست کریں تاکہ چینج آرڈر کی رقم بنے"
+    },
+    "missing": {
+      "fail": "چینج آرڈر {code} اتنی ذمہ داریوں کو چھوتا ہے: {count} اور تقسیم نہیں ہوا",
+      "suggestion": "یہ چینج آرڈر تقسیم کریں: ہر آرڈر یا ذیلی ٹھیکے کی رقم درج کریں"
     }
   }
 }

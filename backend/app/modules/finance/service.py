@@ -35,6 +35,8 @@ from app.modules.finance.commitment import (
     invoice_agreement_link,
     list_commitments,
     load_commitment,
+    po_line_owners,
+    po_line_statement,
 )
 from app.modules.finance.models import (
     EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS,
@@ -576,6 +578,7 @@ def _line_item_from(
         cost_category=item_data.cost_category,
         cost_line_id=getattr(item_data, "cost_line_id", None),
         contract_line_id=getattr(item_data, "contract_line_id", None),
+        po_line_id=getattr(item_data, "po_line_id", None),
         sort_order=item_data.sort_order if item_data.sort_order else idx,
         vat_rate=item_data.vat_rate if item_data.vat_rate is not None else default_vat_rate,
         vat_category=item_data.vat_category,
@@ -893,6 +896,7 @@ class FinanceService:
                 direction=data.invoice_direction,
                 contact_id=data.contact_id,
             )
+        await self._check_po_lines(data.purchase_order_id, data.line_items)
         if data.subcontract_agreement_id is not None:
             if data.purchase_order_id is not None:
                 raise HTTPException(
@@ -1207,7 +1211,9 @@ class FinanceService:
         new_status = fields.get("status")
         if new_status and new_status != invoice.status:
             if new_status in _INVOICE_POSTING_STATUSES and invoice.status not in _INVOICE_POSTING_STATUSES:
-                await self._enforce_posting_rules(self._posting_state(invoice, fields), exclude_invoice_id=invoice_id)
+                await self._enforce_posting_rules(
+                    self._posting_state(invoice, fields, lines=data.line_items), exclude_invoice_id=invoice_id
+                )
                 fields["approved_by"] = _actor_uuid(actor_id)
                 fields["approved_at"] = _utcnow_iso()
             elif new_status == "pending":
@@ -1242,6 +1248,14 @@ class FinanceService:
             await resolve_position_cost_lines(self.session, data.line_items)
             await _resolve_contract_lines(self.session, invoice.project_id, data.line_items)
             await _drop_line_splits(self.session, prior_items)
+            if any(getattr(i, "po_line_id", None) for i in data.line_items):
+                await self._check_po_lines(
+                    invoice_po_link(
+                        fields.get("purchase_order_id", invoice.purchase_order_id),
+                        fields.get("metadata_", invoice.metadata_),
+                    ),
+                    data.line_items,
+                )
             await self.line_items.delete_by_invoice(invoice_id)
             default_vat = _default_vat_matching_tax(
                 data.line_items,
@@ -1321,6 +1335,19 @@ class FinanceService:
         except ImportError:  # pragma: no cover - procurement is optional for finance
             return
         await check_payment_release(self.session, po_id, invoice_ref=getattr(invoice, "invoice_number", "") or "")
+
+    async def _check_po_lines(self, purchase_order_id: uuid.UUID | None, items: Sequence[Any] | None) -> None:
+        """Refuse (422) an invoice line naming an order line that is not on the invoice's order."""
+        named = {i.po_line_id for i in items or [] if getattr(i, "po_line_id", None)}
+        if not named:
+            return
+        owners = await po_line_owners(self.session, named)
+        stray = [line_id for line_id in named if owners.get(line_id) != purchase_order_id or purchase_order_id is None]
+        if stray:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="An invoice line can only bill a line of the purchase order the invoice is linked to.",
+            )
 
     async def _check_agreement_link(
         self,
@@ -1405,7 +1432,20 @@ class FinanceService:
                 "tolerance": str(commitment.tolerance()),
                 "retention_percent": str(commitment.retention_percent),
                 "retain_on_receipt": commitment.retain_on_receipt,
+                "shared_change_orders": commitment.shared_change_orders,
             }
+        )
+        raw_lines = state.get("line_items") or state.get("lines") or []
+        typed = [
+            {"po_line_id": line.get("po_line_id"), "amount": line.get("amount")}
+            if isinstance(line, dict)
+            else {"po_line_id": getattr(line, "po_line_id", None), "amount": getattr(line, "amount", "0")}
+            for line in raw_lines
+        ]
+        payload["po_lines"] = (
+            await po_line_statement(self.session, commitment, typed)
+            if commitment is not None and commitment.kind == "purchase_order"
+            else []
         )
 
         same_number: list[str] = []
@@ -1440,7 +1480,9 @@ class FinanceService:
         payload["same_amount_date"] = same_amount_date
         return payload, commitment
 
-    async def _posting_report(self, state: dict[str, Any], *, exclude_invoice_id: uuid.UUID | None) -> Any:
+    async def _posting_report(
+        self, state: dict[str, Any], *, exclude_invoice_id: uuid.UUID | None, with_lines: bool = False
+    ) -> Any:
         from app.core.i18n import get_locale
         from app.core.validation.engine import validation_engine
         from app.modules.finance.commitment_rules import PAYLOAD_KEY, RULE_SET, register_posting_rules
@@ -1455,6 +1497,8 @@ class FinanceService:
             project_id=str(state.get("project_id") or ""),
             metadata={"locale": get_locale(), "operation": "invoice_posting"},
         )
+        if with_lines:
+            return report, commitment, payload.get("po_lines") or []
         return report, commitment
 
     async def posting_check(
@@ -1468,7 +1512,9 @@ class FinanceService:
         Returns the commitment figures, whether approval would be refused and
         the full report, so the form says why before anyone presses Approve.
         """
-        report, commitment = await self._posting_report(state, exclude_invoice_id=exclude_invoice_id)
+        report, commitment, po_lines = await self._posting_report(
+            state, exclude_invoice_id=exclude_invoice_id, with_lines=True
+        )
         summary = report.summary()
         return {
             "commitment": commitment.as_dict() if commitment is not None else None,
@@ -1477,6 +1523,7 @@ class FinanceService:
                 if commitment is not None
                 else None
             ),
+            "po_lines": po_lines,
             "blocking": bool(report.has_errors),
             "report": {
                 "status": summary["status"],
@@ -1530,10 +1577,16 @@ class FinanceService:
         )
 
     @staticmethod
-    def _posting_state(invoice: Invoice, fields: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _posting_state(
+        invoice: Invoice, fields: dict[str, Any] | None = None, *, lines: list[Any] | None = None
+    ) -> dict[str, Any]:
         """The invoice as a patch would leave it, in the shape the posting rules read."""
         fields = fields or {}
         state = {key: fields.get(key, getattr(invoice, key, None)) for key in _POSTING_FIELDS}
+        state["line_items"] = [
+            {"po_line_id": getattr(line, "po_line_id", None), "amount": getattr(line, "amount", "0")}
+            for line in (lines if lines is not None else list(invoice.line_items or []))
+        ]
         state["metadata"] = fields.get("metadata_", invoice.metadata_)
         state["tax_amount"] = fields.get("tax_amount", invoice.tax_amount)
         return state

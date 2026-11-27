@@ -601,6 +601,9 @@ def refuse_pricing_a_mirrored_order_through_its_lines(order: ChangeOrder) -> Non
     )
 
 
+ALLOCATABLE_STATUSES = frozenset({"draft", "submitted", "approved", "executed"})
+
+
 class ChangeOrderService:
     """Business logic for change order operations."""
 
@@ -684,6 +687,8 @@ class ChangeOrderService:
             "cost_impact": order.cost_impact if cost_impact is None else cost_impact,
             "currency": order.currency or "",
             "schedule_impact_days": order.schedule_impact_days,
+            "linked_po_ids": getattr(order, "linked_po_ids", None),
+            "commitment_allocations": getattr(order, "commitment_allocations", None),
         }
         return await self._enforce_rules(order.id, header, items, operation)
 
@@ -1282,14 +1287,17 @@ class ChangeOrderService:
         context when omitted.
         """
         order = await self.get_order(order_id)
+        fields = data.model_dump(exclude_unset=True)
 
-        if order.status != "draft":
+        # Splitting the amount across linked commitments reprices nothing, so an
+        # order already submitted or approved may still be allocated.
+        allocation_only = set(fields) == {"commitment_allocations"} and order.status in ALLOCATABLE_STATUSES
+        if order.status != "draft" and not allocation_only:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Only draft change orders can be edited",
             )
 
-        fields = data.model_dump(exclude_unset=True)
         refuse_repricing_a_mirrored_order(order, fields)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
@@ -1304,6 +1312,10 @@ class ChangeOrderService:
         for key in ("linked_po_ids", "linked_rfi_ids"):
             if key in fields and fields[key] is not None:
                 fields[key] = [str(x) for x in fields[key]]
+        if "commitment_allocations" in fields:
+            from app.modules.changeorders.allocations import to_json  # noqa: PLC0415
+
+            fields["commitment_allocations"] = to_json(fields["commitment_allocations"])
 
         if not fields:
             return order
@@ -1317,7 +1329,10 @@ class ChangeOrderService:
         code_snapshot = order.code
 
         # The rules judge the order as it will be, before the write.
-        merged = {k: fields.get(k, getattr(order, k)) for k in ("cost_impact", "currency", "schedule_impact_days")}
+        merged = {
+            k: fields.get(k, getattr(order, k))
+            for k in ("cost_impact", "currency", "schedule_impact_days", "linked_po_ids", "commitment_allocations")
+        }
         warnings = await self._enforce_rules(
             order_id,
             {

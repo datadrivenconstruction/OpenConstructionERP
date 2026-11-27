@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "الدفع مجدول في {scheduled}، قبل تاريخ الفاتورة {invoice_date}",
       "suggestion": "جدول الدفع في تاريخ الفاتورة أو بعده"
+    },
+    "unallocated_change_order": {
+      "fail": "أوامر التغيير غير المحتسبة على {commitment} حتى توزيعها: {count}",
+      "suggestion": "وزّع أمر التغيير هذا: أدخل حصة كل أمر شراء أو عقد باطن يمسّه"
+    },
+    "po_line_within_balance": {
+      "fail": "البند {line} من الفاتورة {invoice} يتجاوز رصيده المتبقي {balance} بمقدار {excess}",
+      "suggestion": "اعتمد أمر تغيير يغطي التجاوز، أو صحّح مبلغ البند"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "كان موعد دفع الفاتورة {invoice} في {scheduled} ولم تُحَل إلى المحاسبة",
+      "suggestion": "أدرجها في تصدير قيود محاسبية، أو غيّر تاريخ الدفع المجدول"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "توزيع أمر التغيير {code} يبلغ {allocated} وليس مبلغه {amount}",
+      "suggestion": "عدّل التوزيع ليساوي مبلغ أمر التغيير"
+    },
+    "missing": {
+      "fail": "أمر التغيير {code} يمسّ عددًا من الالتزامات: {count} وغير موزّع",
+      "suggestion": "وزّع أمر التغيير هذا: أدخل المبلغ لكل أمر شراء أو عقد باطن"
     }
   }
 }

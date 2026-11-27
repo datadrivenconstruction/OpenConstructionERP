@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Platba je naplánována na {scheduled}, před datem faktury {invoice_date}",
       "suggestion": "Naplánujte platbu na datum faktury nebo později"
+    },
+    "unallocated_change_order": {
+      "fail": "Změny nezapočtené v {commitment}, dokud nejsou rozděleny: {count}",
+      "suggestion": "Rozdělte tuto změnu: zadejte podíl každé dotčené objednávky nebo subdodávky"
+    },
+    "po_line_within_balance": {
+      "fail": "Řádek {line} faktury {invoice} překračuje zbývající zůstatek {balance} o {excess}",
+      "suggestion": "Schvalte změnu, která překročení pokryje, nebo opravte částku řádku"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Faktura {invoice} byla splatná {scheduled} a nebyla předána účetnictví",
+      "suggestion": "Zařaďte ji do exportu účetních zápisů, nebo posuňte plánované datum platby"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Rozdělení změny {code} dává {allocated}, ne její částku {amount}",
+      "suggestion": "Upravte rozdělení tak, aby dávalo částku změny"
+    },
+    "missing": {
+      "fail": "Změna {code} se týká závazků: {count} a není rozdělena",
+      "suggestion": "Rozdělte tuto změnu: zadejte částku pro každou objednávku nebo subdodávku"
     }
   }
 }

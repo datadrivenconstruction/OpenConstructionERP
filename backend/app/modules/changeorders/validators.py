@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from app.core.currency_registry import sentence_amount
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
 from app.core.validation.money_rules import (
     MAX_SANE_AMOUNT,
@@ -27,6 +28,7 @@ from app.core.validation.money_rules import (
     section,
     to_dec,
 )
+from app.modules.changeorders.allocations import allocations_of, commitments_touched
 from app.modules.changeorders.service import VALID_TRANSITIONS
 
 CHANGEORDERS_RULE_SET = "changeorders"
@@ -160,12 +162,66 @@ class ChangeOrderStatusTransitionRule(MoneyRule):
         return found or [self.ok(ref)]
 
 
+class ChangeOrderAllocationSumRule(MoneyRule):
+    """The allocations of a change order across commitments add up to its amount."""
+
+    rule_id = "changeorders.allocation_matches_amount"
+    name = "Change order allocations add up to its amount"
+    standard = CHANGEORDERS_RULE_SET
+    severity = Severity.ERROR
+    message_section = "co_allocation"
+    description = "commitment_allocations must sum to the change order amount"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        co = section(context, "change_order")
+        ref = str(co.get("id", ""))
+        allocations = allocations_of(co.get("commitment_allocations"))
+        amount = to_dec(co.get("cost_impact"))
+        if not allocations or amount is None:
+            return [self.ok(ref)]
+        allocated = sum((a["amount"] for a in allocations), Decimal("0"))
+        if abs(allocated - amount) <= MONEY_TOLERANCE:
+            return [self.ok(ref)]
+        currency = currency_of(co)
+        return [
+            self.fail(
+                context,
+                "sum",
+                ref=ref,
+                code=str(co.get("code") or ref),
+                allocated=sentence_amount(allocated, currency),
+                amount=sentence_amount(amount, currency),
+            )
+        ]
+
+
+class ChangeOrderAllocationNeededRule(MoneyRule):
+    """A change order touching several commitments says how its amount splits."""
+
+    rule_id = "changeorders.allocation_needed"
+    name = "Allocate a change order that touches several commitments"
+    standard = CHANGEORDERS_RULE_SET
+    severity = Severity.WARNING
+    message_section = "co_allocation"
+    description = "A change order linked to more than one order raises none of them until allocated"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        co = section(context, "change_order")
+        ref = str(co.get("id", ""))
+        touched = commitments_touched(co.get("linked_po_ids"), None)
+        if touched < 2 or allocations_of(co.get("commitment_allocations")):
+            return [self.ok(ref)]
+        return [self.fail(context, "missing", ref=ref, code=str(co.get("code") or ref), count=touched)]
+
+
 CHANGEORDERS_RULES = (
     ChangeOrderTotalMatchesItemsRule,
     ChangeOrderRangesRule,
     ChangeOrderCurrencyRule,
     ChangeOrderReferencesRule,
     ChangeOrderStatusTransitionRule,
+    ChangeOrderAllocationSumRule,
+    ChangeOrderAllocationNeededRule,
 )
 
 

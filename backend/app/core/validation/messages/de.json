@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Die Zahlung ist für {scheduled} geplant, vor dem Rechnungsdatum {invoice_date}",
       "suggestion": "Planen Sie die Zahlung am oder nach dem Rechnungsdatum"
+    },
+    "unallocated_change_order": {
+      "fail": "Nachträge, die auf {commitment} erst nach Aufteilung zählen: {count}",
+      "suggestion": "Teilen Sie diesen Nachtrag auf: Anteil je betroffener Bestellung oder Nachunternehmervertrag eingeben"
+    },
+    "po_line_within_balance": {
+      "fail": "Position {line} der Rechnung {invoice} liegt {excess} über ihrem Restbetrag von {balance}",
+      "suggestion": "Genehmigen Sie einen Nachtrag für die Überschreitung oder korrigieren Sie den Positionsbetrag"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Rechnung {invoice} war am {scheduled} zur Zahlung fällig und ist nicht an die Buchhaltung übergeben",
+      "suggestion": "Nehmen Sie sie in einen Buchungsexport auf oder verschieben Sie das geplante Zahlungsdatum"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Die Aufteilung des Nachtrags {code} ergibt {allocated}, nicht seinen Betrag von {amount}",
+      "suggestion": "Passen Sie die Aufteilung an, bis sie den Nachtragsbetrag ergibt"
+    },
+    "missing": {
+      "fail": "Nachtrag {code} betrifft {count} Verpflichtungen und ist nicht aufgeteilt",
+      "suggestion": "Teilen Sie diesen Nachtrag auf: Betrag je Bestellung oder Nachunternehmervertrag eingeben"
     }
   }
 }

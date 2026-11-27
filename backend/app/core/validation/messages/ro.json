@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Plata este programată pentru {scheduled}, înainte de data facturii {invoice_date}",
       "suggestion": "Programați plata la data facturii sau după"
+    },
+    "unallocated_change_order": {
+      "fail": "Modificări nenumărate pe {commitment} până la repartizare: {count}",
+      "suggestion": "Repartizați această modificare: introduceți partea fiecărei comenzi sau subantreprize afectate"
+    },
+    "po_line_within_balance": {
+      "fail": "Linia {line} a facturii {invoice} depășește cu {excess} soldul rămas de {balance}",
+      "suggestion": "Aprobați o modificare care acoperă depășirea, sau corectați suma liniei"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Factura {invoice} trebuia plătită la {scheduled} și nu a fost transmisă contabilității",
+      "suggestion": "Includeți-o într-un export contabil, sau mutați data de plată planificată"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Repartizarea modificării {code} dă {allocated}, nu suma ei de {amount}",
+      "suggestion": "Ajustați repartizarea ca să dea suma modificării"
+    },
+    "missing": {
+      "fail": "Modificarea {code} privește {count} angajamente și nu este repartizată",
+      "suggestion": "Repartizați această modificare: introduceți suma pentru fiecare comandă sau subantrepriză"
     }
   }
 }

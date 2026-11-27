@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "지급 예정일 {scheduled}이(가) 송장 날짜 {invoice_date}보다 앞섭니다",
       "suggestion": "지급 예정일을 송장 날짜 이후로 설정하십시오"
+    },
+    "unallocated_change_order": {
+      "fail": "배분될 때까지 {commitment}에 반영되지 않는 변경 지시: {count}",
+      "suggestion": "이 변경 지시를 배분하세요: 관련된 각 주문 또는 하도급의 몫을 입력하세요"
+    },
+    "po_line_within_balance": {
+      "fail": "송장 {invoice}의 항목 {line}이(가) 잔액 {balance}을(를) {excess} 초과합니다",
+      "suggestion": "초과분을 충당하는 변경 지시를 승인하거나 항목 금액을 수정하세요"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "송장 {invoice}은(는) {scheduled}에 지급 예정이었으나 회계로 넘어가지 않았습니다",
+      "suggestion": "분개 내보내기에 포함하거나 예정 지급일을 옮기세요"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "변경 지시 {code}의 배분 합계는 {allocated}이며 금액 {amount}과(와) 다릅니다",
+      "suggestion": "배분 합계가 변경 지시 금액과 같도록 조정하세요"
+    },
+    "missing": {
+      "fail": "변경 지시 {code}은(는) 여러 약정에 걸쳐 있으며({count}) 배분되지 않았습니다",
+      "suggestion": "이 변경 지시를 배분하세요: 각 주문 또는 하도급의 금액을 입력하세요"
     }
   }
 }

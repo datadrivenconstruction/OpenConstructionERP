@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "To'lov {scheduled} sanasiga, hisob sanasi {invoice_date} dan oldin rejalashtirilgan",
       "suggestion": "To'lovni hisob sanasida yoki undan keyin rejalashtiring"
+    },
+    "unallocated_change_order": {
+      "fail": "Taqsimlanmaguncha {commitment} boʻyicha hisoblanmaydigan oʻzgarishlar: {count}",
+      "suggestion": "Bu oʻzgarishni taqsimlang: tegishli har bir buyurtma yoki subpudrat ulushini kiriting"
+    },
+    "po_line_within_balance": {
+      "fail": "{invoice} hisob-fakturasining {line} qatori qolgan {balance} qoldiqdan {excess} oshadi",
+      "suggestion": "Oshib ketishni qoplaydigan oʻzgarishni tasdiqlang yoki qator summasini tuzating"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "{invoice} hisob-fakturasi {scheduled} kuni toʻlanishi kerak edi va buxgalteriyaga topshirilmagan",
+      "suggestion": "Uni buxgalteriya eksportiga qoʻshing yoki rejalashtirilgan toʻlov sanasini oʻzgartiring"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "{code} oʻzgarishining taqsimoti {allocated} beradi, uning {amount} summasini emas",
+      "suggestion": "Taqsimotni oʻzgarish summasini beradigan qilib tuzating"
+    },
+    "missing": {
+      "fail": "{code} oʻzgarishi majburiyatlarga tegishli: {count} va taqsimlanmagan",
+      "suggestion": "Bu oʻzgarishni taqsimlang: har bir buyurtma yoki subpudrat uchun summani kiriting"
     }
   }
 }

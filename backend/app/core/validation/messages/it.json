@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Il pagamento è previsto per il {scheduled}, prima della data della fattura {invoice_date}",
       "suggestion": "Pianifichi il pagamento alla data della fattura o dopo"
+    },
+    "unallocated_change_order": {
+      "fail": "Varianti non conteggiate su {commitment} finché non sono ripartite: {count}",
+      "suggestion": "Ripartisci questa variante: inserisci la quota di ogni ordine o subappalto interessato"
+    },
+    "po_line_within_balance": {
+      "fail": "La riga {line} della fattura {invoice} supera di {excess} il residuo da eseguire di {balance}",
+      "suggestion": "Approva una variante che copra lo sforamento, o correggi l'importo della riga"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "La fattura {invoice} andava pagata il {scheduled} e non è stata trasmessa alla contabilità",
+      "suggestion": "Includila in un'esportazione contabile, o sposta la data di pagamento pianificata"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "La ripartizione della variante {code} somma {allocated}, non il suo importo di {amount}",
+      "suggestion": "Correggi la ripartizione perché sommi l'importo della variante"
+    },
+    "missing": {
+      "fail": "La variante {code} riguarda {count} impegni e non è ripartita",
+      "suggestion": "Ripartisci questa variante: inserisci l'importo per ogni ordine o subappalto"
     }
   }
 }

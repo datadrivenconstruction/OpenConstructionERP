@@ -183,7 +183,55 @@ class BookingService:
                 )
             )
         await self.session.flush()
+        await self._mark_released(plan.included, batch.id, user_id, now)
         return batch
+
+    async def _mark_released(self, captured_ids: list[str], batch_id: uuid.UUID, user_id: object, when: str) -> None:
+        """Record on each approved register invoice the first export that carried it to accounting.
+
+        A re-export leaves the first release as it is.
+        """
+        from app.modules.finance.commitment_rules import RELEASED_STATUSES
+        from app.modules.finance.models import Invoice
+
+        ids = [uuid.UUID(i) for i in captured_ids]
+        if not ids:
+            return
+        posted = (
+            (
+                await self.session.execute(
+                    select(CapturedInvoice.posted_invoice_id).where(
+                        CapturedInvoice.id.in_(ids), CapturedInvoice.posted_invoice_id.is_not(None)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not posted:
+            return
+        try:
+            actor = uuid.UUID(str(user_id)) if user_id else None
+        except ValueError:
+            actor = None
+        rows = (
+            (
+                await self.session.execute(
+                    select(Invoice).where(
+                        Invoice.id.in_(set(posted)),
+                        Invoice.released_at.is_(None),
+                        Invoice.status.in_(RELEASED_STATUSES | {"paid"}),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for invoice in rows:
+            invoice.released_at = when
+            invoice.released_by = actor
+            invoice.released_export_id = batch_id
+        await self.session.flush()
 
     async def page(
         self, allowed: set[uuid.UUID] | None, offset: int, limit: int

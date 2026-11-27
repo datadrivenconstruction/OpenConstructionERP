@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "A fizetés ütemezett napja {scheduled}, a számla dátuma ({invoice_date}) előtt",
       "suggestion": "Ütemezze a fizetést a számla dátumára vagy későbbre"
+    },
+    "unallocated_change_order": {
+      "fail": "A(z) {commitment} esetén felosztásig nem számított módosítások: {count}",
+      "suggestion": "Ossza fel ezt a módosítást: adja meg minden érintett rendelés vagy alvállalkozás részét"
+    },
+    "po_line_within_balance": {
+      "fail": "A(z) {invoice} számla {line} tétele {excess} összeggel meghaladja a {balance} hátralékot",
+      "suggestion": "Hagyjon jóvá a túllépést fedező módosítást, vagy javítsa a tétel összegét"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "A(z) {invoice} számla {scheduled} napon volt fizetendő, és nem került a könyvelésbe",
+      "suggestion": "Vegye fel egy könyvelési exportba, vagy módosítsa a tervezett fizetési dátumot"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "A(z) {code} módosítás felosztása {allocated}, nem az összege, {amount}",
+      "suggestion": "Igazítsa a felosztást, hogy kiadja a módosítás összegét"
+    },
+    "missing": {
+      "fail": "A(z) {code} módosítás ennyi kötelezettséget érint: {count}, és nincs felosztva",
+      "suggestion": "Ossza fel ezt a módosítást: adja meg az összeget rendelésenként vagy alvállalkozásonként"
     }
   }
 }

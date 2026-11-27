@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Thanh toán được lên lịch vào {scheduled}, trước ngày hóa đơn {invoice_date}",
       "suggestion": "Lên lịch thanh toán vào hoặc sau ngày hóa đơn"
+    },
+    "unallocated_change_order": {
+      "fail": "Lệnh thay đổi chưa được tính vào {commitment} cho đến khi phân bổ: {count}",
+      "suggestion": "Phân bổ lệnh thay đổi này: nhập phần của từng đơn hàng hoặc thầu phụ liên quan"
+    },
+    "po_line_within_balance": {
+      "fail": "Dòng {line} của hóa đơn {invoice} vượt số dư còn lại {balance} là {excess}",
+      "suggestion": "Duyệt một lệnh thay đổi bù phần vượt, hoặc sửa số tiền của dòng"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Hóa đơn {invoice} đến hạn thanh toán ngày {scheduled} và chưa được chuyển cho kế toán",
+      "suggestion": "Đưa nó vào một lần xuất bút toán, hoặc dời ngày thanh toán dự kiến"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Phân bổ của lệnh thay đổi {code} cộng lại là {allocated}, không phải số tiền {amount}",
+      "suggestion": "Điều chỉnh phân bổ để cộng lại bằng số tiền của lệnh thay đổi"
+    },
+    "missing": {
+      "fail": "Lệnh thay đổi {code} liên quan đến số cam kết: {count} và chưa được phân bổ",
+      "suggestion": "Phân bổ lệnh thay đổi này: nhập số tiền cho từng đơn hàng hoặc thầu phụ"
     }
   }
 }

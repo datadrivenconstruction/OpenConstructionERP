@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "התשלום מתוכנן ל-{scheduled}, לפני תאריך החשבונית {invoice_date}",
       "suggestion": "תכננו את התשלום בתאריך החשבונית או אחריו"
+    },
+    "unallocated_change_order": {
+      "fail": "פקודות שינוי שאינן נספרות ב-{commitment} עד שיחולקו: {count}",
+      "suggestion": "חלקו את פקודת השינוי: הזינו את חלקה של כל הזמנה או קבלנות משנה שהיא נוגעת בה"
+    },
+    "po_line_within_balance": {
+      "fail": "שורה {line} בחשבונית {invoice} חורגת ב-{excess} מיתרת {balance}",
+      "suggestion": "אשרו פקודת שינוי שמכסה את החריגה, או תקנו את סכום השורה"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "חשבונית {invoice} הייתה אמורה להשתלם ב-{scheduled} ולא הועברה להנהלת החשבונות",
+      "suggestion": "כללו אותה בייצוא רישומים, או הזיזו את תאריך התשלום המתוכנן"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "החלוקה של פקודת השינוי {code} מסתכמת ב-{allocated}, לא בסכום {amount}",
+      "suggestion": "התאימו את החלוקה כך שתסתכם בסכום פקודת השינוי"
+    },
+    "missing": {
+      "fail": "פקודת השינוי {code} נוגעת בהתחייבויות: {count} ואינה מחולקת",
+      "suggestion": "חלקו את פקודת השינוי: הזינו את הסכום לכל הזמנה או קבלנות משנה"
     }
   }
 }

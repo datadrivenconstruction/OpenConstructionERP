@@ -2979,6 +2979,30 @@
     "payment_date_before_invoice": {
       "fail": "Płatność zaplanowano na {scheduled}, przed datą faktury {invoice_date}",
       "suggestion": "Zaplanuj płatność w dniu faktury lub później"
+    },
+    "unallocated_change_order": {
+      "fail": "Zmiany nieliczone w {commitment} do czasu rozdzielenia: {count}",
+      "suggestion": "Rozdziel tę zmianę: podaj udział każdego dotkniętego zamówienia lub podwykonawstwa"
+    },
+    "po_line_within_balance": {
+      "fail": "Pozycja {line} faktury {invoice} przekracza o {excess} pozostałe saldo {balance}",
+      "suggestion": "Zatwierdź zmianę pokrywającą przekroczenie lub popraw kwotę pozycji"
+    }
+  },
+  "invoice_release": {
+    "overdue_unreleased": {
+      "fail": "Faktura {invoice} była płatna {scheduled} i nie została przekazana do księgowości",
+      "suggestion": "Uwzględnij ją w eksporcie księgowań lub przesuń planowaną datę płatności"
+    }
+  },
+  "co_allocation": {
+    "sum": {
+      "fail": "Podział zmiany {code} daje {allocated}, a nie jej kwotę {amount}",
+      "suggestion": "Popraw podział, aby dawał kwotę zmiany"
+    },
+    "missing": {
+      "fail": "Zmiana {code} dotyczy zobowiązań: {count} i nie jest rozdzielona",
+      "suggestion": "Rozdziel tę zmianę: podaj kwotę dla każdego zamówienia lub podwykonawstwa"
     }
   }
 }
