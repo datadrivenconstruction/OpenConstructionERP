@@ -5,7 +5,9 @@
 A project may set, in one currency, a list of bands. Each band names the amount
 it starts at and the approvers it adds. When a requisition is submitted its
 value (the sum of its priced lines) decides which bands apply: every band whose
-start is at or below the value. Their approvers are appended, lowest band
+start is at or below the value. A band names people, roles, or both; a role
+step is decided by any project member whose role meets it, as on a purchase
+order approval route, and is kept in the chain as ``role:<name>``. Their approvers are appended, lowest band
 first, after the requisition's own designated approvers, so a site buyer signs
 first, the project manager next and the director last.
 
@@ -26,9 +28,23 @@ from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-#: At most this many bands per project, and approvers per band.
+#: At most this many bands per project, and approvers (people plus roles) per band.
 MAX_BANDS = 6
 MAX_BAND_APPROVERS = 5
+
+#: Prefix of a role step in a stored approval chain; people are stored as their user id.
+ROLE_PREFIX = "role:"
+
+
+def role_token(role: str) -> str:
+    """The chain entry of a role step."""
+    return f"{ROLE_PREFIX}{role.strip().lower()}"
+
+
+def role_of(entry: str | None) -> str | None:
+    """The role a chain entry names, or None when it names a person."""
+    text = str(entry or "")
+    return text[len(ROLE_PREFIX) :] if text.startswith(ROLE_PREFIX) else None
 
 
 class BandError(ValueError):
@@ -41,7 +57,10 @@ class BandError(ValueError):
 
 @dataclass(frozen=True)
 class Band:
-    """One threshold: from ``from_amount`` (inclusive) these approvers also sign."""
+    """One threshold: from ``from_amount`` (inclusive) these approvers also sign.
+
+    ``approvers`` holds user ids and ``role:<name>`` entries, people first.
+    """
 
     from_amount: Decimal
     approvers: tuple[str, ...]
@@ -79,11 +98,15 @@ def parse_bands(raw: Iterable[Mapping[str, Any]] | None) -> list[Band]:
         start = _amount(entry.get("from_amount"))
         if start <= 0:
             raise BandError("band_amount_not_positive", "Each band must start above zero.")
-        approvers = tuple(str(a) for a in (entry.get("approvers") or []))
+        people = [str(a) for a in (entry.get("approvers") or [])]
+        roles = [str(r).strip().lower() for r in (entry.get("roles") or [])]
+        if any(not r for r in roles):
+            raise BandError("band_role_invalid", "A band role must have a name.")
+        approvers = tuple(people + [role_token(r) for r in roles])
         if not approvers or len(approvers) > MAX_BAND_APPROVERS:
             raise BandError(
                 "band_approvers_count",
-                f"Each band needs between 1 and {MAX_BAND_APPROVERS} approvers.",
+                f"Each band needs between 1 and {MAX_BAND_APPROVERS} approvers, people and roles together.",
             )
         if len(set(approvers)) != len(approvers) or seen & set(approvers):
             raise BandError("band_approver_repeated", "An approver may appear in only one band, once.")
@@ -130,7 +153,8 @@ def banded_chain(
             continue
         start = format(band.from_amount, "f")
         applied.append(start)
-        eligible = [a for a in band.approvers if a not in excluded]
+        # A role step can always be decided by someone else holding the role.
+        eligible = [a for a in band.approvers if role_of(a) is not None or a not in excluded]
         if not eligible:
             unmet.append(start)
             continue

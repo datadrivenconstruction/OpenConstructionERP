@@ -23,6 +23,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   EXTERNAL_ORDER_STATUSES,
+  BAND_APPROVER_ROLES,
   bandDraftProblem,
   getProcurementSettings,
   isPositiveDecimal,
@@ -228,7 +229,14 @@ export function ApprovalChainView({ steps }: { steps: RequisitionApprovalStep[] 
       {steps.map((s, index) => (
         <li key={`${s.user_id}-${index}`} className="flex flex-wrap items-center gap-2">
           <span className="w-5 text-right tabular-nums text-content-tertiary">{index + 1}.</span>
-          <span className="text-content-primary">{s.name || s.user_id.slice(0, 8)}</span>
+          <span className="text-content-primary">
+            {s.role && !s.name
+              ? t('procurement.requisitions.step_role', {
+                  defaultValue: 'Anyone with the role {{role}}',
+                  role: t(`users.roles.${s.role}`, { defaultValue: s.role }),
+                })
+              : s.name || s.user_id.slice(0, 8)}
+          </span>
           <Badge variant={STEP_VARIANT[s.state]} size="sm">
             {stepLabel(t, s.state)}
           </Badge>
@@ -662,6 +670,10 @@ function bandProblemLabel(t: Translate, problem: BandDraftProblem): string {
       return t('procurement.requisitions.bands_problem_approvers', {
         defaultValue: 'Each band needs at least one approver.',
       });
+    case 'too_many':
+      return t('procurement.requisitions.bands_problem_too_many', {
+        defaultValue: 'A band can have at most five approvers, people and roles together.',
+      });
     case 'order':
       return t('procurement.requisitions.bands_problem_order', {
         defaultValue: 'Band start amounts must rise from one band to the next.',
@@ -671,6 +683,61 @@ function bandProblemLabel(t: Translate, problem: BandDraftProblem): string {
         defaultValue: 'An approver may sit in only one band.',
       });
   }
+}
+
+interface BandRolesPickerProps {
+  index: number;
+  value: string[];
+  taken: string[];
+  onChange: (roles: string[]) => void;
+}
+
+/** Roles of one band: any project member holding one may decide that band's step. */
+function BandRolesPicker({ index, value, taken, onChange }: BandRolesPickerProps) {
+  const { t } = useTranslation();
+  const roleName = (role: string) => t(`users.roles.${role}`, { defaultValue: role });
+  const free = BAND_APPROVER_ROLES.filter((r) => !value.includes(r) && !taken.includes(r));
+  return (
+    <div className="flex flex-wrap items-center gap-2" data-testid={`band-${index}-roles`}>
+      <label className="oe-label" htmlFor={`settings-band-${index}-role`}>
+        {t('procurement.requisitions.bands_roles', { defaultValue: 'Or anyone with the role' })}
+      </label>
+      {value.map((role) => (
+        <span
+          key={role}
+          className="inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-xs text-content-primary"
+        >
+          {roleName(role)}
+          <button
+            type="button"
+            className="text-content-tertiary hover:text-semantic-error"
+            aria-label={t('procurement.requisitions.bands_role_remove', {
+              defaultValue: 'Remove role {{role}}',
+              role: roleName(role),
+            })}
+            onClick={() => onChange(value.filter((r) => r !== role))}
+          >
+            <X size={12} />
+          </button>
+        </span>
+      ))}
+      {free.length > 0 && (
+        <select
+          id={`settings-band-${index}-role`}
+          className={`${smallFieldCls} w-40`}
+          value=""
+          onChange={(e) => e.target.value && onChange([...value, e.target.value])}
+        >
+          <option value="">{t('procurement.requisitions.bands_role_pick', { defaultValue: 'Add a role…' })}</option>
+          {free.map((r) => (
+            <option key={r} value={r}>
+              {roleName(r)}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+  );
 }
 
 interface ValueBandsEditorProps {
@@ -754,6 +821,12 @@ export function ValueBandsEditor({
             excluded={bands.filter((_, i) => i !== index).flatMap((b) => b.approvers)}
             idPrefix={`settings-band-${index}`}
           />
+          <BandRolesPicker
+            index={index}
+            value={band.roles ?? []}
+            taken={bands.filter((_, i) => i !== index).flatMap((b) => b.roles ?? [])}
+            onChange={(roles) => update(index, { roles })}
+          />
         </div>
       ))}
       {problem && (
@@ -766,7 +839,7 @@ export function ValueBandsEditor({
           size="sm"
           variant="secondary"
           icon={<Plus size={14} />}
-          onClick={() => onBandsChange([...bands, { from_amount: '', approvers: [] }])}
+          onClick={() => onBandsChange([...bands, { from_amount: '', approvers: [], roles: [] }])}
         >
           {t('procurement.requisitions.bands_add', { defaultValue: 'Add value band' })}
         </Button>
@@ -805,6 +878,7 @@ export function ProcurementSettingsModal({ projectId, open, onClose }: SettingsM
       (data.approval_bands?.bands ?? []).map((b) => ({
         from_amount: b.from_amount,
         approvers: b.approvers.map((a) => a.user_id),
+        roles: b.roles ?? [],
       })),
     );
   }, [open, data]);

@@ -222529,6 +222529,11 @@
               "name": "band_currency",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "role",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -222670,6 +222675,11 @@
             },
             {
               "name": "next_approver_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "next_approver_role",
               "type": "str | None",
               "default": "None"
             },
@@ -223104,6 +223114,10 @@
             {
               "name": "approvers",
               "type": "list[UUID]"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
             }
           ]
         },
@@ -223138,6 +223152,10 @@
             {
               "name": "approvers",
               "type": "list[RequisitionApprovalStep]"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
             }
           ]
         },

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Requisition approval by value. Bands 5 000 EUR -> PM and 50 000 EUR ->
-// Director: the draft check refuses a list the server would refuse, and an
+// Director (or anyone with a role): the draft check refuses a list the server would refuse, and an
 // approver added by a band shows the band it came from.
 
 import { describe, it, expect, vi } from 'vitest';
@@ -54,6 +54,26 @@ describe('bandDraftProblem', () => {
       ]),
     ).toBe('repeated');
   });
+
+  it('accepts a role as a band approver, alone or beside people', () => {
+    expect(
+      bandDraftProblem('EUR', [
+        { from_amount: '5000', approvers: [], roles: ['manager'] },
+        { from_amount: '50000', approvers: [DIRECTOR], roles: ['admin'] },
+      ]),
+    ).toBeNull();
+  });
+
+  it('refuses a role in two bands and more than five approvers in one', () => {
+    expect(
+      bandDraftProblem('EUR', [
+        { from_amount: '5000', approvers: [], roles: ['manager'] },
+        { from_amount: '50000', approvers: [], roles: ['manager'] },
+      ]),
+    ).toBe('repeated');
+    const five = ['1', '2', '3', '4', '5'].map((n) => `aaaaaaaa-aaaa-4aaa-8aaa-00000000000${n}`);
+    expect(bandDraftProblem('EUR', [{ from_amount: '5000', approvers: five, roles: ['manager'] }])).toBe('too_many');
+  });
 });
 
 describe('ApprovalChainView', () => {
@@ -74,6 +94,19 @@ describe('ApprovalChainView', () => {
     const bands = screen.getAllByTestId('approval-step-band');
     expect(bands).toHaveLength(1);
     expect(bands[0]!.textContent).toMatch(/Value band from/);
+    expect(screen.queryByText(/Anyone with the role/)).toBeNull();
     expect(bands[0]!.textContent).toMatch(/5[,.\s  ]?000/);
+  });
+});
+
+describe('ApprovalChainView with a role step', () => {
+  it('names the role of an open role step and the person who decided a closed one', () => {
+    const steps: RequisitionApprovalStep[] = [
+      { user_id: 'role:manager', name: 'Project manager', state: 'approved', decided_at: null, comment: null, role: 'manager' },
+      { user_id: 'role:admin', name: null, state: 'next', decided_at: null, comment: null, role: 'admin' },
+    ];
+    render(<ApprovalChainView steps={steps} />);
+    expect(screen.getByText('Project manager')).toBeTruthy();
+    expect(screen.getByText(/Anyone with the role/)).toBeTruthy();
   });
 });
