@@ -173,6 +173,7 @@ class SubmittalService:
                 long_lead=data.long_lead,
                 lead_time_weeks=data.lead_time_weeks,
                 linked_drawing_ids=data.linked_drawing_ids,
+                distribution_list=data.distribution_list or [],
                 created_by=user_id,
                 metadata_=create_meta,
             )
@@ -353,6 +354,9 @@ class SubmittalService:
                         "dedicated /submit, /review, or /approve endpoint."
                     ),
                 )
+
+        if "distribution_list" in fields and fields["distribution_list"] is None:
+            fields["distribution_list"] = []
 
         if not fields:
             return submittal
@@ -952,6 +956,54 @@ class SubmittalService:
             new_status="approved",
             actor_id=approver_id,
             extra={"source": "approve"},
+        )
+        return fresh or submittal
+
+    async def close_submittal(self, submittal_id: uuid.UUID, closed_by: str) -> Submittal:
+        """Close a decided submittal: the last step of the workflow.
+
+        Approved, approved as noted and rejected submittals may be closed; the
+        decision stamp stays readable. Ball in court is cleared. Closing an
+        already closed submittal is a no-op, like a repeated approval.
+        """
+        submittal = await self.get_submittal(submittal_id)
+        if submittal.status == "closed":
+            return submittal
+        if "closed" not in _SUBMITTAL_STATUS_TRANSITIONS.get(submittal.status, set()):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot close submittal with status '{submittal.status}'",
+            )
+        prior_status = submittal.status
+        project_id_s = str(submittal.project_id)
+        number = submittal.submittal_number
+        await self.repo.update_fields(submittal_id, status="closed", ball_in_court=None)
+        fresh = await self.repo.get_by_id(submittal_id)
+        from app.core.audit_log import log_activity as _log_activity
+
+        await _log_activity(
+            self.session,
+            actor_id=closed_by,
+            entity_type="submittal",
+            entity_id=str(submittal_id),
+            action="status_changed",
+            from_status=prior_status,
+            to_status="closed",
+            reason="Submittal closed via close_submittal()",
+            module="submittals",
+            parent_entity_type="project",
+            parent_entity_id=project_id_s,
+            before_state={"status": prior_status},
+            after_state={"status": "closed", "ball_in_court": None},
+        )
+        _log_state_change(
+            submittal_id=submittal_id,
+            submittal_number=number,
+            project_id=project_id_s,
+            prior_status=prior_status,
+            new_status="closed",
+            actor_id=closed_by,
+            extra={"source": "close"},
         )
         return fresh or submittal
 

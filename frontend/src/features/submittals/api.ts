@@ -150,6 +150,9 @@ export interface Submittal extends SubmittalRegisterFields {
   status: SubmittalStatus;
   ball_in_court: string | null;
   ball_in_court_name: string | null;
+  /** User ids that receive the submittal for information, and their names. */
+  distribution_list: string[];
+  distribution_names: string[];
   revision: number;
   date_submitted: string | null;
   date_required: string | null;
@@ -201,6 +204,8 @@ interface RegisterFieldsPayload {
 }
 
 export interface CreateSubmittalPayload extends RegisterFieldsPayload {
+  ball_in_court?: string;
+  distribution_list?: string[];
   project_id: string;
   title: string;
   description?: string;
@@ -216,6 +221,9 @@ export interface CreateSubmittalPayload extends RegisterFieldsPayload {
  * string would be refused by the patterns on the dates and the numbers.
  */
 export interface UpdateSubmittalPayload extends RegisterFieldsPayload {
+  /** A user id; `null` hands the ball to nobody. */
+  ball_in_court?: string | null;
+  distribution_list?: string[];
   title?: string;
   description?: string;
   spec_section?: string;
@@ -311,8 +319,10 @@ export interface SubmittalValidationResult {
 
 type SubmittalWire = Omit<
   Submittal,
-  'type' | 'revision' | 'linked_boq_item_ids' | 'metadata' | keyof SubmittalRegisterFields
+  'type' | 'revision' | 'linked_boq_item_ids' | 'metadata' | 'distribution_list' | 'distribution_names' | keyof SubmittalRegisterFields
 > & {
+  distribution_list?: string[] | null;
+  distribution_names?: string[] | null;
   type?: SubmittalType;
   submittal_type?: SubmittalType;
   revision?: number;
@@ -368,6 +378,8 @@ function normaliseSubmittal(s: SubmittalWire): Submittal {
     description: s.description ?? null,
     review_notes: s.review_notes ?? null,
     ball_in_court_name: s.ball_in_court_name ?? null,
+    distribution_list: s.distribution_list ?? [],
+    distribution_names: s.distribution_names ?? [],
     linked_boq_item_ids: s.linked_boq_item_ids ?? [],
     metadata: s.metadata ?? {},
     discipline: s.discipline ?? null,
@@ -551,6 +563,12 @@ export async function updateSubmittal(id: string, data: UpdateSubmittalPayload):
 
 export async function submitSubmittal(id: string): Promise<Submittal> {
   const row = await apiPost<SubmittalWire>(`/v1/submittals/${id}/submit/`);
+  return normaliseSubmittal(row);
+}
+
+/** Close an approved, approved-as-noted or rejected submittal (manager or higher). */
+export async function closeSubmittal(id: string): Promise<Submittal> {
+  const row = await apiPost<SubmittalWire>(`/v1/submittals/${id}/close/`);
   return normaliseSubmittal(row);
 }
 

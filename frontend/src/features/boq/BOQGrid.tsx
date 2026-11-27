@@ -2579,8 +2579,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       if (movedData._isResource || movedData._isAddResource || movedData._isVariantHeader || movedData._isCopilot) return;
 
       // Section-to-section reorder
-      if (movedData._isSection && overData._isSection && onReorderSections) {
-        onReorderSections(movedData.id, overData.id);
+      // A section may be dropped on any row of the bill; the editor resolves the
+      // sibling it means, so a drop on a line inside another section is not lost.
+      if (movedData._isSection && onReorderSections) {
+        if (overData.id && !overData._isResource) onReorderSections(movedData.id, overData.id);
         return;
       }
 

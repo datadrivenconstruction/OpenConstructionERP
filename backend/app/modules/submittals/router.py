@@ -169,7 +169,10 @@ async def _name_map(session: AsyncSession, submittals: Iterable[object]) -> dict
     row names a supplier, which keeps a page of older rows at one query.
     """
     rows = list(submittals)
-    names = await _fetch_user_names(session, (getattr(s, "ball_in_court", None) for s in rows))
+    people: list[object] = [getattr(s, "ball_in_court", None) for s in rows]
+    for s in rows:
+        people.extend(getattr(s, "distribution_list", None) or [])
+    names = await _fetch_user_names(session, people)  # type: ignore[arg-type]
     suppliers = [getattr(s, "supplier", None) for s in rows]
     if any(suppliers):
         from app.core.party_names import resolve_party_names
@@ -204,6 +207,8 @@ def _to_response(item: object, name_map: dict[str, str] | None = None) -> Submit
     supplier = getattr(item, "supplier", None)
     history = getattr(item, "review_history", None)
     drawings = getattr(item, "linked_drawing_ids", None)
+    raw_distribution = getattr(item, "distribution_list", None)
+    distribution = [str(u) for u in raw_distribution] if isinstance(raw_distribution, list) else []
     return SubmittalResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
@@ -237,6 +242,8 @@ def _to_response(item: object, name_map: dict[str, str] | None = None) -> Submit
         long_lead=getattr(item, "long_lead", False) is True,
         lead_time_weeks=getattr(item, "lead_time_weeks", None),
         linked_drawing_ids=[str(d) for d in drawings] if isinstance(drawings, list) else [],
+        distribution_list=distribution,
+        distribution_names=[names[u] for u in distribution if u in names],
         review_history=[e for e in history if isinstance(e, dict)] if isinstance(history, list) else [],
         review_outcome=figures.outcome,
         review_code=figures.code,
@@ -468,6 +475,26 @@ async def approve_submittal(
         notes=body.notes if body else None,
         code=body.code if body else None,
     )
+    name_map = await _name_map(session, [submittal])
+    return _to_response(submittal, name_map)
+
+
+@router.post(
+    "/{submittal_id}/close/",
+    response_model=SubmittalResponse,
+    dependencies=[Depends(RequireRole("manager"))],
+)
+async def close_submittal(
+    submittal_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("submittals.update")),
+    service: SubmittalService = Depends(_get_service),
+) -> SubmittalResponse:
+    """Close an approved, approved-as-noted or rejected submittal (manager or higher)."""
+    existing = await service.get_submittal(submittal_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
+    submittal = await service.close_submittal(submittal_id, closed_by=user_id)
     name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 

@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { SubmittalPeopleFields, EMPTY_PEOPLE_FORM, peopleFormData, buildPeoplePatch, buildPeopleCreate, type PeopleFormData } from './SubmittalPeopleFields';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -60,6 +61,7 @@ import {
   type SubmittalVocabulary,
   type CreateSubmittalPayload,
   type UpdateSubmittalPayload,
+  closeSubmittal,
   type ApproveSubmittalPayload,
 } from './api';
 import { SubmittalStatusPipeline } from './SubmittalStatusPipeline';
@@ -176,7 +178,7 @@ const textareaCls =
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
-interface SubmittalFormData extends ProcurementFormData {
+interface SubmittalFormData extends ProcurementFormData, PeopleFormData {
   title: string;
   spec_section: string;
   type: SubmittalType;
@@ -194,6 +196,7 @@ const EMPTY_FORM: SubmittalFormData = {
   date_required: '',
   description: '',
   ...EMPTY_PROCUREMENT_FORM,
+  ...EMPTY_PEOPLE_FORM,
 };
 
 /**
@@ -217,6 +220,7 @@ export function submittalFormData(existing?: Submittal): SubmittalFormData {
     date_required: existing.date_required ?? '',
     description: existing.description ?? '',
     ...procurementFormData(existing),
+    ...peopleFormData(existing),
   };
 }
 
@@ -248,7 +252,7 @@ export function buildSubmittalPatch(
     data.date_required = form.date_required || null;
   }
   // The register columns follow the same rule: only what was changed.
-  return { ...data, ...buildProcurementPatch(form, base) };
+  return { ...data, ...buildProcurementPatch(form, base), ...buildPeoplePatch(form, base) };
 }
 
 /**
@@ -460,6 +464,13 @@ function SubmittalFormModal({
         </WideModalField>
       </WideModalSection>
 
+      <SubmittalPeopleFields
+        idPrefix={idPrefix}
+        form={form}
+        onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+        existing={isEdit ? existing : undefined}
+      />
+
       <SubmittalProcurementFields
         idPrefix={idPrefix}
         form={form}
@@ -647,6 +658,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
   projectId,
   onSubmit,
   onReview,
+  onClose,
   onEdit,
   onOpenBoqPosition,
   vocabulary,
@@ -657,6 +669,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
   projectId: string;
   onSubmit: (id: string) => void;
   onReview: (s: Submittal) => void;
+  onClose: (id: string) => void;
   onEdit: (s: Submittal) => void;
   onOpenBoqPosition: (positionId: string) => void;
   vocabulary: SubmittalVocabulary | null;
@@ -941,6 +954,28 @@ const SubmittalRow = React.memo(function SubmittalRow({
               >
                 {t('submittals.action_review', { defaultValue: 'Review' })}
               </Button>
+            )}
+            {(submittal.status === 'approved' ||
+              submittal.status === 'approved_as_noted' ||
+              submittal.status === 'rejected') && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose(submittal.id);
+                }}
+              >
+                {t('submittals.action_close', { defaultValue: 'Close' })}
+              </Button>
+            )}
+            {submittal.distribution_names.length > 0 && (
+              <span className="text-xs text-content-tertiary">
+                {t('submittals.distribution_to', {
+                  defaultValue: 'Distribution: {{names}}',
+                  names: submittal.distribution_names.join(', '),
+                })}
+              </span>
             )}
             <Button
               variant="secondary"
@@ -1279,6 +1314,24 @@ export function SubmittalsPage() {
       }),
   });
 
+  const closeMut = useMutation({
+    mutationFn: (id: string) => closeSubmittal(id),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({ type: 'success', title: t('submittals.closed', { defaultValue: 'Submittal closed' }) });
+    },
+    onError: (e: Error, id) =>
+      addToast({
+        type: 'error',
+        title: t('submittals.close_failed', {
+          defaultValue: 'Failed to close {{number}}',
+          number: submittalLabelById(id),
+        }),
+        message: e.message,
+      }),
+  });
+  const handleClose = useCallback((id: string) => closeMut.mutate(id), [closeMut]);
+
   const approveMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: ApproveSubmittalPayload }) =>
       submitReviewDecision(id, data),
@@ -1340,6 +1393,7 @@ export function SubmittalsPage() {
         submittal_type: formData.type,
         date_required: formData.date_required || undefined,
         ...buildProcurementCreate(formData),
+        ...buildPeopleCreate(formData),
         ...(containerId && { metadata: { cde_container_id: containerId } }),
       });
       sourceContainerIdRef.current = '';
@@ -1730,6 +1784,7 @@ export function SubmittalsPage() {
                   projectId={projectId}
                   onSubmit={handleSubmit}
                   onReview={handleReview}
+                  onClose={handleClose}
                   onEdit={handleEdit}
                   onOpenBoqPosition={handleOpenBoqPosition}
                   vocabulary={vocabulary}
