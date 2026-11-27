@@ -28,6 +28,7 @@ import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { usePreferencesStore, useNumberLocale } from '@/stores/usePreferencesStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
+import { orderAfterLineMove, orderAfterSectionMove, siblingDropTarget } from './boqReorder';
 import {
   boqApi,
   billDirectCost,
@@ -2317,39 +2318,30 @@ export function BOQEditorPage() {
     },
   });
 
+  /* A drag sends the lines the grid showed; the server renumbers only what it
+   * is given, so the full bill is completed here or the moved rows fall back. */
   const handleReorderPositions = useCallback(
     (reorderedIds: string[]) => {
       if (!boq || reorderedIds.length === 0) return;
-      reorderMutation.mutate(reorderedIds);
+      reorderMutation.mutate(orderAfterLineMove(boq.positions, reorderedIds));
     },
     [boq, reorderMutation],
   );
 
-  /* ── Section reorder (drag section onto another section) ─────── */
+  /* ── Section reorder (drag section onto another row) ─────────── */
   const handleReorderSections = useCallback(
-    (fromId: string, toId: string) => {
+    (fromId: string, overId: string) => {
       if (!boq) return;
-      const sectionIds = grouped.sections.map((g) => g.section.id);
-      const fromIdx = sectionIds.indexOf(fromId);
-      const toIdx = sectionIds.indexOf(toId);
-      if (fromIdx === -1 || toIdx === -1) return;
-      const reordered = [...sectionIds];
-      reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, fromId);
-      // Build full position order: sections interleaved with their children
-      const fullOrder: string[] = [];
-      for (const secId of reordered) {
-        fullOrder.push(secId);
-        const group = grouped.sections.find((g) => g.section.id === secId);
-        if (group) {
-          for (const child of group.children) fullOrder.push(child.id);
-        }
+      // The drop may land on a line or sub-section inside a sibling section.
+      const toId = siblingDropTarget(boq.positions, fromId, overId);
+      const order = toId ? orderAfterSectionMove(boq.positions, fromId, toId) : null;
+      if (!order) {
+        invalidateAll();
+        return;
       }
-      // Include ungrouped at the end
-      for (const pos of grouped.ungrouped) fullOrder.push(pos.id);
-      reorderMutation.mutate(fullOrder);
+      reorderMutation.mutate(order);
     },
-    [boq, grouped, reorderMutation],
+    [boq, reorderMutation, invalidateAll],
   );
 
   /* ── Delete section with all its positions ──────────────────── */

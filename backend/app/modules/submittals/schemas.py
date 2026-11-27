@@ -80,6 +80,35 @@ def _normalise_register_fields(data: Any) -> Any:
     return out
 
 
+_MAX_DISTRIBUTION = 200
+
+
+def _user_id(value: Any) -> Any:
+    """A user id as its canonical string; anything else is refused."""
+    if value is None:
+        return None
+    if isinstance(value, str) and not value.strip():
+        return None
+    try:
+        return str(UUID(str(value).strip()))
+    except (ValueError, TypeError, AttributeError):
+        raise ValueError("must be a user id") from None
+
+
+def _user_ids(value: Any) -> Any:
+    """A distribution list as unique canonical user ids, in the order given."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("must be a list of user ids")
+    out: list[str] = []
+    for raw in value:
+        uid = _user_id(raw)
+        if uid and uid not in out:
+            out.append(uid)
+    return out
+
+
 class _RegisterFields(BaseModel):
     """The register columns a create and an update share, all optional."""
 
@@ -91,8 +120,15 @@ class _RegisterFields(BaseModel):
     review_period_days: int | None = Field(default=None, ge=0, le=_MAX_REVIEW_PERIOD_DAYS)
     required_on_site_date: str | None = Field(default=None, pattern=_DATE_PATTERN)
     lead_time_weeks: int | None = Field(default=None, ge=0, le=_MAX_LEAD_TIME_WEEKS)
+    # Who receives the submittal for information, as user ids.
+    distribution_list: list[str] | None = Field(default=None, max_length=_MAX_DISTRIBUTION)
 
     _register_codes = model_validator(mode="before")(_normalise_register_fields)
+
+    @field_validator("distribution_list", mode="before")
+    @classmethod
+    def _distribution_ids(cls, value: Any) -> Any:
+        return _user_ids(value)
 
     @field_validator("manufacturer", "model_reference", "supplier", mode="before")
     @classmethod
@@ -123,6 +159,12 @@ class SubmittalCreate(_RegisterFields):
         ),
     )
     ball_in_court: str | None = Field(default=None, max_length=100)
+
+    @field_validator("ball_in_court", mode="before")
+    @classmethod
+    def _ball_is_a_user(cls, value: Any) -> Any:
+        return _user_id(value)
+
     current_revision: int = Field(default=1, ge=1)
     submitted_by_org: str | None = Field(default=None, max_length=255)
     reviewer_id: str | None = Field(default=None, max_length=36)
@@ -161,6 +203,12 @@ class SubmittalUpdate(_RegisterFields):
         ),
     )
     ball_in_court: str | None = Field(default=None, max_length=100)
+
+    @field_validator("ball_in_court", mode="before")
+    @classmethod
+    def _ball_is_a_user(cls, value: Any) -> Any:
+        return _user_id(value)
+
     current_revision: int | None = Field(default=None, ge=1)
     submitted_by_org: str | None = Field(default=None, max_length=255)
     reviewer_id: str | None = Field(default=None, max_length=36)
@@ -251,6 +299,8 @@ class SubmittalResponse(BaseModel):
     long_lead: bool = False
     lead_time_weeks: int | None = None
     linked_drawing_ids: list[str] = Field(default_factory=list)
+    distribution_list: list[str] = Field(default_factory=list)
+    distribution_names: list[str] = Field(default_factory=list)
     review_history: list[dict[str, Any]] = Field(default_factory=list)
     # The reviewer's decision on the current revision and the mark for it.
     # ``review_outcome`` falls back to a status that is itself a decision, so
