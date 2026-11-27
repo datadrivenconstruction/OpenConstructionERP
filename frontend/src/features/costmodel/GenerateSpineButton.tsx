@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Network } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
@@ -60,6 +61,7 @@ export function GenerateSpineButton({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { reason: writeReason } = useRoleGate('editor');
 
   const generate = useMutation({
     // The error is shown here in the user's language; the global toast would repeat it raw.
@@ -109,6 +111,7 @@ export function GenerateSpineButton({
       size={size}
       icon={<Network size={size === 'sm' ? 14 : 16} />}
       loading={generate.isPending}
+      disabledReason={writeReason}
       onClick={handleClick}
     >
       {t('costmodel.spine.generate_cta', { defaultValue: 'Generate from BOQ' })}

@@ -9,7 +9,7 @@
 //   2. On success the ['spine', projectId] query is invalidated so the spine
 //      panel refetches.
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -60,7 +60,12 @@ vi.mock('./api', () => ({
 }));
 
 import { ApiError } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { GenerateSpineButton } from './GenerateSpineButton';
+
+beforeEach(() => {
+  useAuthStore.setState({ userRole: 'editor' });
+});
 
 afterEach(() => {
   cleanup();
@@ -84,6 +89,18 @@ function renderButton(projectId = 'proj-1') {
 }
 
 describe('<GenerateSpineButton>', () => {
+  it('is disabled with a reason for a viewer and enabled for an editor', () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    const { unmount } = renderButton();
+    const btn = screen.getByRole('button', { name: /Generate from BOQ/i });
+    expect(btn).toBeDisabled();
+    expect(btn.getAttribute('aria-describedby')).toBeTruthy();
+    unmount();
+    useAuthStore.setState({ userRole: 'editor' });
+    renderButton();
+    expect(screen.getByRole('button', { name: /Generate from BOQ/i })).toBeEnabled();
+  });
+
   it('shows a toast with the created counts on success', async () => {
     generateSpineMock.mockResolvedValueOnce({ accounts_created: 5, cost_lines_created: 42 });
     renderButton();

@@ -80,6 +80,7 @@ function renderPanel() {
 }
 
 beforeEach(() => {
+  useAuthStore.setState({ userRole: 'editor' });
   for (const fn of Object.values(api)) fn.mockReset();
   toast.addToast.mockReset();
   api.getStructure.mockResolvedValue(tree());
@@ -220,7 +221,10 @@ describe('<CostStructurePanel>', () => {
     renderPanel();
     const btn = await screen.findByRole('button', { name: /import code list/i });
     expect(btn).toBeDisabled();
-    expect(btn.getAttribute('title') || btn.getAttribute('aria-label') || '').toMatch(/editor|manager|administrator/i);
+    expect(btn.getAttribute('title') || '').toMatch(/editor|manager|administrator/i);
+    for (const name of [/build from code list/i, /generate from boq/i]) {
+      expect(screen.getByRole('button', { name })).toBeDisabled();
+    }
     useAuthStore.setState({ userRole: 'editor' });
   });
 
@@ -228,5 +232,6 @@ describe('<CostStructurePanel>', () => {
     useAuthStore.setState({ userRole: 'editor' });
     renderPanel();
     expect(await screen.findByRole('button', { name: /import code list/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /generate from boq/i })).toBeEnabled();
   });
 });

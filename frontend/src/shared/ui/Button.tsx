@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { createContext, forwardRef, useContext, type ButtonHTMLAttributes } from 'react';
+import { createContext, forwardRef, useContext, useId, useState, type ButtonHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -14,8 +14,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconPosition?: 'left' | 'right';
   /**
    * Why the action is unavailable to this user ("Only a manager can do this").
-   * A non-empty reason disables the button and shows the reason as its tooltip;
-   * the button stays visible, so a reader sees what exists and who can use it.
+   * A non-empty reason disables the button and shows the reason in a tooltip
+   * that opens on hover, keyboard focus or tap of a wrapper (a disabled button
+   * gets no pointer or focus events); the button stays visible, so a reader sees what exists and who can use it.
    */
   disabledReason?: string | null;
 }
@@ -90,8 +91,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const reason = disabledReason?.trim() || undefined;
     const isDisabled = disabled || loading || !!reason;
     const iconOnly = !children && !!icon && !loading;
+    const tipId = useId();
+    const [tipOpen, setTipOpen] = useState(false);
 
-    return (
+    const control = (
       <button
         ref={ref}
         data-oe-button={variant}
@@ -99,6 +102,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-disabled={isDisabled || undefined}
         aria-busy={loading || undefined}
         title={reason ?? title}
+        aria-describedby={reason ? tipId : props['aria-describedby']}
         // The reason takes the tooltip; the control keeps its own name.
         aria-label={reason && title && !props['aria-label'] ? title : undefined}
         className={clsx(
@@ -111,7 +115,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           sizeStyles[effSize],
           iconOnly && iconOnlyStyles[effSize],
           // A reason needs the pointer to reach the button, or its tooltip never shows.
-          isDisabled && (reason ? 'cursor-not-allowed active:scale-100' : 'pointer-events-none'),
+          isDisabled && (reason ? 'pointer-events-none active:scale-100' : 'pointer-events-none'),
           isDisabled && !loading && 'opacity-40',
           className,
         )}
@@ -131,6 +135,38 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         )}
       </button>
+    );
+
+    if (!reason) return control;
+    return (
+      <span
+        tabIndex={0}
+        data-oe-disabled-reason=""
+        className={clsx(
+          'relative inline-flex cursor-not-allowed rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60',
+          className?.includes('w-full') && 'w-full',
+        )}
+        onMouseEnter={() => setTipOpen(true)}
+        onMouseLeave={() => setTipOpen(false)}
+        onFocus={() => setTipOpen(true)}
+        onBlur={() => setTipOpen(false)}
+        onClick={() => setTipOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setTipOpen(false);
+        }}
+      >
+        {control}
+        {
+          <span
+            id={tipId}
+            role="tooltip"
+            hidden={!tipOpen}
+            className="absolute start-0 top-full z-50 mt-1 w-max max-w-[16rem] whitespace-normal rounded-md border border-border bg-surface-primary px-2 py-1 text-2xs leading-snug text-content-tertiary shadow-sm"
+          >
+            {reason}
+          </span>
+        }
+      </span>
     );
   },
 );

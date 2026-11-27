@@ -447,6 +447,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
           icon={<ListTree size={14} />}
           disabled={!chosenKey}
           loading={apply.isPending}
+          disabledReason={writeReason}
           onClick={() => apply.mutate()}
         >
           {t('costmodel.structure.apply_cta', { defaultValue: 'Build from code list' })}
