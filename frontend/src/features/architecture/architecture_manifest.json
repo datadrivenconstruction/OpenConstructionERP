@@ -81050,6 +81050,7 @@
         "budget_ledger_rules.py",
         "budget_ledger_schemas.py",
         "budget_ledger_service.py",
+        "budget_line_lookup.py",
         "cashflow_forecast.py",
         "cashflow_forecast_data.py",
         "cashflow_forecast_demo.py",
@@ -81070,6 +81071,9 @@
         "cost_control_schemas.py",
         "cost_control_service.py",
         "cost_control_settings.py",
+        "cost_type_grid.py",
+        "cost_type_router.py",
+        "cost_type_rules.py",
         "data_paths.py",
         "elemental.py",
         "events.py",
@@ -218426,6 +218430,12 @@
               "nullable": true
             },
             {
+              "name": "budget_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "sort_order",
               "annotation": "Mapped[int]",
               "sql_type": "Integer",
@@ -219546,6 +219556,11 @@
               "description": "Cost line to commit against. Takes precedence over boq_position_id."
             },
             {
+              "name": "budget_line_id",
+              "type": "UUID | None",
+              "description": "Budget line (cost code x cost type) the line's commitment rolls into."
+            },
+            {
               "name": "requisition_item_id",
               "type": "UUID | None",
               "description": "Requisition line this order line came from. Set by the requisition conversion."
@@ -219819,6 +219834,11 @@
             {
               "name": "cost_category",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_line_id",
+              "type": "UUID | None",
               "default": "None"
             },
             {
@@ -304577,6 +304597,12 @@
               "nullable": true
             },
             {
+              "name": "budget_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "status",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -306948,6 +306974,11 @@
               "default": "None"
             },
             {
+              "name": "budget_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "notes",
               "type": "str | None",
               "default": "None"
@@ -307086,6 +307117,11 @@
               "default": "None"
             },
             {
+              "name": "budget_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "status",
               "type": "str | None"
             },
@@ -307159,6 +307195,11 @@
             },
             {
               "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_line_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -309898,6 +309939,7 @@
         "changeorders",
         "contacts",
         "contracts",
+        "costmodel",
         "doc_templates",
         "finance",
         "geo_hub",
@@ -345093,10 +345135,10 @@
     },
     {
       "name": "costmodel",
-      "ts_files": 30,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 30
+      "test_files": 10,
+      "total_files": 34
     },
     {
       "name": "costs",
@@ -348374,6 +348416,7 @@
       "changeorders",
       "contacts",
       "contracts",
+      "costmodel",
       "doc_templates",
       "finance",
       "geo_hub",
@@ -348550,13 +348593,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11598,
+    "total_columns": 11600,
     "total_relationships": 264,
     "total_routes": 5613,
     "total_schemas": 5246,
-    "total_python_files": 3855,
+    "total_python_files": 3859,
     "frontend_features": 254,
-    "frontend_ts_files": 4591,
+    "frontend_ts_files": 4595,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
