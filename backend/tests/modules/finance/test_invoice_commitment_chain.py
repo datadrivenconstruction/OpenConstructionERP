@@ -224,6 +224,7 @@ async def _project(session: AsyncSession, currency: str = "USD") -> uuid.UUID:
 async def _order(session: AsyncSession, project_id: uuid.UUID, net: str = "10000.00", **over: object) -> uuid.UUID:
     from app.modules.procurement.models import PurchaseOrder
 
+    fields: dict[str, object] = {"status": "issued", **over}
     po = PurchaseOrder(
         id=uuid.uuid4(),
         project_id=project_id,
@@ -233,8 +234,7 @@ async def _order(session: AsyncSession, project_id: uuid.UUID, net: str = "10000
         amount_subtotal=net,
         tax_amount="0",
         amount_total=net,
-        status="issued",
-        **over,
+        **fields,
     )
     session.add(po)
     await session.flush()
@@ -780,3 +780,97 @@ async def test_an_approved_change_order_can_still_be_split_but_not_repriced(sess
     assert (after.approved_changes, after.shared_change_orders) == (Decimal("700.00"), 0)
     with pytest.raises(HTTPException):
         await service.update_order(order.id, ChangeOrderUpdate(cost_impact="1000.00"))
+
+
+# ── review: project scope, posted relinks, draft orders, wording ─────────────
+
+
+@pytest.mark.asyncio
+async def test_the_posting_check_never_shows_an_order_of_another_project(session: AsyncSession) -> None:
+    mine, theirs = await _project(session), await _project(session)
+    their_po = await _order(session, theirs, "13000.00")
+    with pytest.raises(HTTPException) as hidden:
+        await FinanceService(session).posting_check(
+            {
+                "project_id": mine,
+                "invoice_direction": "payable",
+                "purchase_order_id": their_po,
+                "currency_code": "USD",
+                "amount_subtotal": "10.00",
+            }
+        )
+    assert hidden.value.status_code == 404
+    assert "13000" not in str(hidden.value.detail)
+
+
+@pytest.mark.asyncio
+async def test_the_posting_check_refuses_a_draft_order_as_creating_the_invoice_does(session: AsyncSession) -> None:
+    project_id = await _project(session)
+    draft = await _order(session, project_id, status="draft")
+    state = {
+        "project_id": project_id,
+        "invoice_direction": "payable",
+        "purchase_order_id": draft,
+        "currency_code": "USD",
+        "amount_subtotal": "10.00",
+    }
+    with pytest.raises(HTTPException) as on_check:
+        await FinanceService(session).posting_check(state)
+    with pytest.raises(HTTPException) as on_create:
+        await _invoice(FinanceService(session), project_id, "10.00", purchase_order_id=draft)
+    assert on_check.value.status_code == on_create.value.status_code == 422
+    assert on_check.value.detail == on_create.value.detail
+
+
+@pytest.mark.asyncio
+async def test_an_approved_invoice_relinked_to_an_order_is_weighed_against_it(session: AsyncSession) -> None:
+    # 62,000 approved without an order cannot then be moved onto an order of 13,000.
+    project_id = await _project(session)
+    po_id = await _order(session, project_id, "13000.00")
+    service = FinanceService(session)
+    invoice_id = await _invoice(service, project_id, "62000.00")
+    await service.approve_invoice(invoice_id)
+    with pytest.raises(HTTPException) as refused:
+        await service.update_invoice(invoice_id, InvoiceUpdate(purchase_order_id=po_id))
+    assert refused.value.status_code == 422
+    assert refused.value.detail["rule_id"] == "invoice_posting.within_commitment"
+
+    fits = await _invoice(service, project_id, "12000.00")
+    await service.approve_invoice(fits)
+    assert (await service.update_invoice(fits, InvoiceUpdate(purchase_order_id=po_id))).purchase_order_id == po_id
+
+
+@pytest.mark.asyncio
+async def test_listing_commitments_reads_the_project_invoices_once(session: AsyncSession) -> None:
+    from sqlalchemy import event
+
+    from app.modules.finance.commitment import list_commitments
+
+    project_id = await _project(session)
+    orders = [await _order(session, project_id, "1000.00") for _ in range(3)]
+    service = FinanceService(session)
+    for po_id in orders:
+        await service.approve_invoice(await _invoice(service, project_id, "100.00", purchase_order_id=po_id))
+
+    reads: list[str] = []
+
+    def count(_conn, _cursor, statement, *_args) -> None:
+        if "FROM oe_finance_invoice " in statement or statement.rstrip().endswith("FROM oe_finance_invoice"):
+            reads.append(statement)
+
+    engine = session.bind.sync_engine if hasattr(session.bind, "sync_engine") else session.bind
+    event.listen(engine, "before_cursor_execute", count)
+    try:
+        found = await list_commitments(session, project_id, None)
+    finally:
+        event.remove(engine, "before_cursor_execute", count)
+    assert [c.invoiced for c in found] == [Decimal("100.00")] * 3
+    assert len(reads) == 1
+
+
+def test_an_amount_in_a_german_sentence_is_written_the_german_way() -> None:
+    from app.core.currency_registry import sentence_amount
+
+    assert sentence_amount(Decimal("1500"), "USD", locale="en") == "1,500.00 USD"
+    assert sentence_amount(Decimal("1500"), "USD", locale="de") == "1.500,00 $"
+    assert sentence_amount(Decimal("1500"), "EUR", locale="de") == "1.500,00 €"
