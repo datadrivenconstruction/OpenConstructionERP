@@ -1532,6 +1532,13 @@ def rvt_failure_status(cause: str) -> str:
     return "needs_converter" if cause == "converter_outdated" else "error"
 
 
+def _ifc_converter_missing() -> bool:
+    """True when no DDC IFC converter binary is installed."""
+    from app.modules.boq.cad_import import find_converter
+
+    return find_converter("ifc") is None
+
+
 async def _process_cad_in_background(
     *,
     project_id: str,
@@ -1574,7 +1581,8 @@ async def _process_cad_in_background(
     # Pre-flight: check the converter binary up front so we can surface a
     # specific actionable error ("install the RVT converter") instead of the
     # generic "no elements extracted" message that lands when DDC isn't found
-    # mid-pipeline. IFC has a built-in text fallback so we don't gate on it.
+    # mid-pipeline. IFC is checked after the conversion instead (see the
+    # zero-element branch below), once provisioning had its chance.
     #
     # Two-stage check (added 2026-04-28 to address "many problems with the
     # converters and downloading"):
@@ -1645,17 +1653,11 @@ async def _process_cad_in_background(
         except Exception:  # noqa: BLE001 - pre-flight is best-effort
             logger.exception("RVT converter pre-flight check failed for %s", model_id)
 
-    # IFC pre-provision: always try to get the DDC IFC converter so the
-    # element table carries the model's full property and quantity sets, not
-    # just what the text fallback parser reads. IFC has a text fallback (so we
-    # do NOT gate the import on the converter the way RVT does), but on a fresh
-    # install the converter is missing and the inline ``ensure_converter`` call
-    # inside ``process_ifc_file`` would race a cold ~35 MB download.
-    # Provisioning it here, up front and off the request path, means the
-    # conversion below uses the converter on the first upload instead of
-    # silently degrading to the text parser. This is
-    # best-effort: a genuine failure (offline / locked-down host) just falls
-    # through to the text fallback, so the import still completes.
+    # IFC pre-provision: fetch the DDC IFC converter up front, off the request
+    # path, so the inline ``ensure_converter`` call inside ``process_ifc_file``
+    # does not race a cold ~35 MB download. Best-effort: when it fails the
+    # conversion below finds no converter and the model ends in
+    # ``needs_converter`` (real uploads never use the text STEP parser).
     if ext.lower() == ".ifc":
         try:
             from app.modules.boq.cad_import import (
@@ -1673,12 +1675,9 @@ async def _process_cad_in_background(
                 converter_path = await asyncio.to_thread(_ensure, "ifc")
                 logger.info("IFC converter provisioned at %s for model %s", converter_path, model_id)
         except Exception as exc:  # noqa: BLE001 - provisioning is best-effort
-            # Do NOT fail the import here: the text fallback still produces a
-            # usable (placeholder) result, and the metadata path below will
-            # honestly flag it as placeholder so the UI nudges the user.
+            # The conversion below reports the missing converter to the user.
             logger.warning(
-                "IFC converter auto-provision failed for model %s (%s) - "
-                "falling back to the built-in text parser (placeholder geometry)",
+                "IFC converter auto-provision failed for model %s (%s)",
                 model_id,
                 exc,
             )
@@ -1699,7 +1698,7 @@ async def _process_cad_in_background(
             # last. The worker inherits a copy of this context, so it fills
             # in the same record object; we take our copy of it here, while
             # the scope is still open.
-            from app.modules.bim_hub.ifc_processor import ddc_failure_scope
+            from app.modules.bim_hub.ifc_processor import ddc_failure_scope, text_step_fallback_disabled
 
             # Once a queued conversion gets its slot, the progress clock restarts:
             # time spent waiting must not count against the conversion time limit.
@@ -1713,7 +1712,8 @@ async def _process_cad_in_background(
             _hook_token = slot_acquired_hook.set(_on_slot)
             try:
                 with ddc_failure_scope() as _ddc_record:
-                    result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
+                    with text_step_fallback_disabled():
+                        result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
                     ddc_failure = dict(_ddc_record)
             finally:
                 slot_acquired_hook.reset(_hook_token)
@@ -2050,6 +2050,19 @@ async def _process_cad_in_background(
                         "exit_code": ddc_failure.get("exit_code"),
                         "stderr_tail": stderr_tail,
                     }
+                elif ext == ".ifc" and not ddc_failure.get("reason") and _ifc_converter_missing():
+                    # No converter, no import: the text STEP parser is for demo
+                    # placeholders and tests, never for a real upload.
+                    model.status = "needs_converter"
+                    model.error_message = (
+                        "The IFC converter (DDC cad2data) is not installed on this server. "
+                        "Open Settings → BIM Converters, click Install for IFC, then click Retry on this model."
+                    )
+                    meta["error_code"] = "ddc_not_found"
+                    meta["suggested_actions"] = ["install_converter"]
+                    meta["converter_id"] = "ifc"
+                    meta["install_endpoint"] = "/api/v1/takeoff/converters/ifc/install/"
+                    meta["verify_endpoint"] = "/api/v1/takeoff/converters/ifc/verify/"
                 else:
                     # Default disposition is a hard ``error`` - but a file that
                     # READ CLEANLY and simply has no physical products is NOT a

@@ -2120,6 +2120,19 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
     return None
 
 
+_TEXT_STEP_FALLBACK: ContextVar[bool] = ContextVar("oe_text_step_fallback", default=True)
+
+
+@contextmanager
+def text_step_fallback_disabled() -> Iterator[None]:
+    """Turn the text STEP parser off for the current context (real user uploads)."""
+    token = _TEXT_STEP_FALLBACK.set(False)
+    try:
+        yield
+    finally:
+        _TEXT_STEP_FALLBACK.reset(token)
+
+
 def process_ifc_file(
     ifc_path: Path,
     output_dir: Path,
@@ -2129,7 +2142,10 @@ def process_ifc_file(
 
     Pipeline:
     1. Try DDC cad2data (full conversion with geometry)
-    2. Fallback: text-based IFC parser (elements only, box geometry)
+    2. Fallback: text-based IFC parser (elements only, box geometry). It exists
+       for demo placeholders and tests; real uploads run inside
+       :func:`text_step_fallback_disabled`, so a missing or failing converter
+       is an error, not a degraded import.
 
     Args:
         conversion_depth: 'standard' (~15 key columns, faster) or
@@ -2156,6 +2172,12 @@ def process_ifc_file(
 
     # Step 2: Fallback to text parser (IFC only)
     ext = ifc_path.suffix.lower()
+    if not _TEXT_STEP_FALLBACK.get():
+        result = _empty_result()
+        if cad_empty_reason:
+            result["empty_reason"] = cad_empty_reason
+            result["raw_row_count"] = cad_raw_row_count
+        return result
     if ext != ".ifc":
         logger.warning("Text parser only supports IFC, not %s. Use cad2data for RVT.", ext)
         result = _empty_result()

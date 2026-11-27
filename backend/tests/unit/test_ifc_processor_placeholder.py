@@ -176,3 +176,17 @@ def test_ddc_path_without_real_dae_falls_back_to_placeholder(temp_dir):
 
     assert result["geometry_quality"] == "placeholder"
     assert all(e.get("is_placeholder") is True for e in result["elements"])
+
+
+def test_text_step_fallback_is_off_for_real_uploads(minimal_ifc_file, temp_dir, monkeypatch):
+    """Real uploads never fall back to the text STEP parser; demo placeholders and tests still do."""
+    from app.modules.bim_hub import ifc_processor
+
+    monkeypatch.setattr(ifc_processor, "_try_cad2data", lambda *a, **k: None)
+
+    assert process_ifc_file(minimal_ifc_file, temp_dir)["element_count"] > 0
+
+    with ifc_processor.text_step_fallback_disabled():
+        result = process_ifc_file(minimal_ifc_file, temp_dir)
+    assert result["element_count"] == 0
+    assert ifc_processor._TEXT_STEP_FALLBACK.get() is True
