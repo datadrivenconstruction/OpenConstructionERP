@@ -42,6 +42,9 @@ import { fmtList } from '../formatters';
 // measuring what it is about.
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 
+// The app's `languageChanged` listener fetches each language's bundle. Walking all of
+// them below then held every locale in one fork and ran it past 4 GB; fmtList needs none.
+i18next.off('languageChanged');
 void i18next.init({ lng: 'en', resources: {}, initAsync: false });
 const original = i18next.language;
 afterAll(() => {
