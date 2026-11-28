@@ -168,7 +168,7 @@ dependencies = [
     # was lifted on 2026-09-08. Keep the <4 ceiling: a new major gets the same
     # deliberate run before it is let in.
     "pandas>=2.2.0,<4",
-    "pyarrow>=23.0.1,<26",
+    "pyarrow>=23.0.1,<27",
     "trimesh>=4.0.0,<6",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
     # "collada"); without it trimesh.load() of a .dae raises ImportError and the
