@@ -680,6 +680,31 @@ async def unverify_certificate(
     return CertificateResponse.model_validate(entity)
 
 
+async def _download_bid_file_certificate(session: Any, user_id: Any, meta: dict) -> StreamingResponse:
+    """The file a bidder sent through its tender link, for a member of the tender's project."""
+    from app.core.storage import is_within_safe_root  # noqa: PLC0415
+    from app.modules.tendering.models import TenderBidFile, TenderPackage  # noqa: PLC0415
+
+    try:
+        file_id = uuid.UUID(str(meta["bid_file_id"]))
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No file attached") from None
+    row = await session.get(TenderBidFile, file_id)
+    package = await session.get(TenderPackage, row.package_id) if row is not None else None
+    if row is None or package is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    await verify_project_access(package.project_id, user_id, session)
+    path = Path(row.file_path).resolve()
+    if not is_within_safe_root(path, extra_roots=[module_uploads_dir("tendering").resolve()]) or not path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    data = await asyncio.to_thread(path.read_bytes)
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type=row.mime_type or "application/octet-stream",
+        headers={"Content-Disposition": attachment_disposition(row.file_name), "X-Content-Type-Options": "nosniff"},
+    )
+
+
 @router.get("/certificates/{certificate_id}/download")
 async def download_certificate(
     certificate_id: uuid.UUID,
@@ -687,10 +712,12 @@ async def download_certificate(
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> StreamingResponse:
-    """Open the file behind a certificate that was attached through an agreement."""
+    """Open the file behind a certificate attached through an agreement or sent through a bid link."""
     svc = SubcontractorService(session)
     entity = await svc.certs.get_by_id(certificate_id)
     meta = (entity.metadata_ or {}) if entity is not None else {}
+    if meta.get("bid_file_id"):
+        return await _download_bid_file_certificate(session, user_id, meta)
     try:
         agreement_id = uuid.UUID(str(meta.get("agreement_id")))
         document_id = uuid.UUID(str(meta.get("source_document_id")))

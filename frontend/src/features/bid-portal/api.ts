@@ -39,7 +39,7 @@ export type BidPricingMode = 'unit_price' | 'lump_sum';
 
 export type BidPortalState = 'open' | 'submitted' | 'closed' | 'declined';
 
-export type BidFileKind = 'x84' | 'offer_pdf' | 'attachment';
+export type BidFileKind = 'x84' | 'offer_pdf' | 'attachment' | 'insurance';
 
 /** A file this firm uploaded through its link. */
 export interface BidPortalFile {
@@ -180,6 +180,7 @@ const DETAIL_CODES: Record<string, BidPortalErrorCode> = {
   empty_file: 'file_rejected',
   file_type_not_allowed: 'file_rejected',
   not_a_pdf: 'file_rejected',
+  invalid_valid_until: 'file_rejected',
   file_too_large: 'file_too_large',
   too_many_files: 'too_many_files',
 };
@@ -257,8 +258,16 @@ export function submitBidX84(token: string, file: File, notes = ''): Promise<Bid
   return call(token, 'x84/', { method: 'POST', body: fileForm(file, { notes }) });
 }
 
-export function uploadBidFile(token: string, file: File, kind: 'offer_pdf' | 'attachment'): Promise<BidPortalView> {
-  return call(token, 'files/', { method: 'POST', body: fileForm(file, { kind }) });
+export function uploadBidFile(
+  token: string,
+  file: File,
+  kind: 'offer_pdf' | 'attachment' | 'insurance',
+  validUntil = '',
+): Promise<BidPortalView> {
+  return call(token, 'files/', {
+    method: 'POST',
+    body: fileForm(file, validUntil ? { kind, valid_until: validUntil } : { kind }),
+  });
 }
 
 export function declineBid(token: string, reason: string): Promise<BidPortalView> {

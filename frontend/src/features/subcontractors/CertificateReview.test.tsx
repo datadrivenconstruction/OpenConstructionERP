@@ -27,11 +27,11 @@ const cert = {
   metadata: { source_document_id: 'd-1' },
 } as unknown as api.Certificate;
 
-function wrap() {
+function wrap(shown: api.Certificate = cert) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <CertificateReview cert={cert} label="Insurance" />
+      <CertificateReview cert={shown} label="Insurance" />
     </QueryClientProvider>,
   );
 }
@@ -51,5 +51,11 @@ describe('CertificateReview', () => {
     useAuthStore.setState({ userRole: 'editor' });
     wrap();
     expect(screen.queryByText('Mark as verified')).toBeNull();
+  });
+
+  it('opens the file a bidder sent through its tender link', () => {
+    useAuthStore.setState({ userRole: 'manager' });
+    wrap({ ...cert, metadata: { source: 'bid_portal', bid_file_id: 'f-1' } } as api.Certificate);
+    expect(screen.getByText('Open file')).toBeTruthy();
   });
 });
