@@ -124,7 +124,7 @@ from app.modules.boq.exchange_fidelity_router import exchange_fidelity_router
 from app.modules.boq.exchange_fidelity_service import with_exchange_fidelity
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.gaeb_exchange_router import gaeb_exchange_router
-from app.modules.boq.importers._encoding import is_price_placeholder
+from app.modules.boq.importers._encoding import is_price_placeholder, parse_numeric_cell
 from app.modules.boq.importers.excel import (
     _parse_csv,
     _parse_rows_from_csv,
@@ -7278,21 +7278,7 @@ def _parse_numeric_cell(value: Any) -> tuple[float | None, str | None]:
     so callers can return a 400 with row + offending text rather than
     silently zero-filling and crashing later in the rollup.
     """
-    if value is None:
-        return 0.0, None
-    if isinstance(value, bool):
-        # ``bool`` is an ``int`` subclass - explicitly reject so True/False
-        # is not silently accepted as 1/0 in a numeric column.
-        return None, f"expected a number, got boolean {value!r}"
-    if isinstance(value, (int, float)):
-        return float(value), None
-    text = str(value).strip()
-    if not text:
-        return 0.0, None
-    parsed = _safe_float(text, default=float("nan"))
-    if parsed != parsed:  # NaN check - ``_safe_float`` returns NaN on miss
-        return None, f"expected a number, got {text!r}"
-    return parsed, None
+    return parse_numeric_cell(value)
 
 
 # ── Round-trip apply (GitHub #360) ────────────────────────────────────────────

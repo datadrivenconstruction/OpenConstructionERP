@@ -335,6 +335,27 @@ def parse_numeric_cell(
     # Sentinel for unparseable: safe_float returns NaN-equivalent only
     # if we explicitly ask for it. Easier to re-parse with a NaN-default.
     parsed = safe_float(text, default=float("nan"))
-    if parsed != parsed:  # NaN - safe_float couldn't coerce it.
+    if parsed != parsed or _drops_digits(text):  # NaN - safe_float couldn't coerce it.
         return None, f"expected a number, got {text!r}"
     return parsed, None
+
+
+# What may follow a number and still hold a digit: a squared or cubed unit, alone or per a
+# currency ("m3", "m²", "€/m2", "EUR / m³").
+_UNIT_WITH_DIGIT = re.compile(r"^\s*(?:[^\d\s/]{0,4}\s*/\s*)?[^\W\d_]{1,3}[23²³]\s*$")
+
+
+def _drops_digits(text: str) -> bool:
+    """Whether :func:`safe_float` would read ``text`` by throwing digits away.
+
+    It keeps the leading number and drops the rest, which is right for "150 EUR" and
+    "3.0 m", and wrong for "1O0" (a letter O for a zero, read as 1), "12-15" or "5 x 3".
+    """
+    rest = strip_currency(fold_width(text).strip())
+    if rest[:1] in "+-":
+        rest = strip_currency(rest[1:].strip())
+    m = re.match(r"[0-9][0-9.,\s'’  ]*", rest)
+    if not m:
+        return False
+    tail = rest[m.end() :]
+    return any(ch.isdigit() for ch in tail) and not _UNIT_WITH_DIGIT.match(tail)
