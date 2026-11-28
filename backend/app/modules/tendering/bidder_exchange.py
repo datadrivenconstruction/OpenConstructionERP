@@ -8,8 +8,10 @@
   mismatch per line before anything is stored; a clean file is submitted
   through the link's regular submit path, so sealed mode, deadlines, revisions
   and the receipt behave exactly as for typed prices.
-* **Upload an offer PDF or attachments.** Kept per firm, filed with the
-  project's documents.
+* **Upload an offer PDF, an insurance certificate or attachments.** Kept per
+  firm, filed with the project's documents. An insurance certificate of a firm
+  the buyer picked from the subcontractor directory also lands in that firm's
+  certificate register, awaiting review.
 * **Decline to bid,** with a reason the buyer reads per firm.
 * **Download request documents** the buyer attached to the package.
 
@@ -22,7 +24,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -46,8 +48,13 @@ logger = logging.getLogger(__name__)
 MAX_BIDDER_FILE_BYTES = 25 * 1024 * 1024
 #: Files one firm may upload to one package.
 MAX_FILES_PER_BIDDER = 30
+#: Insurance certificates are a scan or a PDF, never an office file.
+INSURANCE_EXTENSIONS = frozenset({".pdf", ".jpg", ".jpeg", ".png"})
+#: Years a stated insurance expiry may fall in; anything else is a typo.
+MIN_VALID_UNTIL_YEAR = 2000
+MAX_VALID_UNTIL_YEAR = 2100
 #: Kinds a bidder may upload by hand (``x84`` comes only through the X84 route).
-UPLOAD_KINDS = frozenset({"offer_pdf", "attachment"})
+UPLOAD_KINDS = frozenset({"offer_pdf", "attachment", "insurance"})
 _ALLOWED_EXTENSIONS = frozenset(
     {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt", ".zip", ".jpg", ".jpeg", ".png", ".x84", ".xml"}
 )
@@ -107,12 +114,30 @@ def check_upload(kind: str, file_name: str, content: bytes) -> str:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="file_type_not_allowed")
     if kind == "offer_pdf" and ext != ".pdf":
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="not_a_pdf")
+    if kind == "insurance" and ext not in INSURANCE_EXTENSIONS:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="file_type_not_allowed")
     # The bytes must be what the name says, so a renamed program never lands in Documents.
     expected = _SIGNATURE_BY_EXTENSION.get(ext)
     if expected is not None and detect(head) != expected:
         code = "not_a_pdf" if ext == ".pdf" else "file_type_not_allowed"
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=code)
     return _MIME_BY_EXTENSION[ext]
+
+
+def parse_valid_until(raw: date | str | None) -> date | None:
+    """The expiry a bidder states for its insurance; 422 ``invalid_valid_until`` when unreadable."""
+    if raw is None or isinstance(raw, date):
+        return raw
+    text = raw.strip()
+    if not text:
+        return None
+    try:
+        parsed = date.fromisoformat(text)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="invalid_valid_until") from None
+    if not MIN_VALID_UNTIL_YEAR <= parsed.year <= MAX_VALID_UNTIL_YEAR:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="invalid_valid_until")
+    return parsed
 
 
 class BidderExchangeService:
@@ -206,14 +231,49 @@ class BidderExchangeService:
     async def view(self, token: str) -> BidPortalView:
         return await self.portal.public_view(token)
 
-    async def upload(self, token: str, kind: str, file_name: str, content: bytes) -> BidPortalView:
-        """Keep an offer PDF or an attachment of the firm and file it in Documents."""
+    async def upload(
+        self, token: str, kind: str, file_name: str, content: bytes, valid_until: date | str | None = None
+    ) -> BidPortalView:
+        """Keep an offer PDF, an insurance certificate or an attachment of the firm and file it in Documents.
+
+        An insurance certificate from a firm that is a directory subcontractor also lands in
+        that subcontractor's certificate register, awaiting review.
+        """
         invitation = await self.portal._resolve(token, for_update=True)
         package = await self._package(invitation)
         await self._check_upload_window(invitation, package)
         mime = check_upload(kind, file_name, content)
-        await self._record(invitation, package, kind=kind, file_name=file_name, content=content, mime_type=mime)
+        until = parse_valid_until(valid_until) if kind == "insurance" else None
+        row = await self._record(invitation, package, kind=kind, file_name=file_name, content=content, mime_type=mime)
+        if kind == "insurance":
+            await self._register_certificate(invitation, package, row, until)
         return await self.portal.public_view(token)
+
+    async def _register_certificate(
+        self, invitation: TenderBidInvitation, package: TenderPackage, row: TenderBidFile, valid_until: date | None
+    ) -> None:
+        """File the certificate on the directory firm the buyer invited under this link, if any.
+
+        The subcontractor is read from the buyer's own recipient entry of this invitation,
+        never from anything the bidder sends.
+        """
+        from app.modules.subcontractors.service import SubcontractorService
+
+        if not invitation.recipient_id:
+            return
+        recipients = (package.metadata_ or {}).get("recipients")
+        entry = next(
+            (r for r in recipients or [] if isinstance(r, dict) and str(r.get("id")) == invitation.recipient_id), {}
+        )
+        try:
+            subcontractor_id = uuid.UUID(str(entry.get("subcontractor_id")))
+        except ValueError:
+            return  # not a directory subcontractor: the file stays with the bid files
+        svc = SubcontractorService(self.session)
+        if await svc.subs.get_by_id(subcontractor_id) is None:
+            return
+        await svc.record_certificate_from_bid_file(subcontractor_id, package, row, valid_until)
+        logger.info("Bidder insurance filed: package=%s subcontractor=%s", package.id, subcontractor_id)
 
     async def check_x84(self, token: str, file_name: str, content: bytes) -> X84ImportPreview:
         """Match an X84 against the bill this link prices; nothing is stored."""

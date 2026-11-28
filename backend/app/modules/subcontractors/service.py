@@ -215,6 +215,22 @@ class ComplianceFinding:
     lapsed_on: date | None = None
 
 
+#: ``metadata_.source`` of a certificate a bidder sent through its tender link.
+BID_PORTAL_CERT_SOURCE = "bid_portal"
+
+
+def counts_for_compliance(cert: Certificate) -> bool:
+    """Whether a register row may answer a compliance gate.
+
+    A certificate an outside firm sent itself through its bid link is its own claim
+    until a person verified it, so it covers nothing before that.
+    """
+    meta = getattr(cert, "metadata_", None) or {}
+    if meta.get("source") != BID_PORTAL_CERT_SOURCE:
+        return True
+    return bool((meta.get("review") or {}).get("verified_at"))
+
+
 def _has_valid_certificate(
     certificates: Sequence[Certificate],
     cert_type: str,
@@ -271,7 +287,8 @@ def evaluate_required_certificates(
     """
     held_by_type: dict[str, list[Certificate]] = {}
     for cert in certificates:
-        held_by_type.setdefault(cert.cert_type, []).append(cert)
+        if counts_for_compliance(cert):
+            held_by_type.setdefault(cert.cert_type, []).append(cert)
 
     findings: list[ComplianceFinding] = []
     for cert_type in required_types:
@@ -431,7 +448,7 @@ def _apply_insurance_backstop(
     expiry_on_record = getattr(subcontractor, "insurance_expiry_date", None)
     if expiry_on_record is None or expiry_on_record >= as_at:
         return findings
-    if any(c.cert_type == "insurance" for c in certificates):
+    if any(c.cert_type == "insurance" and counts_for_compliance(c) for c in certificates):
         return findings
 
     on_record = ComplianceFinding(
@@ -1273,6 +1290,46 @@ class SubcontractorService(ProgressBillingMixin):
             raise HTTPException(status_code=404, detail="Certificate not found")
         entity.metadata_ = {k: v for k, v in (entity.metadata_ or {}).items() if k != "review"}
         await self.session.flush()
+        return entity
+
+    async def record_certificate_from_bid_file(
+        self, subcontractor_id: uuid.UUID, package: Any, bid_file: Any, valid_until: date | None
+    ) -> Certificate:
+        """Register an insurance certificate a bidder sent through its link, awaiting review.
+
+        One row per firm and package: a re-upload replaces the file and expiry of that row,
+        and a changed file or expiry drops an earlier verification.
+        """
+        meta = {
+            "source": BID_PORTAL_CERT_SOURCE,
+            "package_id": str(package.id),
+            "recipient_id": str(bid_file.recipient_id),
+            "bid_file_id": str(bid_file.id),
+            "sha256": bid_file.sha256,
+        }
+        for entity in await self.certs.list_by_subcontractor(subcontractor_id):
+            old = entity.metadata_ or {}
+            if old.get("source") != BID_PORTAL_CERT_SOURCE or old.get("package_id") != meta["package_id"]:
+                continue
+            if old.get("recipient_id") != meta["recipient_id"] or entity.cert_type != "insurance":
+                continue
+            same = old.get("sha256") == bid_file.sha256 and entity.valid_until == valid_until
+            review = old.get("review") if same else None
+            entity.metadata_ = {**meta, "review": review} if review else meta
+            entity.valid_until = valid_until
+            entity.status = derive_cert_status(valid_until, entity.revoked)
+            await self.session.flush()
+            return entity
+        entity = Certificate(
+            subcontractor_id=subcontractor_id,
+            cert_type="insurance",
+            valid_until=valid_until,
+            status=derive_cert_status(valid_until, revoked=False),
+            revoked=False,
+            notes=f"{bid_file.company_name}: {package.name}"[:2000],
+            metadata_=meta,
+        )
+        await self.certs.create(entity)
         return entity
 
     async def record_certificate_from_document(

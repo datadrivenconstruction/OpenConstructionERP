@@ -13,7 +13,7 @@ vi.mock('./api', async (importOriginal) => {
   return { ...actual, checkBidX84: vi.fn(), submitBidX84: vi.fn(), declineBid: vi.fn(), uploadBidFile: vi.fn() };
 });
 
-import { checkBidX84, declineBid, submitBidX84 } from './api';
+import { checkBidX84, declineBid, submitBidX84, uploadBidFile } from './api';
 import type { BidPortalView, X84Preview } from './api';
 import { BidExchangeSection } from './BidExchangeSection';
 
@@ -68,6 +68,7 @@ beforeEach(() => {
   vi.mocked(checkBidX84).mockReset();
   vi.mocked(submitBidX84).mockReset();
   vi.mocked(declineBid).mockReset();
+  vi.mocked(uploadBidFile).mockReset();
 });
 
 describe('BidExchangeSection', () => {
@@ -129,5 +130,27 @@ describe('BidExchangeSection', () => {
     const link = screen.getByRole('link', { name: /Download/ });
     expect(link.getAttribute('href')).toBe('/api/v1/tendering/bid-portal/tok/documents/d1/');
     expect(screen.getByTestId('bid-portal-documents').textContent).toContain('Conditions.pdf');
+  });
+
+  it('sends an insurance certificate with the expiry the firm states', async () => {
+    const after = makeView({ files: [] });
+    vi.mocked(uploadBidFile).mockResolvedValue(after);
+    const onView = vi.fn();
+    render(<BidExchangeSection token="tok" view={makeView()} onView={onView} />);
+    fireEvent.change(screen.getByTestId('bid-insurance-until'), { target: { value: '2027-06-30' } });
+    const file = new File(['%PDF-1.7'], 'coi.pdf', { type: 'application/pdf' });
+    fireEvent.change(screen.getByTestId('bid-insurance-input'), { target: { files: [file] } });
+    await waitFor(() => expect(uploadBidFile).toHaveBeenCalledWith('tok', file, 'insurance', '2027-06-30'));
+    await waitFor(() => expect(onView).toHaveBeenCalledWith(after));
+  });
+
+  it('sends no expiry with an ordinary attachment', async () => {
+    vi.mocked(uploadBidFile).mockResolvedValue(makeView());
+    render(<BidExchangeSection token="tok" view={makeView()} onView={vi.fn()} />);
+    fireEvent.change(screen.getByTestId('bid-insurance-until'), { target: { value: '2027-06-30' } });
+    const input = screen.getByTestId('bid-pdf-input');
+    const file = new File(['%PDF-1.7'], 'offer.pdf', { type: 'application/pdf' });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() => expect(uploadBidFile).toHaveBeenCalledWith('tok', file, 'offer_pdf', ''));
   });
 });

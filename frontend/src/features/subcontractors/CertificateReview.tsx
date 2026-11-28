@@ -37,7 +37,7 @@ export function CertificateReview({ cert, label }: { cert: Certificate; label: s
   const role = useAuthStore((s) => s.userRole);
   const canVerify = role === 'admin' || role === 'manager';
   const state = cert.review_status ?? (cert.status === 'valid' ? 'awaiting_review' : cert.status);
-  const hasFile = !!cert.metadata?.source_document_id;
+  const hasFile = !!(cert.metadata?.source_document_id || cert.metadata?.bid_file_id);
 
   const toggle = useMutation({
     mutationFn: () => (state === 'verified' ? unverifyCertificate(cert.id) : verifyCertificate(cert.id)),

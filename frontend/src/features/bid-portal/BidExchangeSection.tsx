@@ -59,6 +59,8 @@ export function BidExchangeSection({
   const x84Input = useRef<HTMLInputElement>(null);
   const pdfInput = useRef<HTMLInputElement>(null);
   const attachInput = useRef<HTMLInputElement>(null);
+  const insuranceInput = useRef<HTMLInputElement>(null);
+  const [insuranceUntil, setInsuranceUntil] = useState('');
 
   const open = view.state === 'open';
   const documents = view.documents ?? [];
@@ -95,17 +97,17 @@ export function BidExchangeSection({
     }
   };
 
-  const onFile = async (file: File | undefined, kind: 'offer_pdf' | 'attachment') => {
+  const onFile = async (file: File | undefined, kind: 'offer_pdf' | 'attachment' | 'insurance') => {
     if (!file) return;
     setError(null);
     setBusy('file');
     try {
-      onView(await uploadBidFile(token, file, kind));
+      onView(await uploadBidFile(token, file, kind, kind === 'insurance' ? insuranceUntil : ''));
     } catch (err) {
       fail(err);
     } finally {
       setBusy(null);
-      for (const input of [pdfInput.current, attachInput.current]) if (input) input.value = '';
+      for (const input of [pdfInput.current, attachInput.current, insuranceInput.current]) if (input) input.value = '';
     }
   };
 
@@ -191,6 +193,15 @@ export function BidExchangeSection({
             <Button variant="secondary" size="sm" disabled={busy !== null} onClick={() => pdfInput.current?.click()}>
               <FileText size={14} aria-hidden />
               {t('bid_portal.files.offer_pdf', { defaultValue: 'Upload offer PDF' })}
+            </Button>
+            <input ref={insuranceInput} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" data-testid="bid-insurance-input" onChange={(e) => void onFile(e.target.files?.[0], 'insurance')} />
+            <label className="flex items-center gap-1 text-xs text-content-secondary">
+              {t('bid_portal.files.insurance_valid_until', { defaultValue: 'Insurance valid until' })}
+              <input type="date" value={insuranceUntil} onChange={(e) => setInsuranceUntil(e.target.value)} className="rounded border border-border-light px-1 py-0.5 text-xs" data-testid="bid-insurance-until" />
+            </label>
+            <Button variant="secondary" size="sm" disabled={busy !== null} onClick={() => insuranceInput.current?.click()}>
+              <FileText size={14} aria-hidden />
+              {t('bid_portal.files.insurance', { defaultValue: 'Upload insurance certificate' })}
             </Button>
             <Button variant="secondary" size="sm" disabled={busy !== null} onClick={() => attachInput.current?.click()}>
               <Paperclip size={14} aria-hidden />

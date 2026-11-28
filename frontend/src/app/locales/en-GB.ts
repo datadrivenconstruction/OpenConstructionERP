@@ -3504,6 +3504,9 @@ const resource = {
     "bim.link_check_more": "+{{count}} more",
     "bim.link_check_show_3d": "Show unlinked elements in 3D",
     "bim.link_check_show_3d_failed": "Could not load the unlinked elements",
+    "bid_portal.files.insurance": "Upload insurance certificate",
+    "bid_portal.files.insurance_valid_until": "Insurance valid until",
+    "bid_portal.files.kind_insurance": "Insurance certificate",
   }
 } as { translation: Record<string, string> };
 

@@ -1442,12 +1442,16 @@ async def bid_portal_upload_file(
     session: SessionDep,
     file: UploadFile = File(...),
     kind: str = Form(default="attachment"),
+    valid_until: str = Form(default="", max_length=32),
 ) -> BidPortalView:
-    """Public: upload the offer PDF or an attachment; it is filed with the buyer's project documents."""
+    """Public: upload the offer PDF, an insurance certificate or an attachment, filed with the project documents.
+
+    ``valid_until`` (ISO date) is read for an insurance certificate only.
+    """
     enforce_rate_limit(request, write=True)
     _public_headers(response)
     content = await file.read(MAX_BIDDER_FILE_BYTES + 1)
-    return await BidderExchangeService(session).upload(token, kind, file.filename or "", content)
+    return await BidderExchangeService(session).upload(token, kind, file.filename or "", content, valid_until)
 
 
 @router.post("/bid-portal/{token}/decline/", response_model=BidPortalView)
